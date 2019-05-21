@@ -3,15 +3,30 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" 
-        android:background="#000"
+        android:layout_height="match_parent"
         tools:context=".Fragments.MainFragment">
 
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:background="#1e6ffd"
+            app:titleTextColor="#ffffff"
+            android:paddingTop="30dp"
+            android:paddingStart="10dp"
+            android:paddingBottom="10dp"
+            app:titleTextAppearance="@style/TitleTextAppearance"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
     <androidx.recyclerview.widget.RecyclerView
-            android:background="#fff"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="10dp"
             android:id="@+id/notes_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="0dp"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"

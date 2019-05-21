@@ -1,32 +1,37 @@
 package com.infinitysolutions.notessync.ViewModel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.infinitysolutions.notessync.Model.Note
-import com.infinitysolutions.notessync.Model.NoteDisplayItem
-import com.infinitysolutions.notessync.Model.NotesDao
-import com.infinitysolutions.notessync.Model.NotesRoomDatabase
-import com.infinitysolutions.notessync.Repository.NotesRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
-    val notesDisplayList: LiveData<List<NoteDisplayItem>>
-    private val repository: NotesRepository
-    private val notesDao: NotesDao = NotesRoomDatabase.getDatabase(application).notesDao()
+class MainViewModel: ViewModel(){
+    private val mToolbar = MutableLiveData<Toolbar>()
+    private var selectedNote: Note? = null
+    private val shouldGoToEditor = MutableLiveData<Boolean>()
 
-    init {
-        repository = NotesRepository(notesDao)
-        notesDisplayList = repository.notesDisplayList
+    fun setSelectedNote(note: Note?){
+        selectedNote = note
     }
 
-    fun insert(note: Note) = viewModelScope.launch(Dispatchers.IO){
-        repository.insert(note)
+    fun getSelectedNote(): Note?{
+        return selectedNote
     }
 
-//    fun getNote(nId: Long){
-//        notesDao.getNote(nId)
-//    }
+    fun setShouldGoToEditor(shouldGoTo: Boolean){
+        shouldGoToEditor.value = shouldGoTo
+    }
+
+    fun getShouldGoToEditor(): LiveData<Boolean>{
+        return shouldGoToEditor
+    }
+
+    fun setToolbar(toolbar: Toolbar){
+        mToolbar.value = toolbar
+    }
+
+    fun getToolbar():LiveData<Toolbar>{
+        return mToolbar
+    }
 }

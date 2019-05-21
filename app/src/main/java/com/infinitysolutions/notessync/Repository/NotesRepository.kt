@@ -7,7 +7,7 @@ import com.infinitysolutions.notessync.Model.NoteDisplayItem
 import com.infinitysolutions.notessync.Model.NotesDao
 
 class NotesRepository(private val notesDao: NotesDao){
-    val notesDisplayList: LiveData<List<NoteDisplayItem>> = notesDao.getDisplayList()
+    val notesList: LiveData<List<Note>> = notesDao.getAll()
 
     @WorkerThread
     suspend fun insert(note: Note){
