@@ -9,8 +9,11 @@ import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.notes_list_item.view.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class NotesAdapter(val mainViewModel: MainViewModel, val items: List<Note>, val context: Context): RecyclerView.Adapter<NotesAdapter.ViewHolder>(){
+    private val formatter = SimpleDateFormat("E, MMM d", Locale.ENGLISH)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(context).inflate(R.layout.notes_list_item, parent, false)
@@ -20,10 +23,11 @@ class NotesAdapter(val mainViewModel: MainViewModel, val items: List<Note>, val 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.titleTextView.text = items.get(position).noteTitle
         holder.contentTextView.text = items.get(position).noteContent
-        holder.dateModifiedTextView.text = items.get(position).dateModified.toString()
+        holder.dateModifiedTextView.text = formatter.format(items.get(position).dateModified)
+
         holder.itemContainer.setOnClickListener {
             mainViewModel.setSelectedNote(items.get(position))
-            mainViewModel.setShouldGoToEditor(true)
+            mainViewModel.setShouldOpenEditor(true)
         }
     }
 

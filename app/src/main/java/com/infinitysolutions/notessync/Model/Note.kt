@@ -11,6 +11,5 @@ data class Note(
     @ColumnInfo(name = "content") val noteContent: String?,
     @ColumnInfo(name = "date_created") val dateCreated: Long,
     @ColumnInfo(name = "date_modified") val dateModified: Long?,
-    @ColumnInfo(name = "g_drive_id") val gDriveId: String?,
-    @ColumnInfo(name = "o_drive_id") val oDriveId: String?
+    @ColumnInfo(name = "g_drive_id") val gDriveId: String?
 )
