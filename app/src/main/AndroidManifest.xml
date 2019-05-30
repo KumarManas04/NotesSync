@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.infinitysolutions.notessync">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
@@ -11,7 +14,7 @@
             android:theme="@style/AppTheme">
         <service
                 android:name=".NotesSyncService"
-                android:enabled="false"
+                android:enabled="true"
                 android:exported="false">
         </service>
 

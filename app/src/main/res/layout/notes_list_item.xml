@@ -6,7 +6,7 @@
         android:paddingBottom="20dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="5dp"
@@ -49,15 +49,25 @@
               app:layout_constraintTop_toBottomOf="@id/title_text"
               app:layout_constraintStart_toEndOf="@id/indicator_view"/>
 
+    <ImageView
+            android:id="@+id/last_modified_view"
+            android:src="@drawable/last_modified_icon"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="@id/content_preview_text"
+            app:layout_constraintTop_toBottomOf="@id/content_preview_text"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="Last modified indicator"/>
+
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#bdbdbd"
+            android:textColor="#616161"
             android:textSize="14sp"
-            android:layout_marginTop="4dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
             android:id="@+id/date_modified_text"
-            app:layout_constraintStart_toEndOf="@+id/indicator_view"
+            app:layout_constraintStart_toEndOf="@+id/last_modified_view"
             app:layout_constraintTop_toBottomOf="@+id/content_preview_text"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

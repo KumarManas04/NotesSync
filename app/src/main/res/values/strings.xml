@@ -6,4 +6,5 @@
     <string name="delete_note">Delete note</string>
     <string name="title">Title</string>
     <string name="write_something">Write something...</string>
+    <string name="sync">sync</string>
 </resources>

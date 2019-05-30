@@ -17,6 +17,7 @@ import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_main.view.*
 
 class MainFragment : Fragment() {
+    private val TAG = "MainFragment"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_main, container, false)
@@ -32,6 +33,15 @@ class MainFragment : Fragment() {
         notesRecyclerView.layoutManager = LinearLayoutManager(activity!!)
         val toolbar = rootView.toolbar
         toolbar.title = "Notes"
+        toolbar.inflateMenu(R.menu.main_fragment_menu)
+        toolbar.setOnMenuItemClickListener { item ->
+            when(item.itemId){
+                R.id.sync_menu_item ->{
+                    mainViewModel.setSyncNotes()
+                }
+            }
+            true
+        }
 
         rootView.fab.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
@@ -40,7 +50,6 @@ class MainFragment : Fragment() {
 
         databaseViewModel.notesList.observe(this, Observer { notesList ->
             if (notesList != null) {
-                databaseViewModel.prepareFilesList()
                 notesRecyclerView.adapter = NotesAdapter(mainViewModel, notesList, context!!)
             }
         })

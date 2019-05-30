@@ -12,6 +12,9 @@ interface NotesDao {
     @Query("SELECT * FROM notes_table ORDER BY date_modified DESC")
     fun getAll(): LiveData<List<Note>>
 
+    @Query("SELECT * FROM notes_table ORDER BY note_id ASC")
+    suspend fun getCurrentData(): List<Note>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: Note)
 

@@ -1,7 +1,6 @@
 package com.infinitysolutions.notessync.ViewModel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,7 +12,6 @@ import com.infinitysolutions.notessync.Model.NotesRoomDatabase
 import com.infinitysolutions.notessync.Repository.NotesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class DatabaseViewModel(application: Application) : AndroidViewModel(application) {
     val notesList: LiveData<List<Note>>
@@ -38,18 +36,5 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
 
     fun getFilesList(): LiveData<List<NoteFile>>{
         return filesList
-    }
-
-    fun prepareFilesList(){
-        val files: MutableList<NoteFile> = ArrayList()
-        viewModelScope.launch {
-            Log.d("TAG", "In background thread")
-            for (note in notesList.value!!) {
-                files.add(NoteFile(note.nId, note.dateCreated, note.dateModified, note.gDriveId))
-            }
-            withContext(Dispatchers.Main){
-                filesList.value = files
-            }
-        }
     }
 }
