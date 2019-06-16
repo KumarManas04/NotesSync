@@ -2,6 +2,7 @@ package com.infinitysolutions.notessync.Fragments
 
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -78,6 +79,7 @@ class NoteEditFragment : Fragment() {
                     )
                 )
             } else {
+                Log.d("TAG", "GDriveId = ${selectedNote.gDriveId}")
                 databaseViewModel.insert(
                     Note(
                         selectedNote.nId,
@@ -85,7 +87,7 @@ class NoteEditFragment : Fragment() {
                         noteContent.text.toString(),
                         selectedNote.dateCreated,
                         timeModified,
-                        "-1"
+                        selectedNote.gDriveId
                     )
                 )
             }

@@ -10,6 +10,6 @@ data class Note(
     @ColumnInfo(name = "title") var noteTitle: String?,
     @ColumnInfo(name = "content") var noteContent: String?,
     @ColumnInfo(name = "date_created") var dateCreated: Long,
-    @ColumnInfo(name = "date_modified") var dateModified: Long?,
+    @ColumnInfo(name = "date_modified") var dateModified: Long,
     @ColumnInfo(name = "g_drive_id") var gDriveId: String?
 )
