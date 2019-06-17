@@ -33,8 +33,4 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
             viewModelScope.launch(Dispatchers.IO) { notesDao.deleteNoteById(id) }
         }
     }
-
-    fun getFilesList(): LiveData<List<NoteFile>>{
-        return filesList
-    }
 }

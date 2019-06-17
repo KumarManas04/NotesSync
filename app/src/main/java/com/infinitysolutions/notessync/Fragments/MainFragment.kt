@@ -45,7 +45,7 @@ class MainFragment : Fragment() {
 
         rootView.fab.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
-            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1"))
+            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", false, false))
         }
 
         databaseViewModel.notesList.observe(this, Observer { notesList ->

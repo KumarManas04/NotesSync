@@ -41,7 +41,6 @@ class GoogleDriveHelper(driveService: Drive) {
             fields = "files(id)"
         }.execute()
         if (result.files.size > 0) {
-            Log.d(TAG, "File found!")
             fileId = result.files[0].id
         } else {
             Log.d(TAG, "File not found")
@@ -70,7 +69,8 @@ class GoogleDriveHelper(driveService: Drive) {
         return file.id
     }
 
-    fun deleteFile(fileId: String){
-        googleDriveService.files().delete(fileId).execute()
+    fun deleteFile(fileId: String?){
+        if (fileId != null)
+            googleDriveService.files().delete(fileId).execute()
     }
 }

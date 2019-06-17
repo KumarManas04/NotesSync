@@ -47,7 +47,19 @@ class NoteEditFragment : Fragment() {
             when(item.itemId){
                 R.id.delete_menu_item ->{
                     activity!!.onBackPressed()
-                    databaseViewModel.deleteNoteById(mainViewModel.getSelectedNote()?.nId)
+                    val selectedNote = mainViewModel.getSelectedNote()
+                    if (selectedNote != null) {
+                        databaseViewModel.insert(Note(
+                            selectedNote.nId,
+                            selectedNote.noteTitle,
+                            selectedNote.noteContent,
+                            selectedNote.dateCreated,
+                            Calendar.getInstance().timeInMillis,
+                            selectedNote.gDriveId,
+                            true,
+                            selectedNote.synced
+                            ))
+                    }
                 }
             }
             true
@@ -75,7 +87,9 @@ class NoteEditFragment : Fragment() {
                         noteContent.text.toString(),
                         timeModified,
                         timeModified,
-                        "-1"
+                        "-1",
+                        false,
+                        false
                     )
                 )
             } else {
@@ -87,7 +101,9 @@ class NoteEditFragment : Fragment() {
                         noteContent.text.toString(),
                         selectedNote.dateCreated,
                         timeModified,
-                        selectedNote.gDriveId
+                        selectedNote.gDriveId,
+                        selectedNote.deleted,
+                        selectedNote.synced
                     )
                 )
             }

@@ -11,5 +11,7 @@ data class Note(
     @ColumnInfo(name = "content") var noteContent: String?,
     @ColumnInfo(name = "date_created") var dateCreated: Long,
     @ColumnInfo(name = "date_modified") var dateModified: Long,
-    @ColumnInfo(name = "g_drive_id") var gDriveId: String?
+    @ColumnInfo(name = "g_drive_id") var gDriveId: String?,
+    @ColumnInfo(name = "deleted") var deleted: Boolean,
+    @ColumnInfo(name = "synced") var synced: Boolean
 )

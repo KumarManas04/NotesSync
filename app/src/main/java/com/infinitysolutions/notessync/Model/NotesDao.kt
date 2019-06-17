@@ -9,7 +9,7 @@ import androidx.room.Query
 @Dao
 interface NotesDao {
 
-    @Query("SELECT * FROM notes_table ORDER BY date_modified DESC")
+    @Query("SELECT * FROM notes_table WHERE NOT deleted ORDER BY date_modified DESC")
     fun getAll(): LiveData<List<Note>>
 
     @Query("SELECT * FROM notes_table ORDER BY note_id ASC")
