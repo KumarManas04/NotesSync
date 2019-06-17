@@ -110,9 +110,9 @@ class NoteEditFragment : Fragment() {
         }
     }
 
-    override fun onPause() {
+    override fun onDestroy() {
         if ( (mainViewModel.getSelectedNote()?.noteContent != noteContent.text.toString()) || (mainViewModel.getSelectedNote()?.noteTitle != noteTitle.text.toString()) )
             saveNote()
-        super.onPause()
+        super.onDestroy()
     }
 }
