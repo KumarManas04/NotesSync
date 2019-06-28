@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/destinations" android:checkableBehavior="single">
+
+        <item android:id="@+id/notes"
+              android:icon="@drawable/notes"
+              android:title="Notes"/>
+
+        <item
+            android:id="@+id/reminders"
+            android:icon="@drawable/reminders_drawer_item"
+            android:title="Reminders"/>
+
+        <item
+            android:id="@+id/archive"
+            android:icon="@drawable/archive_drawer_item"
+            android:title="Archive"/>
+    </group>
+
+    <group android:id="@+id/others">
+
+        <item
+            android:id="@+id/settings"
+            android:icon="@drawable/settings_drawer_item"
+            android:title="Settings"/>
+
+        <item
+            android:id="@+id/about"
+            android:icon="@drawable/about_drawer_item"
+            android:title="About"/>
+    </group>
+</menu>

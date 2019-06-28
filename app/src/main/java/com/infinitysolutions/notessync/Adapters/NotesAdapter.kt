@@ -1,6 +1,8 @@
 package com.infinitysolutions.notessync.Adapters
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,9 +23,10 @@ class NotesAdapter(val mainViewModel: MainViewModel, val items: List<Note>, val 
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.titleTextView.text = items.get(position).noteTitle
-        holder.contentTextView.text = items.get(position).noteContent
-        holder.dateModifiedTextView.text = formatter.format(items.get(position).dateModified)
+        holder.titleTextView.text = items[position].noteTitle
+        holder.contentTextView.text = items[position].noteContent
+        holder.dateModifiedTextView.text = formatter.format(items[position].dateModified)
+        holder.parentView.backgroundTintList = ColorStateList.valueOf(Color.parseColor(items[position].noteColor))
 
         holder.itemContainer.setOnClickListener {
             mainViewModel.setSelectedNote(items.get(position))
@@ -35,6 +38,7 @@ class NotesAdapter(val mainViewModel: MainViewModel, val items: List<Note>, val 
         val titleTextView = itemView.title_text
         val contentTextView = itemView.content_preview_text
         val dateModifiedTextView = itemView.date_modified_text
+        val parentView = itemView.parent_view
         val itemContainer = itemView
     }
 

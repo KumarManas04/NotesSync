@@ -7,6 +7,7 @@ import com.infinitysolutions.notessync.Model.NotesDao
 
 class NotesRepository(private val notesDao: NotesDao){
     val notesList: LiveData<List<Note>> = notesDao.getAll()
+    val archiveList : LiveData<List<Note>> = notesDao.getArchived()
 
     @WorkerThread
     suspend fun insert(note: Note) {

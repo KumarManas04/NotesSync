@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
@@ -42,11 +43,34 @@ class MainFragment : Fragment() {
             }
             true
         }
+        mainViewModel.setToolbar(toolbar)
 
         rootView.fab.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
-            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", false, false))
+            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null))
         }
+
+        mainViewModel.getViewMode().observe(this, Observer { mode->
+            if (mode != null){
+                if(mode == 1){
+                    toolbar.title = "Notes"
+                    databaseViewModel.archivesList.removeObservers(this)
+                    databaseViewModel.notesList.observe(this, Observer { notesList ->
+                        if (notesList != null) {
+                            notesRecyclerView.adapter = NotesAdapter(mainViewModel, notesList, context!!)
+                        }
+                    })
+                }else if (mode == 2){
+                    toolbar.title = "Archive"
+                    databaseViewModel.notesList.removeObservers(this)
+                    databaseViewModel.archivesList.observe(this, Observer { archiveList ->
+                        if (archiveList != null) {
+                            notesRecyclerView.adapter = NotesAdapter(mainViewModel, archiveList, context!!)
+                        }
+                    })
+                }
+            }
+        })
 
         databaseViewModel.notesList.observe(this, Observer { notesList ->
             if (notesList != null) {

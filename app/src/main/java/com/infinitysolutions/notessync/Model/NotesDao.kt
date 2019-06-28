@@ -9,8 +9,11 @@ import androidx.room.Query
 @Dao
 interface NotesDao {
 
-    @Query("SELECT * FROM notes_table WHERE NOT deleted ORDER BY date_modified DESC")
+    @Query("SELECT * FROM notes_table WHERE type = 1 ORDER BY date_modified DESC")
     fun getAll(): LiveData<List<Note>>
+
+    @Query("SELECT * FROM notes_table WHERE type = 2 ORDER BY date_modified DESC")
+    fun getArchived(): LiveData<List<Note>>
 
     @Query("SELECT * FROM notes_table ORDER BY note_id ASC")
     suspend fun getCurrentData(): List<Note>

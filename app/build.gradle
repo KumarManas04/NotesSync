@@ -71,7 +71,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines"
 
     //Drive REST API
-    implementation 'com.google.android.gms:play-services-auth:16.0.1'
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
     implementation 'com.google.http-client:google-http-client-gson:1.26.0'
     implementation('com.google.api-client:google-api-client-android:1.26.0') {
         exclude group: 'org.apache.httpcomponents'
@@ -88,4 +88,6 @@ dependencies {
 
     //Guava(Required as Drive REST api dependency)
     api 'com.google.guava:guava:27.1-android'
+
+    implementation 'com.android.support:design:28.0.0'
 }
