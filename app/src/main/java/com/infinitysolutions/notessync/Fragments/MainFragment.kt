@@ -23,6 +23,10 @@ class MainFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_main, container, false)
         initDataBinding(rootView)
+
+        rootView.search_button.setOnClickListener{
+            Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_searchFragment)
+        }
         return rootView
     }
 
@@ -45,7 +49,7 @@ class MainFragment : Fragment() {
         }
         mainViewModel.setToolbar(toolbar)
 
-        rootView.fab.setOnClickListener {
+        rootView.new_note_button.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
             mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null))
         }
@@ -54,36 +58,24 @@ class MainFragment : Fragment() {
             if (mode != null){
                 if(mode == 1){
                     toolbar.title = "Notes"
-                    databaseViewModel.archivesList.removeObservers(this)
-                    databaseViewModel.notesList.observe(this, Observer { notesList ->
-                        if (notesList != null) {
-                            notesRecyclerView.adapter = NotesAdapter(mainViewModel, notesList, context!!)
-                        }
-                    })
+                    databaseViewModel.setViewMode(1)
                 }else if (mode == 2){
                     toolbar.title = "Archive"
-                    databaseViewModel.notesList.removeObservers(this)
-                    databaseViewModel.archivesList.observe(this, Observer { archiveList ->
-                        if (archiveList != null) {
-                            notesRecyclerView.adapter = NotesAdapter(mainViewModel, archiveList, context!!)
-                        }
-                    })
+                    databaseViewModel.setViewMode(2)
                 }
             }
         })
 
-        databaseViewModel.notesList.observe(this, Observer { notesList ->
-            if (notesList != null) {
-                notesRecyclerView.adapter = NotesAdapter(mainViewModel, notesList, context!!)
+        databaseViewModel.viewList.observe(this, Observer { viewList ->
+            if (viewList != null) {
+                notesRecyclerView.adapter = NotesAdapter(mainViewModel, viewList, context!!)
             }
         })
 
         mainViewModel.getShouldOpenEditor().observe(this, Observer {should ->
             if(should){
-                /*
-                If we don't put the navigation statement in try-catch block then app crashes due to unable to
-                find navController. This is an issue in the Navigation components in Jetpack
-                 */
+                // If we don't put the navigation statement in try-catch block then app crashes due to unable to
+                // find navController. This is an issue in the Navigation components in Jetpack
                 try {
                     Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_noteEditFragment)
                 }catch (e: Exception){

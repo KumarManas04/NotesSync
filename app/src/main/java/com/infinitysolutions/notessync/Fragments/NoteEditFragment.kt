@@ -43,6 +43,7 @@ class NoteEditFragment : Fragment() {
             val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
             dialogView.delete_button.setOnClickListener {
                 deleteNote()
+                dialog.hide()
             }
 
             val layoutManager = LinearLayoutManager(this@NoteEditFragment.context!!, RecyclerView.HORIZONTAL, false)
@@ -70,7 +71,7 @@ class NoteEditFragment : Fragment() {
         toolbar.title = ""
         toolbar.inflateMenu(com.infinitysolutions.notessync.R.menu.note_editor_menu)
         toolbar.setNavigationOnClickListener {
-            activity!!.onBackPressed()
+            activity?.onBackPressed()
         }
 
         toolbar.setOnMenuItemClickListener { item ->
@@ -92,6 +93,7 @@ class NoteEditFragment : Fragment() {
                                     mainViewModel.getSelectedColor().value
                                 )
                             )
+                            activity?.onBackPressed()
                         } else if (selectedNote.noteType == NOTE_ARCHIVED) {
                             databaseViewModel.insert(
                                 Note(
@@ -106,6 +108,7 @@ class NoteEditFragment : Fragment() {
                                     mainViewModel.getSelectedColor().value
                                 )
                             )
+                            activity?.onBackPressed()
                         }
                     }
                 }
@@ -131,19 +134,21 @@ class NoteEditFragment : Fragment() {
         val selectedNote = mainViewModel.getSelectedNote()
         if (selectedNote != null) {
             if (selectedNote.nId == -1L) {
-                databaseViewModel.insert(
-                    Note(
-                        null,
-                        noteTitle.text.toString(),
-                        noteContent.text.toString(),
-                        timeModified,
-                        timeModified,
-                        "-1",
-                        NOTE_DEFAULT,
-                        false,
-                        mainViewModel.getSelectedColor().value
+                if (noteTitle.text.isNotEmpty() && noteContent.text.isNotEmpty()) {
+                    databaseViewModel.insert(
+                        Note(
+                            null,
+                            noteTitle.text.toString(),
+                            noteContent.text.toString(),
+                            timeModified,
+                            timeModified,
+                            "-1",
+                            NOTE_DEFAULT,
+                            false,
+                            mainViewModel.getSelectedColor().value
+                        )
                     )
-                )
+                }
             } else {
                 Log.d("TAG", "GDriveId = ${selectedNote.gDriveId}")
                 databaseViewModel.insert(

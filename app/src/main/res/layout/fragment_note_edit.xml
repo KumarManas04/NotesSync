@@ -45,8 +45,8 @@
             android:layout_weight="1"/>
 
     <LinearLayout
-            android:padding="10dp"
-            android:elevation="2dp"
+            android:elevation="8dp"
+            android:background="#ffffff"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -54,16 +54,19 @@
         <TextView
                 android:id="@+id/last_edited_text"
                 android:textColor="#424242"
+                android:padding="10dp"
                 android:layout_gravity="center_vertical"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"/>
 
         <ImageView
                 android:id="@+id/open_bottom_menu"
                 android:src="@drawable/more_options"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:background="@drawable/simple_ripple"
                 android:layout_gravity="center_vertical"
                 android:contentDescription="more options"/>
     </LinearLayout>

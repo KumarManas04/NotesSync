@@ -14,23 +14,68 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="?attr/actionBarSize"/>
 
     <androidx.recyclerview.widget.RecyclerView
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/bottom_bar"
             android:id="@+id/notes_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/fab_create_note"
-            android:layout_margin="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+    <LinearLayout
+            android:id="@+id/bottom_bar"
+            android:background="#ffffff"
+            android:padding="0dp"
+            android:elevation="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <TextView
+                android:id="@+id/new_note_button"
+                android:text="Take a note..."
+                android:ellipsize="end"
+                android:textAllCaps="false"
+                style="?android:attr/borderlessButtonStyle"
+                android:background="@drawable/simple_ripple"
+                android:padding="12dp"
+                android:textSize="18sp"
+                android:textAlignment="viewStart"
+                android:fontFamily="sans-serif-condensed"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"/>
+
+        <ImageView
+                android:id="@+id/new_list_button"
+                android:src="@drawable/new_list"
+                android:clickable="true"
+                android:background="@drawable/simple_ripple"
+                android:layout_gravity="center_vertical"
+                android:padding="12dp"
+                android:layout_width="wrap_content"
+                android:scaleType="fitXY"
+                android:adjustViewBounds="true"
+                android:layout_height="match_parent"
+                android:focusable="true"/>
+
+        <ImageView
+                android:id="@+id/search_button"
+                android:src="@drawable/search_icon"
+                android:clickable="true"
+                android:background="@drawable/simple_ripple"
+                android:layout_gravity="center_vertical"
+                android:padding="12dp"
+                android:layout_width="wrap_content"
+                android:scaleType="fitXY"
+                android:adjustViewBounds="true"
+                android:layout_height="match_parent"
+                android:focusable="true"/>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

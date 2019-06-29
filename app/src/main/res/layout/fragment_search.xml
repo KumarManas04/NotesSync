@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="#ffffff"
+              tools:context=".Fragments.SearchFragment">
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:background="#ffffff"
+            android:elevation="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <ImageView
+                android:id="@+id/back_button"
+                android:padding="14dp"
+                android:background="@drawable/simple_ripple"
+                android:clickable="true"
+                android:focusable="true"
+                android:src="@drawable/back_arrow"
+                android:layout_width="?attr/actionBarSize"
+                android:layout_height="?attr/actionBarSize"/>
+
+        <EditText
+                android:id="@+id/search_edit_text"
+                android:hint="Search your notes..."
+                android:textColorHint="#757575"
+                android:textColor="#000000"
+                android:inputType="textCapSentences"
+                android:background="#ffffff"
+                android:padding="14dp"
+                android:textSize="16sp"
+                android:textCursorDrawable="@null"
+                android:fontFamily="sans-serif"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/result_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+</LinearLayout>

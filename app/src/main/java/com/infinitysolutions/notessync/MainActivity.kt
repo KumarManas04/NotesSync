@@ -9,6 +9,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -53,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun prepareNavDrawer(){
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        navigation_view.setCheckedItem(0)
+        navigation_view.menu.get(0).isChecked = true
         navigation_view.setNavigationItemSelectedListener {
             when(it.itemId){
                 R.id.notes->{
@@ -67,6 +68,7 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+
     }
 
     private fun syncFiles(){

@@ -7,8 +7,13 @@
     <fragment android:id="@+id/mainFragment" android:name="com.infinitysolutions.notessync.Fragments.MainFragment"
               android:label="fragment_main" tools:layout="@layout/fragment_main">
         <action android:id="@+id/action_mainFragment_to_noteEditFragment" app:destination="@id/noteEditFragment"/>
+        <action android:id="@+id/action_mainFragment_to_searchFragment" app:destination="@id/searchFragment"/>
     </fragment>
     <fragment android:id="@+id/noteEditFragment"
               android:name="com.infinitysolutions.notessync.Fragments.NoteEditFragment"
               android:label="NoteEditFragment"/>
+    <fragment android:id="@+id/searchFragment" android:name="com.infinitysolutions.notessync.Fragments.SearchFragment"
+              android:label="fragment_search" tools:layout="@layout/fragment_search">
+        <action android:id="@+id/action_searchFragment_to_noteEditFragment" app:destination="@id/noteEditFragment"/>
+    </fragment>
 </navigation>
