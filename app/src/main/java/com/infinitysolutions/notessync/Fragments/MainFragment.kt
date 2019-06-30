@@ -27,6 +27,7 @@ class MainFragment : Fragment() {
         rootView.search_button.setOnClickListener{
             Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_searchFragment)
         }
+
         return rootView
     }
 
