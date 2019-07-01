@@ -137,6 +137,7 @@ class NotesSyncService : Service() {
         var isCloudDbChanged = false
         var isLocalDbChanged = false
         val localNotesList: MutableList<Note> = ArrayList()
+        val extraNotesLocal: MutableList<Note> = ArrayList()
         localNotesList.addAll(mNotesList)
         var localCounter = 0
         var cloudCounter = 0
@@ -146,20 +147,41 @@ class NotesSyncService : Service() {
         val newFilesList: MutableList<NoteFile> = ArrayList()
         while (localCounter < localNotesList.size && cloudCounter < cloudFilesList.size) {
             if (localNotesList[localCounter].nId == cloudFilesList[cloudCounter].nId) {
+                //Notes with same Id
+                if(localNotesList[localCounter].dateCreated != cloudFilesList[cloudCounter].dateCreated){
+                    fileContent = googleDriveHelper.getFileContent(cloudFilesList[cloudCounter].gDriveId)
+                    noteData = gson.fromJson(fileContent, NoteContent::class.java)
+                    if (localNotesList[localCounter].noteType != NOTE_DELETED)
+                        extraNotesLocal.add(localNotesList[localCounter])
+                    localNotesList[localCounter].noteTitle = noteData.noteTitle
+                    localNotesList[localCounter].noteContent = noteData.noteContent
+                    localNotesList[localCounter].noteColor = noteData.noteColor
+                    localNotesList[localCounter].dateCreated = cloudFilesList[cloudCounter].dateCreated
+                    localNotesList[localCounter].dateModified = cloudFilesList[cloudCounter].dateModified
+                    localNotesList[localCounter].gDriveId = cloudFilesList[cloudCounter].gDriveId
+                    localNotesList[localCounter].synced = true
+                    localNotesList[localCounter].noteType = noteData.noteType!!
+                    isLocalDbChanged = true
+                    continue
+                }
+
                 if (localNotesList[localCounter].noteType == NOTE_DELETED){
+                    //If note deleted from device then delete from cloud too
                     googleDriveHelper.deleteFile(localNotesList[localCounter].gDriveId)
                     isCloudDbChanged = true
                     localCounter++
                     cloudCounter++
                     continue
                 }
+
                 if (localNotesList[localCounter].dateModified > cloudFilesList[cloudCounter].dateModified) {
+                    //Local note is more recent
                     noteData = NoteContent(localNotesList[localCounter].noteTitle, localNotesList[localCounter].noteContent, localNotesList[localCounter].noteColor, localNotesList[localCounter].noteType)
                     fileContent = gson.toJson(noteData)
                     googleDriveHelper.updateFile(cloudFilesList[cloudCounter].gDriveId!!, fileContent)
-
                     isCloudDbChanged = true
                 } else if (localNotesList[localCounter].dateModified < cloudFilesList[cloudCounter].dateModified) {
+                    //Cloud note is more recent
                     fileContent = googleDriveHelper.getFileContent(cloudFilesList[cloudCounter].gDriveId)
                     noteData = gson.fromJson(fileContent, NoteContent::class.java)
                     localNotesList[localCounter].noteTitle = noteData.noteTitle
@@ -167,9 +189,9 @@ class NotesSyncService : Service() {
                     localNotesList[localCounter].dateModified = cloudFilesList[cloudCounter].dateModified
                     localNotesList[localCounter].dateCreated = cloudFilesList[cloudCounter].dateCreated
                     localNotesList[localCounter].gDriveId = cloudFilesList[cloudCounter].gDriveId
-
                     isLocalDbChanged = true
                 }
+
                 newFilesList.add(
                     NoteFile(
                         localNotesList[localCounter].nId,
@@ -289,7 +311,6 @@ class NotesSyncService : Service() {
                 )
 
                 localNotesList[i].gDriveId = fileId
-
                 newFilesList.add(
                     NoteFile(
                         localNotesList[i].nId,
@@ -301,6 +322,22 @@ class NotesSyncService : Service() {
                 i++
             }
             isCloudDbChanged = true
+        }
+
+        if (extraNotesLocal.isNotEmpty()){
+            val lastId = localNotesList[localNotesList.size - 1].nId
+            var fileId: String?
+            for (i in 1 until extraNotesLocal.size + 1){
+                extraNotesLocal[i].nId = lastId
+                noteData = NoteContent(extraNotesLocal[i].noteTitle, extraNotesLocal[i].noteContent, extraNotesLocal[i].noteColor, extraNotesLocal[i].noteType)
+                fileContent = gson.toJson(noteData)
+                fileId = googleDriveHelper.createFile(parentFolderId, "${extraNotesLocal[i].nId}.txt", FILE_TYPE_TEXT, fileContent)
+                extraNotesLocal[i].gDriveId = fileId
+                localNotesList.add(extraNotesLocal[i])
+                newFilesList.add(NoteFile(extraNotesLocal[i].nId, extraNotesLocal[i].dateCreated, extraNotesLocal[i].dateModified, extraNotesLocal[i].gDriveId))
+            }
+            isCloudDbChanged = true
+            isLocalDbChanged = true
         }
 
         Log.d(TAG, "Comparing done")
@@ -388,23 +425,36 @@ class NotesSyncService : Service() {
         var jsonData: String?
         var fileId: String?
         val filesList: MutableList<NoteFile> = ArrayList()
-        for (i in 0 until mNotesList.size) {
-            noteContent.noteTitle = mNotesList[i].noteTitle
-            noteContent.noteContent = mNotesList[i].noteContent
-            noteContent.noteColor = mNotesList[i].noteColor
-            jsonData = gson.toJson(noteContent)
-            fileId = googleDriveHelper.createFile(parentFolderId, "${mNotesList[i].nId}.txt", FILE_TYPE_TEXT, jsonData)
-            mNotesList[i].gDriveId = fileId
-            filesList.add(
-                NoteFile(
-                    mNotesList[i].nId,
-                    mNotesList[i].dateCreated,
-                    mNotesList[i].dateModified,
-                    mNotesList[i].gDriveId
+        val newNotesList: MutableList<Note> = ArrayList()
+        newNotesList.addAll(mNotesList)
+        var i = 0
+        while( i < newNotesList.size){
+            if (newNotesList[i].noteType != NOTE_DELETED) {
+                noteContent.noteTitle = newNotesList[i].noteTitle
+                noteContent.noteContent = newNotesList[i].noteContent
+                noteContent.noteColor = newNotesList[i].noteColor
+                noteContent.noteType = newNotesList[i].noteType
+                jsonData = gson.toJson(noteContent)
+                fileId =
+                    googleDriveHelper.createFile(parentFolderId, "${newNotesList[i].nId}.txt", FILE_TYPE_TEXT, jsonData)
+                newNotesList[i].gDriveId = fileId
+                filesList.add(
+                    NoteFile(
+                        newNotesList[i].nId,
+                        newNotesList[i].dateCreated,
+                        newNotesList[i].dateModified,
+                        newNotesList[i].gDriveId
+                    )
                 )
-            )
+            }else{
+                deleteByNoteId(newNotesList[i].nId)
+                newNotesList.removeAt(i)
+                i--
+            }
+            i++
         }
 
+        mNotesList = newNotesList
         val fileSystemJson = gson.toJson(filesList)
         googleDriveHelper.createFile(parentFolderId, "notes_files_system.txt", FILE_TYPE_TEXT, fileSystemJson)
         updateLocalDatabase()

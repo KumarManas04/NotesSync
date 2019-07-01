@@ -3,9 +3,9 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-            android:id="@+id/archive_menu_item"
-            android:icon="@drawable/archive_drawer_item"
+            android:id="@+id/remind_menu_item"
+            android:icon="@drawable/add_reminder"
             android:orderInCategory="1"
-            android:title="@string/archive_note"
+            android:title="@string/set_reminder"
             app:showAsAction="always"/>
 </menu>

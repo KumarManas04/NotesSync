@@ -15,10 +15,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.infinitysolutions.notessync.Adapters.ColorPickerAdapter
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVED
+import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Model.Note
+import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
@@ -46,6 +47,22 @@ class NoteEditFragment : Fragment() {
                 dialog.hide()
             }
 
+            val selectedNote = mainViewModel.getSelectedNote()
+            if(selectedNote != null){
+                if(selectedNote.noteType == NOTE_DEFAULT){
+                    dialogView.archive_button_icon.setImageResource(R.drawable.archive_drawer_item)
+                    dialogView.archive_button_text.text = "Archive note"
+                }else{
+                    dialogView.archive_button_icon.setImageResource(R.drawable.unarchive_menu_item)
+                    dialogView.archive_button_text.text = "Unarchive note"
+                }
+            }
+
+            dialogView.archive_button.setOnClickListener {
+                archiveNote()
+                dialog.hide()
+            }
+
             val layoutManager = LinearLayoutManager(this@NoteEditFragment.context!!, RecyclerView.HORIZONTAL, false)
             dialogView.color_picker.layoutManager = layoutManager
             dialogView.color_picker.adapter = ColorPickerAdapter(this@NoteEditFragment.context!!, mainViewModel)
@@ -69,48 +86,15 @@ class NoteEditFragment : Fragment() {
 
         val toolbar = rootView.toolbar
         toolbar.title = ""
-        toolbar.inflateMenu(com.infinitysolutions.notessync.R.menu.note_editor_menu)
+        toolbar.inflateMenu(R.menu.note_editor_menu)
         toolbar.setNavigationOnClickListener {
             activity?.onBackPressed()
         }
 
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                com.infinitysolutions.notessync.R.id.archive_menu_item -> {
-                    val selectedNote = mainViewModel.getSelectedNote()
-                    if (selectedNote != null && selectedNote.nId != -1L) {
-                        if (selectedNote.noteType == NOTE_DEFAULT) {
-                            databaseViewModel.insert(
-                                Note(
-                                    selectedNote.nId,
-                                    noteTitle.text.toString(),
-                                    noteContent.text.toString(),
-                                    selectedNote.dateCreated,
-                                    Calendar.getInstance().timeInMillis,
-                                    selectedNote.gDriveId,
-                                    NOTE_ARCHIVED,
-                                    selectedNote.synced,
-                                    mainViewModel.getSelectedColor().value
-                                )
-                            )
-                            activity?.onBackPressed()
-                        } else if (selectedNote.noteType == NOTE_ARCHIVED) {
-                            databaseViewModel.insert(
-                                Note(
-                                    selectedNote.nId,
-                                    noteTitle.text.toString(),
-                                    noteContent.text.toString(),
-                                    selectedNote.dateCreated,
-                                    Calendar.getInstance().timeInMillis,
-                                    selectedNote.gDriveId,
-                                    NOTE_DEFAULT,
-                                    selectedNote.synced,
-                                    mainViewModel.getSelectedColor().value
-                                )
-                            )
-                            activity?.onBackPressed()
-                        }
-                    }
+                R.id.remind_menu_item -> {
+
                 }
             }
             true
@@ -126,6 +110,43 @@ class NoteEditFragment : Fragment() {
                 val formatter = SimpleDateFormat("MMM d, YYYY", Locale.ENGLISH)
                 rootView.last_edited_text.text = "Edited  ${formatter.format(Calendar.getInstance().timeInMillis)}"
             }
+        }
+    }
+
+    private fun archiveNote(){
+        val selectedNote = mainViewModel.getSelectedNote()
+        if (selectedNote != null && selectedNote.nId != -1L) {
+            if (selectedNote.noteType == NOTE_DEFAULT) {
+                databaseViewModel.insert(
+                    Note(
+                        selectedNote.nId,
+                        noteTitle.text.toString(),
+                        noteContent.text.toString(),
+                        selectedNote.dateCreated,
+                        Calendar.getInstance().timeInMillis,
+                        selectedNote.gDriveId,
+                        Contract.NOTE_ARCHIVED,
+                        selectedNote.synced,
+                        mainViewModel.getSelectedColor().value
+                    )
+                )
+                activity?.onBackPressed()
+            } else if (selectedNote.noteType == Contract.NOTE_ARCHIVED) {
+                databaseViewModel.insert(
+                    Note(
+                        selectedNote.nId,
+                        noteTitle.text.toString(),
+                        noteContent.text.toString(),
+                        selectedNote.dateCreated,
+                        Calendar.getInstance().timeInMillis,
+                        selectedNote.gDriveId,
+                        NOTE_DEFAULT,
+                        selectedNote.synced,
+                        mainViewModel.getSelectedColor().value
+                    )
+                )
+            }
+            activity?.onBackPressed()
         }
     }
 

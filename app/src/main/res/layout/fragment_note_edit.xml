@@ -66,9 +66,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:clickable="true"
+                android:focusable="true"
                 android:background="@drawable/simple_ripple"
                 android:layout_gravity="center_vertical"
-                android:contentDescription="more options"/>
+                android:contentDescription="More options"/>
     </LinearLayout>
 
 </LinearLayout>

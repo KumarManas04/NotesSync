@@ -39,7 +39,9 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         viewMode.value = mode
     }
 
-    fun insert(note: Note) = viewModelScope.launch(Dispatchers.IO){
-        repository.insert(note)
+    fun insert(note: Note){
+        viewModelScope.launch(Dispatchers.IO){
+            repository.insert(note)
+        }
     }
 }

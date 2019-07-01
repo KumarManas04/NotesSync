@@ -10,7 +10,7 @@ class NotesRepository(private val notesDao: NotesDao){
     val archiveList : LiveData<List<Note>> = notesDao.getArchived()
 
     @WorkerThread
-    suspend fun insert(note: Note) {
+    suspend fun insert(note: Note){
         notesDao.insert(note)
     }
 }
