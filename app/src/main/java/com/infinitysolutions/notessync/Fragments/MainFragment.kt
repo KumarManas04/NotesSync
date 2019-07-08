@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
@@ -27,7 +28,6 @@ class MainFragment : Fragment() {
         rootView.search_button.setOnClickListener{
             Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_searchFragment)
         }
-
         return rootView
     }
 
@@ -53,6 +53,11 @@ class MainFragment : Fragment() {
         rootView.new_note_button.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
             mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null))
+        }
+
+        rootView.new_list_button.setOnClickListener{
+            mainViewModel.setShouldOpenEditor(true)
+            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", LIST_DEFAULT, false, null))
         }
 
         mainViewModel.getViewMode().observe(this, Observer { mode->

@@ -15,13 +15,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.infinitysolutions.notessync.Adapters.ColorPickerAdapter
-import com.infinitysolutions.notessync.Contracts.Contract
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_ARCHIVED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
+import it.feio.android.checklistview.exceptions.ViewNotSupportedException
+import it.feio.android.checklistview.models.ChecklistManager
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_note_edit.view.*
 import java.text.SimpleDateFormat
@@ -29,18 +33,22 @@ import java.util.*
 
 
 class NoteEditFragment : Fragment() {
+    private val TAG = "NoteEditFragment"
     private lateinit var databaseViewModel: DatabaseViewModel
     private lateinit var mainViewModel: MainViewModel
     private lateinit var noteTitle: EditText
     private lateinit var noteContent: EditText
+    private lateinit var mChecklistManager: ChecklistManager
+    private var switchView: View? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(com.infinitysolutions.notessync.R.layout.fragment_note_edit, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_note_edit, container, false)
         initDataBinding(rootView)
 
+        //Setting up bottom menu
         val menuButton = rootView.open_bottom_menu
         menuButton.setOnClickListener {
-            val dialogView = layoutInflater.inflate(com.infinitysolutions.notessync.R.layout.bottom_sheet, null)
+            val dialogView = layoutInflater.inflate(R.layout.bottom_sheet, null)
             val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
             dialogView.delete_button.setOnClickListener {
                 deleteNote()
@@ -48,11 +56,11 @@ class NoteEditFragment : Fragment() {
             }
 
             val selectedNote = mainViewModel.getSelectedNote()
-            if(selectedNote != null){
-                if(selectedNote.noteType == NOTE_DEFAULT){
+            if (selectedNote != null) {
+                if (selectedNote.noteType == NOTE_DEFAULT || selectedNote.noteType == LIST_DEFAULT) {
                     dialogView.archive_button_icon.setImageResource(R.drawable.archive_drawer_item)
                     dialogView.archive_button_text.text = "Archive note"
-                }else{
+                } else {
                     dialogView.archive_button_icon.setImageResource(R.drawable.unarchive_menu_item)
                     dialogView.archive_button_text.text = "Unarchive note"
                 }
@@ -94,7 +102,7 @@ class NoteEditFragment : Fragment() {
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.remind_menu_item -> {
-
+                    //TODO: Implement reminder
                 }
             }
             true
@@ -103,20 +111,47 @@ class NoteEditFragment : Fragment() {
         if (mainViewModel.getShouldOpenEditor().value!!) {
             mainViewModel.setShouldOpenEditor(false)
             val selectedNote = mainViewModel.getSelectedNote()
-            if (selectedNote != null && selectedNote.nId != -1L) {
-                rootView.note_title.setText(selectedNote.noteTitle)
-                rootView.note_content.setText(selectedNote.noteContent)
-                mainViewModel.setSelectedColor(selectedNote.noteColor)
-                val formatter = SimpleDateFormat("MMM d, YYYY", Locale.ENGLISH)
-                rootView.last_edited_text.text = "Edited  ${formatter.format(Calendar.getInstance().timeInMillis)}"
+            if (selectedNote != null) {
+                if (selectedNote.nId != -1L) {
+                    noteTitle.setText(selectedNote.noteTitle)
+                    noteContent.setText(selectedNote.noteContent)
+                    mainViewModel.setSelectedColor(selectedNote.noteColor)
+                    val formatter = SimpleDateFormat("MMM d, YYYY", Locale.ENGLISH)
+                    rootView.last_edited_text.text = "Edited  ${formatter.format(Calendar.getInstance().timeInMillis)}"
+                }
+
+                if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
+                    try {
+                        mChecklistManager = ChecklistManager(context)
+                        switchView = noteContent
+                        mChecklistManager.newEntryHint("Add new")
+                        mChecklistManager.moveCheckedOnBottom(0)
+                        mChecklistManager.showCheckMarks(true)
+                        mChecklistManager.keepChecked(true)
+                        mChecklistManager.dragEnabled(false)
+                        val newView = mChecklistManager.convert(switchView)
+                        mChecklistManager.replaceViews(switchView, newView)
+                        switchView = newView
+                    } catch (e: ViewNotSupportedException) {
+                        e.printStackTrace()
+                    }
+                }
             }
         }
     }
 
-    private fun archiveNote(){
+    private fun archiveNote() {
         val selectedNote = mainViewModel.getSelectedNote()
         if (selectedNote != null && selectedNote.nId != -1L) {
-            if (selectedNote.noteType == NOTE_DEFAULT) {
+            val noteType: Int = when(selectedNote.noteType){
+                NOTE_DEFAULT-> NOTE_ARCHIVED
+                LIST_DEFAULT-> LIST_ARCHIVED
+                NOTE_ARCHIVED-> NOTE_DEFAULT
+                LIST_ARCHIVED-> LIST_DEFAULT
+                else -> -1
+            }
+
+            if (noteType != -1) {
                 databaseViewModel.insert(
                     Note(
                         selectedNote.nId,
@@ -125,22 +160,7 @@ class NoteEditFragment : Fragment() {
                         selectedNote.dateCreated,
                         Calendar.getInstance().timeInMillis,
                         selectedNote.gDriveId,
-                        Contract.NOTE_ARCHIVED,
-                        selectedNote.synced,
-                        mainViewModel.getSelectedColor().value
-                    )
-                )
-                activity?.onBackPressed()
-            } else if (selectedNote.noteType == Contract.NOTE_ARCHIVED) {
-                databaseViewModel.insert(
-                    Note(
-                        selectedNote.nId,
-                        noteTitle.text.toString(),
-                        noteContent.text.toString(),
-                        selectedNote.dateCreated,
-                        Calendar.getInstance().timeInMillis,
-                        selectedNote.gDriveId,
-                        NOTE_DEFAULT,
+                        noteType,
                         selectedNote.synced,
                         mainViewModel.getSelectedColor().value
                     )
@@ -155,7 +175,7 @@ class NoteEditFragment : Fragment() {
         val selectedNote = mainViewModel.getSelectedNote()
         if (selectedNote != null) {
             if (selectedNote.nId == -1L) {
-                if (noteTitle.text.isNotEmpty() && noteContent.text.isNotEmpty()) {
+                if (noteContent.text.isNotEmpty()) {
                     databaseViewModel.insert(
                         Note(
                             null,
@@ -164,7 +184,7 @@ class NoteEditFragment : Fragment() {
                             timeModified,
                             timeModified,
                             "-1",
-                            NOTE_DEFAULT,
+                            selectedNote.noteType,
                             false,
                             mainViewModel.getSelectedColor().value
                         )
@@ -217,11 +237,26 @@ class NoteEditFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        if ((mainViewModel.getSelectedNote()?.noteContent != noteContent.text.toString())
-            || (mainViewModel.getSelectedNote()?.noteTitle != noteTitle.text.toString())
-            || (mainViewModel.getSelectedNote()?.noteColor != mainViewModel.getSelectedColor().value)
-        )
-            saveNote()
+        val selectedNote = mainViewModel.getSelectedNote()
+        if (selectedNote != null) {
+            var noteContentText = ""
+            if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
+                try {
+                    noteContentText = (mChecklistManager.convert(switchView) as EditText).text.toString()
+                } catch (e: ViewNotSupportedException) {
+                    e.printStackTrace()
+                    noteContentText = selectedNote.noteContent!!
+                }
+            } else {
+                noteContentText = noteContent.text.toString()
+            }
+
+            if ((selectedNote.noteContent != noteContentText)
+                || (selectedNote.noteTitle != noteTitle.text.toString())
+                || (selectedNote.noteColor != mainViewModel.getSelectedColor().value)
+            )
+                saveNote()
+        }
         super.onDestroy()
     }
 }
