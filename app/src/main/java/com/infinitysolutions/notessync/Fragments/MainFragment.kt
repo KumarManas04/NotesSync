@@ -38,7 +38,7 @@ class MainFragment : Fragment() {
         val notesRecyclerView = rootView.notes_recycler_view
         notesRecyclerView.layoutManager = LinearLayoutManager(activity!!)
         val toolbar = rootView.toolbar
-        toolbar.title = "Notes"
+        toolbar.title = "All"
         toolbar.inflateMenu(R.menu.main_fragment_menu)
         toolbar.setOnMenuItemClickListener { item ->
             when(item.itemId){
@@ -62,12 +62,23 @@ class MainFragment : Fragment() {
 
         mainViewModel.getViewMode().observe(this, Observer { mode->
             if (mode != null){
-                if(mode == 1){
-                    toolbar.title = "Notes"
-                    databaseViewModel.setViewMode(1)
-                }else if (mode == 2){
-                    toolbar.title = "Archive"
-                    databaseViewModel.setViewMode(2)
+                when (mode) {
+                    1 -> {
+                        toolbar.title = "All"
+                        databaseViewModel.setViewMode(1)
+                    }
+                    2 -> {
+                        toolbar.title = "Notes"
+                        databaseViewModel.setViewMode(2)
+                    }
+                    3 -> {
+                        toolbar.title = "To-do lists"
+                        databaseViewModel.setViewMode(3)
+                    }
+                    4 -> {
+                        toolbar.title = "Archive"
+                        databaseViewModel.setViewMode(4)
+                    }
                 }
             }
         })

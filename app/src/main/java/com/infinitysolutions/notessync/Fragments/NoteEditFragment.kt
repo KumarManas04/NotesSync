@@ -4,6 +4,7 @@ package com.infinitysolutions.notessync.Fragments
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -56,36 +57,65 @@ class NoteEditFragment : Fragment() {
         //Setting up bottom menu
         val menuButton = rootView.open_bottom_menu
         menuButton.setOnClickListener {
-            val dialogView = layoutInflater.inflate(R.layout.bottom_sheet, container, false)
-            val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
-            dialogView.delete_button.setOnClickListener {
-                deleteNote()
-                dialog.hide()
-            }
-
-            val selectedNote = mainViewModel.getSelectedNote()
-            if (selectedNote != null) {
-                if (selectedNote.noteType == NOTE_DEFAULT || selectedNote.noteType == LIST_DEFAULT) {
-                    dialogView.archive_button_icon.setImageResource(R.drawable.archive_drawer_item)
-                    dialogView.archive_button_text.text = "Archive note"
-                } else {
-                    dialogView.archive_button_icon.setImageResource(R.drawable.unarchive_menu_item)
-                    dialogView.archive_button_text.text = "Unarchive note"
-                }
-            }
-
-            dialogView.archive_button.setOnClickListener {
-                archiveNote()
-                dialog.hide()
-            }
-
-            val layoutManager = LinearLayoutManager(this@NoteEditFragment.context!!, RecyclerView.HORIZONTAL, false)
-            dialogView.color_picker.layoutManager = layoutManager
-            dialogView.color_picker.adapter = ColorPickerAdapter(this@NoteEditFragment.context!!, mainViewModel)
-            dialog.setContentView(dialogView)
-            dialog.show()
+            startBottomSheetDialog(container)
         }
         return rootView
+    }
+
+    private fun startBottomSheetDialog(container: ViewGroup?) {
+        val dialogView = layoutInflater.inflate(R.layout.bottom_sheet, container, false)
+        val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
+
+        val selectedNote = mainViewModel.getSelectedNote()
+        if (selectedNote != null) {
+            if (selectedNote.noteType == NOTE_DEFAULT || selectedNote.noteType == LIST_DEFAULT) {
+                dialogView.archive_button_icon.setImageResource(R.drawable.archive_drawer_item)
+                dialogView.archive_button_text.text = "Archive note"
+            } else {
+                dialogView.archive_button_icon.setImageResource(R.drawable.unarchive_menu_item)
+                dialogView.archive_button_text.text = "Unarchive note"
+            }
+
+            if (mainViewModel.reminderTime != -1L){
+                dialogView.cancel_reminder_button.visibility = View.VISIBLE
+                val formatter = SimpleDateFormat("h:mm a MMM d, YYYY", Locale.ENGLISH)
+                dialogView.reminder_text.text = "Reminder set:\n${formatter.format(mainViewModel.reminderTime)}"
+                dialogView.reminder_text.setTextColor(Color.parseColor(mainViewModel.getSelectedColor().value))
+                dialogView.cancel_reminder_button.setOnClickListener {
+                    AlertDialog.Builder(context)
+                        .setTitle("Cancel reminder")
+                        .setMessage("Are you sure you want to cancel the reminder?")
+                        .setPositiveButton("Yes"){ _: DialogInterface, _: Int ->
+                            WorkSchedulerHelper().cancelReminder(selectedNote.nId)
+                            mainViewModel.reminderTime = -1L
+                            dialog.hide()
+                        }
+                        .setNegativeButton("No", null)
+                        .show()
+                }
+                dialogView.cancel_reminder_button.setColorFilter(Color.parseColor(mainViewModel.getSelectedColor().value))
+            }else{
+                dialogView.cancel_reminder_button.visibility = View.GONE
+                dialogView.reminder_text.text = "Set reminder"
+                dialogView.reminder_text.setTextColor(Color.parseColor("#000000"))
+            }
+
+            dialogView.reminder_button.setOnClickListener {
+                pickReminderTime(selectedNote.nId)
+                dialog.hide()
+            }
+        }
+
+        dialogView.archive_button.setOnClickListener {
+            archiveNote()
+            dialog.hide()
+        }
+
+        val layoutManager = LinearLayoutManager(this@NoteEditFragment.context!!, RecyclerView.HORIZONTAL, false)
+        dialogView.color_picker.layoutManager = layoutManager
+        dialogView.color_picker.adapter = ColorPickerAdapter(this@NoteEditFragment.context!!, mainViewModel)
+        dialog.setContentView(dialogView)
+        dialog.show()
     }
 
     private fun initDataBinding(rootView: View) {
@@ -110,7 +140,9 @@ class NoteEditFragment : Fragment() {
 
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.remind_menu_item ->pickReminderTime(mainViewModel.getSelectedNote()?.nId)
+                R.id.delete_menu_item ->{
+                    deleteNote()
+                }
             }
             true
         }
@@ -145,10 +177,10 @@ class NoteEditFragment : Fragment() {
                 noteContent.setText(selectedNote.noteContent)
                 mainViewModel.setSelectedColor(selectedNote.noteColor)
                 val formatter = SimpleDateFormat("MMM d, YYYY", Locale.ENGLISH)
-                rootView.last_edited_text.text =
-                    "Edited  ${formatter.format(Calendar.getInstance().timeInMillis)}"
+                rootView.last_edited_text.text = "Edited  ${formatter.format(Calendar.getInstance().timeInMillis)}"
             }
 
+            mainViewModel.reminderTime = selectedNote.reminderTime
             if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
                 try {
                     mChecklistManager = ChecklistManager(context)
@@ -183,6 +215,7 @@ class NoteEditFragment : Fragment() {
                     0
                 )
                 WorkSchedulerHelper().setReminder(noteId, cal.timeInMillis)
+                mainViewModel.reminderTime = cal.timeInMillis
             }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false)
 
             val datePickerDialog = DatePickerDialog(context!!, { _, year, month, dayOfMonth ->
@@ -259,7 +292,7 @@ class NoteEditFragment : Fragment() {
                         selectedNote.noteType,
                         selectedNote.synced,
                         mainViewModel.getSelectedColor().value,
-                        selectedNote.reminderTime
+                        mainViewModel.reminderTime
                     )
                 )
             }
@@ -316,6 +349,7 @@ class NoteEditFragment : Fragment() {
             if ((selectedNote.noteContent != noteContentText)
                 || (selectedNote.noteTitle != noteTitle.text.toString())
                 || (selectedNote.noteColor != mainViewModel.getSelectedColor().value)
+                || (selectedNote.reminderTime != mainViewModel.reminderTime)
             )
                 saveNote()
         }

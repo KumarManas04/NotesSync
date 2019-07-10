@@ -18,12 +18,13 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         notesDao.getSearchResult(searchQuery)
     }
     val viewList: LiveData<List<Note>> = Transformations.switchMap(viewMode){mode->
-        if (mode == 1)
-            repository.notesList
-        else if (mode == 2)
-            repository.archiveList
-        else
-            null
+        when (mode) {
+            1 -> repository.allList
+            2 -> repository.notesList
+            3 -> repository.todoList
+            4 -> repository.archiveList
+            else -> null
+        }
     }
 
     init {

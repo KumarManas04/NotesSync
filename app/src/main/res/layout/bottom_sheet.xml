@@ -7,7 +7,7 @@
               android:layout_height="wrap_content">
 
     <LinearLayout
-            android:id="@+id/delete_button"
+            android:id="@+id/archive_button"
             android:clickable="true"
             android:background="?android:attr/selectableItemBackground"
             android:paddingTop="8dp"
@@ -16,15 +16,18 @@
             android:paddingEnd="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" android:focusable="true">
+            android:orientation="horizontal"
+            android:focusable="true">
 
         <ImageView
-                android:src="@drawable/delete_menu_icon"
+                android:id="@+id/archive_button_icon"
+                android:src="@drawable/archive_drawer_item"
                 android:layout_width="26dp"
                 android:layout_height="26dp"/>
 
         <TextView
-                android:text="Delete"
+                android:id="@+id/archive_button_text"
+                android:text="Archive"
                 android:textSize="16sp"
                 android:textColor="#000"
                 android:layout_marginStart="30dp"
@@ -64,7 +67,7 @@
     </LinearLayout>
 
     <LinearLayout
-            android:id="@+id/archive_button"
+            android:id="@+id/reminder_button"
             android:clickable="true"
             android:background="?android:attr/selectableItemBackground"
             android:paddingTop="8dp"
@@ -73,24 +76,34 @@
             android:paddingEnd="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:focusable="true">
+            android:orientation="horizontal" android:focusable="true">
 
         <ImageView
-                android:id="@+id/archive_button_icon"
-                android:src="@drawable/archive_drawer_item"
+                android:src="@drawable/reminder_icon"
+                android:layout_gravity="center_vertical"
                 android:layout_width="26dp"
                 android:layout_height="26dp"/>
 
         <TextView
-                android:id="@+id/archive_button_text"
-                android:text="Archive"
+                android:id="@+id/reminder_text"
+                android:text="Set reminder"
                 android:textSize="16sp"
                 android:textColor="#000"
                 android:layout_marginStart="30dp"
                 android:layout_gravity="center_vertical"
-                android:layout_width="wrap_content"
+                android:maxLines="2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
+
+        <ImageView
+                android:id="@+id/cancel_reminder_button"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/simple_ripple"
+                android:src="@drawable/cancel_reminder"
+                android:visibility="gone"
+                android:layout_width="26dp"
+                android:layout_height="26dp"/>
 
     </LinearLayout>
 

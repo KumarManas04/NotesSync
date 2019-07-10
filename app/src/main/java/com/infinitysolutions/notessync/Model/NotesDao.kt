@@ -12,6 +12,12 @@ interface NotesDao {
     @Query("SELECT * FROM notes_table WHERE type = 1 OR type = 3 ORDER BY date_modified DESC")
     fun getAll(): LiveData<List<Note>>
 
+    @Query("SELECT * FROM notes_table WHERE type = 1 ORDER BY date_modified DESC")
+    fun getNotesOnly(): LiveData<List<Note>>
+
+    @Query("SELECT * FROM notes_table WHERE type = 3 ORDER BY date_modified DESC")
+    fun getListsOnly(): LiveData<List<Note>>
+
     @Query("SELECT * FROM notes_table WHERE type = 2 OR type = 4 ORDER BY date_modified DESC")
     fun getArchived(): LiveData<List<Note>>
 

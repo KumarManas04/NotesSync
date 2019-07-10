@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">NotesSync</string>
-    <string name="set_reminder">Set reminder</string>
     <string name="title">Title</string>
     <string name="write_something">Write something…</string>
     <string name="sync">sync</string>

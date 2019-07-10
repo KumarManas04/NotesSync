@@ -68,12 +68,20 @@ class MainActivity : AppCompatActivity() {
         navigation_view.menu[0].isChecked = true
         navigation_view.setNavigationItemSelectedListener {
             when(it.itemId){
-                R.id.notes->{
+                R.id.all->{
                     mainViewModel.setViewMode(1)
                     drawer_layout.closeDrawers()
                 }
-                R.id.archive->{
+                R.id.notes->{
                     mainViewModel.setViewMode(2)
+                    drawer_layout.closeDrawers()
+                }
+                R.id.lists->{
+                    mainViewModel.setViewMode(3)
+                    drawer_layout.closeDrawers()
+                }
+                R.id.archive->{
+                    mainViewModel.setViewMode(4)
                     drawer_layout.closeDrawers()
                 }
             }

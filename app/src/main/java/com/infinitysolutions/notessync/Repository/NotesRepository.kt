@@ -6,7 +6,9 @@ import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Model.NotesDao
 
 class NotesRepository(private val notesDao: NotesDao){
-    val notesList: LiveData<List<Note>> = notesDao.getAll()
+    val allList: LiveData<List<Note>> = notesDao.getAll()
+    val notesList: LiveData<List<Note>> = notesDao.getNotesOnly()
+    val todoList: LiveData<List<Note>> = notesDao.getListsOnly()
     val archiveList : LiveData<List<Note>> = notesDao.getArchived()
 
     @WorkerThread

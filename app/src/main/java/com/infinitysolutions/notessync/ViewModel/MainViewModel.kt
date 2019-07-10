@@ -14,6 +14,7 @@ class MainViewModel: ViewModel(){
     private val syncNotes = MutableLiveData<Event<Boolean>>()
     private val mToolbar = MutableLiveData<Toolbar>()
     private val viewMode = MutableLiveData<Int>()
+    var reminderTime = -1L
 
     fun setViewMode(mode: Int){
         viewMode.value = mode

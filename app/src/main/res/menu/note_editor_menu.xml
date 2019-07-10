@@ -3,9 +3,9 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-            android:id="@+id/remind_menu_item"
-            android:icon="@drawable/add_reminder"
+            android:id="@+id/delete_menu_item"
+            android:icon="@drawable/delete_menu_icon"
             android:orderInCategory="1"
-            android:title="@string/set_reminder"
+            android:title="Delete note"
             app:showAsAction="always"/>
 </menu>
