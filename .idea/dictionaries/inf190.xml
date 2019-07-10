@@ -4,6 +4,7 @@
       <w>coroutines</w>
       <w>gson</w>
       <w>jetpack</w>
+      <w>workmanager</w>
     </words>
   </dictionary>
 </component>

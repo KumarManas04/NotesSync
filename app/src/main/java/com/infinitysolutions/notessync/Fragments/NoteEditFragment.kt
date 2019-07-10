@@ -2,6 +2,8 @@ package com.infinitysolutions.notessync.Fragments
 
 
 import android.app.AlertDialog
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -22,12 +24,17 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import it.feio.android.checklistview.exceptions.ViewNotSupportedException
 import it.feio.android.checklistview.models.ChecklistManager
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_note_edit.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -42,13 +49,14 @@ class NoteEditFragment : Fragment() {
     private var switchView: View? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        Log.d(TAG, "OnCreate")
         val rootView = inflater.inflate(R.layout.fragment_note_edit, container, false)
         initDataBinding(rootView)
 
         //Setting up bottom menu
         val menuButton = rootView.open_bottom_menu
         menuButton.setOnClickListener {
-            val dialogView = layoutInflater.inflate(R.layout.bottom_sheet, null)
+            val dialogView = layoutInflater.inflate(R.layout.bottom_sheet, container, false)
             val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
             dialogView.delete_button.setOnClickListener {
                 deleteNote()
@@ -84,6 +92,7 @@ class NoteEditFragment : Fragment() {
         databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
         mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
+        Log.d(TAG, "InitDataBinding")
         noteTitle = rootView.note_title
         noteContent = rootView.note_content
 
@@ -101,42 +110,87 @@ class NoteEditFragment : Fragment() {
 
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.remind_menu_item -> {
-                    //TODO: Implement reminder
-                }
+                R.id.remind_menu_item ->pickReminderTime(mainViewModel.getSelectedNote()?.nId)
             }
             true
         }
 
-        if (mainViewModel.getShouldOpenEditor().value!!) {
-            mainViewModel.setShouldOpenEditor(false)
-            val selectedNote = mainViewModel.getSelectedNote()
-            if (selectedNote != null) {
-                if (selectedNote.nId != -1L) {
-                    noteTitle.setText(selectedNote.noteTitle)
-                    noteContent.setText(selectedNote.noteContent)
-                    mainViewModel.setSelectedColor(selectedNote.noteColor)
-                    val formatter = SimpleDateFormat("MMM d, YYYY", Locale.ENGLISH)
-                    rootView.last_edited_text.text = "Edited  ${formatter.format(Calendar.getInstance().timeInMillis)}"
-                }
-
-                if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
-                    try {
-                        mChecklistManager = ChecklistManager(context)
-                        switchView = noteContent
-                        mChecklistManager.newEntryHint("Add new")
-                        mChecklistManager.moveCheckedOnBottom(0)
-                        mChecklistManager.showCheckMarks(true)
-                        mChecklistManager.keepChecked(true)
-                        mChecklistManager.dragEnabled(false)
-                        val newView = mChecklistManager.convert(switchView)
-                        mChecklistManager.replaceViews(switchView, newView)
-                        switchView = newView
-                    } catch (e: ViewNotSupportedException) {
-                        e.printStackTrace()
+        if (arguments != null){
+            val noteId = arguments?.getLong("NOTE_ID")
+            Log.d(TAG, "Note id = $noteId")
+            if (noteId != null) {
+                GlobalScope.launch(Dispatchers.IO) {
+                    val note = databaseViewModel.getNoteById(noteId)
+                    withContext(Dispatchers.Main) {
+                        mainViewModel.setSelectedNote(note)
+                        prepareNoteView(rootView)
                     }
                 }
             }
+        }else{
+            if (mainViewModel.getShouldOpenEditor().value != null) {
+                if (mainViewModel.getShouldOpenEditor().value!!) {
+                    mainViewModel.setShouldOpenEditor(false)
+                    prepareNoteView(rootView)
+                }
+            }
+        }
+    }
+
+    private fun prepareNoteView(rootView: View) {
+        val selectedNote = mainViewModel.getSelectedNote()
+        if (selectedNote != null) {
+            if (selectedNote.nId != -1L) {
+                noteTitle.setText(selectedNote.noteTitle)
+                noteContent.setText(selectedNote.noteContent)
+                mainViewModel.setSelectedColor(selectedNote.noteColor)
+                val formatter = SimpleDateFormat("MMM d, YYYY", Locale.ENGLISH)
+                rootView.last_edited_text.text =
+                    "Edited  ${formatter.format(Calendar.getInstance().timeInMillis)}"
+            }
+
+            if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
+                try {
+                    mChecklistManager = ChecklistManager(context)
+                    switchView = noteContent
+                    mChecklistManager.newEntryHint("Add new")
+                    mChecklistManager.moveCheckedOnBottom(0)
+                    mChecklistManager.showCheckMarks(true)
+                    mChecklistManager.keepChecked(true)
+                    mChecklistManager.dragEnabled(false)
+                    val newView = mChecklistManager.convert(switchView)
+                    mChecklistManager.replaceViews(switchView, newView)
+                    switchView = newView
+                } catch (e: ViewNotSupportedException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    private fun pickReminderTime(noteId: Long?){
+        if (noteId != null) {
+            val c = Calendar.getInstance()
+            val cal = Calendar.getInstance()
+
+            val timePickerDialog = TimePickerDialog(context, { _, hourOfDay, minute ->
+                cal.set(
+                    cal.get(Calendar.YEAR),
+                    cal.get(Calendar.MONTH),
+                    cal.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay,
+                    minute,
+                    0
+                )
+                WorkSchedulerHelper().setReminder(noteId, cal.timeInMillis)
+            }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false)
+
+            val datePickerDialog = DatePickerDialog(context!!, { _, year, month, dayOfMonth ->
+                cal.set(year, month, dayOfMonth)
+                timePickerDialog.show()
+            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH))
+            datePickerDialog.datePicker.minDate = c.timeInMillis
+            datePickerDialog.show()
         }
     }
 
@@ -162,7 +216,8 @@ class NoteEditFragment : Fragment() {
                         selectedNote.gDriveId,
                         noteType,
                         selectedNote.synced,
-                        mainViewModel.getSelectedColor().value
+                        mainViewModel.getSelectedColor().value,
+                        selectedNote.reminderTime
                     )
                 )
             }
@@ -186,7 +241,8 @@ class NoteEditFragment : Fragment() {
                             "-1",
                             selectedNote.noteType,
                             false,
-                            mainViewModel.getSelectedColor().value
+                            mainViewModel.getSelectedColor().value,
+                            -1L
                         )
                     )
                 }
@@ -202,7 +258,8 @@ class NoteEditFragment : Fragment() {
                         selectedNote.gDriveId,
                         selectedNote.noteType,
                         selectedNote.synced,
-                        mainViewModel.getSelectedColor().value
+                        mainViewModel.getSelectedColor().value,
+                        selectedNote.reminderTime
                     )
                 )
             }
@@ -213,7 +270,7 @@ class NoteEditFragment : Fragment() {
         AlertDialog.Builder(context)
             .setTitle("Delete note")
             .setMessage("Are you sure you want to delete this note?")
-            .setPositiveButton("Yes") { dialog, which ->
+            .setPositiveButton("Yes") { _, _ ->
                 activity!!.onBackPressed()
                 val selectedNote = mainViewModel.getSelectedNote()
                 if (selectedNote != null) {
@@ -227,28 +284,33 @@ class NoteEditFragment : Fragment() {
                             selectedNote.gDriveId,
                             NOTE_DELETED,
                             selectedNote.synced,
-                            mainViewModel.getSelectedColor().value
+                            mainViewModel.getSelectedColor().value,
+                            -1L
                         )
                     )
+
+                    if (selectedNote.reminderTime != -1L){
+                        WorkSchedulerHelper().cancelReminder(selectedNote.nId)
+                    }
                 }
             }
             .setNegativeButton("No", null)
             .show()
+
     }
 
     override fun onDestroy() {
         val selectedNote = mainViewModel.getSelectedNote()
         if (selectedNote != null) {
-            var noteContentText = ""
-            if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
+            val noteContentText = if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
                 try {
-                    noteContentText = (mChecklistManager.convert(switchView) as EditText).text.toString()
+                    (mChecklistManager.convert(switchView) as EditText).text.toString()
                 } catch (e: ViewNotSupportedException) {
                     e.printStackTrace()
-                    noteContentText = selectedNote.noteContent!!
+                    selectedNote.noteContent!!
                 }
             } else {
-                noteContentText = noteContent.text.toString()
+                noteContent.text.toString()
             }
 
             if ((selectedNote.noteContent != noteContentText)

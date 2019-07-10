@@ -44,4 +44,8 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
             repository.insert(note)
         }
     }
+
+    fun getNoteById(nId: Long): Note{
+        return notesDao.getNoteById(nId)
+    }
 }

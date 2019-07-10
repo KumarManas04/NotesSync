@@ -52,12 +52,12 @@ class MainFragment : Fragment() {
 
         rootView.new_note_button.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
-            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null))
+            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
         }
 
         rootView.new_list_button.setOnClickListener{
             mainViewModel.setShouldOpenEditor(true)
-            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", LIST_DEFAULT, false, null))
+            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", LIST_DEFAULT, false, null, -1L))
         }
 
         mainViewModel.getViewMode().observe(this, Observer { mode->

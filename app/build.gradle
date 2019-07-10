@@ -93,4 +93,7 @@ dependencies {
 
     //CheckList
     implementation 'com.github.federicoiosue:checklistview:3.2.1'
+
+    //Workmanager
+    implementation "androidx.work:work-runtime-ktx:2.0.1"
 }

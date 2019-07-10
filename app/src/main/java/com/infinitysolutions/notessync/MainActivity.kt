@@ -10,8 +10,10 @@ import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.Navigation
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
@@ -50,11 +52,20 @@ class MainActivity : AppCompatActivity() {
                 prepareNavDrawer()
             }
         })
+
+        Navigation.findNavController(this, R.id.nav_host_fragment)
+            .addOnDestinationChangedListener { controller, destination, arguments ->
+                when(destination.id){
+                    R.id.mainFragment-> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+                    R.id.noteEditFragment-> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                    R.id.searchFragment-> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                }
+            }
     }
 
     private fun prepareNavDrawer(){
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        navigation_view.menu.get(0).isChecked = true
+        navigation_view.menu[0].isChecked = true
         navigation_view.setNavigationItemSelectedListener {
             when(it.itemId){
                 R.id.notes->{
