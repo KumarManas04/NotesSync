@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
                 setTheme(R.style.AppTheme)
         }
         setContentView(R.layout.activity_main)
-        Log.d(TAG, "OnCreate: $theme")
         initDataBinding()
     }
 

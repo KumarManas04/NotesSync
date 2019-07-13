@@ -43,9 +43,7 @@ class MainFragment : Fragment() {
         toolbar.setOnMenuItemClickListener { item ->
             when(item.itemId){
                 R.id.sync_menu_item ->{
-//                    mainViewModel.setSyncNotes()
-//                    activity?.setTheme(R.style.AppThemeDark)
-                    activity?.recreate()
+                    mainViewModel.setSyncNotes()
                 }
             }
             true
