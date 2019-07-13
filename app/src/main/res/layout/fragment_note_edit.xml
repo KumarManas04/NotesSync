@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical"
-              android:background="#ffffff"
+              android:background="?attr/mainBackground"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
@@ -11,7 +11,7 @@
             app:navigationIcon="?attr/homeAsUpIndicator"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#ffffff"/>
+            android:background="?attr/overlayBackground"/>
 
     <EditText
             android:id="@+id/note_title"
@@ -23,7 +23,7 @@
             android:textSize="20sp"
             android:fontFamily="sans-serif"
             android:textStyle="bold"
-            android:background="#fff"
+            android:background="?attr/mainBackground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textCapSentences"/>
@@ -38,11 +38,11 @@
 
         <EditText
                 android:id="@+id/note_content"
-                android:background="#fff"
+                android:background="?attr/mainBackground"
                 android:textSize="18sp"
                 android:hint="@string/write_something"
                 android:gravity="top|start"
-                android:textColor="#212121"
+                android:textColor="?attr/theTextColor"
                 android:fontFamily="sans-serif-condensed"
                 android:inputType="textCapSentences|textMultiLine"
                 android:layout_width="match_parent"
@@ -51,7 +51,7 @@
 
     <LinearLayout
             android:elevation="8dp"
-            android:background="#ffffff"
+            android:background="?attr/overlayBackground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -73,6 +73,7 @@
                 android:padding="10dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:tint="?attr/iconsTint"
                 android:background="@drawable/simple_ripple"
                 android:layout_gravity="center_vertical"
                 android:contentDescription="More options"/>

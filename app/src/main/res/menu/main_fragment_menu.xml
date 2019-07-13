@@ -4,7 +4,7 @@
 
     <item
             android:id="@+id/sync_menu_item"
-            android:icon="@drawable/sync_notes"
+            android:icon="?attr/syncIcon"
             android:orderInCategory="1"
             android:title="@string/sync"
             app:showAsAction="always"/>

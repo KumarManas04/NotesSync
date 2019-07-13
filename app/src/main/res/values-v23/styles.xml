@@ -1,12 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:statusBarColor">#ffffff</item>
+        <item name="mainBackground">#ffffff</item>
+        <item name="toolbarTextColor">#000000</item>
+        <item name="iconsTint">#000000</item>
+        <item name="theTextColor">#000000</item>
+        <item name="syncIcon">@drawable/sync_notes</item>
+        <item name="overlayBackground">#ffffff</item>
+        <item name="navDrawerItemTint">#3c4043</item>
+        <item name="deleteMenuIcon">@drawable/delete_menu_icon</item>
+    </style>
+
+    <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="mainBackground">#000000</item>
+        <item name="toolbarTextColor">#ffffff</item>
+        <item name="iconsTint">#ffffff</item>
+        <item name="theTextColor">#ffffff</item>
+        <item name="syncIcon">@drawable/sync_notes_dark</item>
+        <item name="overlayBackground">#171717</item>
+        <item name="navDrawerItemTint">#ffffff</item>
+        <item name="deleteMenuIcon">@drawable/delete_menu_icon_dark</item>
     </style>
 
     <style name="NavigationDrawerStyle">

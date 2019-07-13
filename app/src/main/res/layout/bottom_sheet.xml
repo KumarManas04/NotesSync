@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
-              android:background="#fff"
+              android:background="?attr/overlayBackground"
               android:paddingTop="10dp"
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
@@ -22,6 +22,7 @@
         <ImageView
                 android:id="@+id/archive_button_icon"
                 android:src="@drawable/archive_drawer_item"
+                android:tint="?attr/iconsTint"
                 android:layout_width="26dp"
                 android:layout_height="26dp"/>
 
@@ -29,7 +30,7 @@
                 android:id="@+id/archive_button_text"
                 android:text="Archive"
                 android:textSize="16sp"
-                android:textColor="#000"
+                android:textColor="?attr/theTextColor"
                 android:layout_marginStart="30dp"
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
@@ -52,13 +53,14 @@
 
         <ImageView
                 android:src="@drawable/share_menu_item"
+                android:tint="?attr/iconsTint"
                 android:layout_width="26dp"
                 android:layout_height="26dp"/>
 
         <TextView
                 android:text="Share"
                 android:textSize="16sp"
-                android:textColor="#000"
+                android:textColor="?attr/theTextColor"
                 android:layout_marginStart="30dp"
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
@@ -81,6 +83,7 @@
         <ImageView
                 android:src="@drawable/reminder_icon"
                 android:layout_gravity="center_vertical"
+                android:tint="?attr/iconsTint"
                 android:layout_width="26dp"
                 android:layout_height="26dp"/>
 
@@ -88,7 +91,7 @@
                 android:id="@+id/reminder_text"
                 android:text="Set reminder"
                 android:textSize="16sp"
-                android:textColor="#000"
+                android:textColor="?attr/theTextColor"
                 android:layout_marginStart="30dp"
                 android:layout_gravity="center_vertical"
                 android:maxLines="2"

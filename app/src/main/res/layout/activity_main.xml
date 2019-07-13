@@ -21,8 +21,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:theme="@style/NavigationDrawerStyle"
-            app:itemTextColor="#3c4043"
-            app:itemIconTint="#3c4043"
+            app:itemTextColor="?attr/navDrawerItemTint"
+            app:itemIconTint="?attr/navDrawerItemTint"
             app:menu="@menu/nav_drawer_menu"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

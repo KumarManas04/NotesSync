@@ -5,9 +5,11 @@ import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -97,12 +99,23 @@ class NoteEditFragment : Fragment() {
             }else{
                 dialogView.cancel_reminder_button.visibility = View.GONE
                 dialogView.reminder_text.text = "Set reminder"
-                dialogView.reminder_text.setTextColor(Color.parseColor("#000000"))
+                val typedValue = TypedValue()
+                context?.theme?.resolveAttribute(R.attr.theTextColor, typedValue, true)
+                val textColor = typedValue.data
+                dialogView.reminder_text.setTextColor(textColor)
             }
 
             dialogView.reminder_button.setOnClickListener {
                 pickReminderTime(selectedNote.nId)
                 dialog.hide()
+            }
+
+            dialogView.share_button.setOnClickListener {
+                val shareIntent = Intent(Intent.ACTION_SEND)
+                shareIntent.type = "text/plain"
+                shareIntent.putExtra(Intent.EXTRA_TEXT, "${noteTitle.text}\n${getNoteText(selectedNote)}")
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, noteTitle.text.toString())
+                startActivity(Intent.createChooser(shareIntent, "Share..."))
             }
         }
 
@@ -332,19 +345,23 @@ class NoteEditFragment : Fragment() {
 
     }
 
+    private fun getNoteText(selectedNote: Note): String {
+        return if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
+            try {
+                (mChecklistManager.convert(switchView) as EditText).text.toString()
+            } catch (e: ViewNotSupportedException) {
+                e.printStackTrace()
+                selectedNote.noteContent!!
+            }
+        } else {
+            noteContent.text.toString()
+        }
+    }
+
     override fun onDestroy() {
         val selectedNote = mainViewModel.getSelectedNote()
         if (selectedNote != null) {
-            val noteContentText = if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
-                try {
-                    (mChecklistManager.convert(switchView) as EditText).text.toString()
-                } catch (e: ViewNotSupportedException) {
-                    e.printStackTrace()
-                    selectedNote.noteContent!!
-                }
-            } else {
-                noteContent.text.toString()
-            }
+            val noteContentText = getNoteText(selectedNote)
 
             if ((selectedNote.noteContent != noteContentText)
                 || (selectedNote.noteTitle != noteTitle.text.toString())

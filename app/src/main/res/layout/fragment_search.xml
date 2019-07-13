@@ -4,12 +4,12 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:background="#ffffff"
+              android:background="?attr/mainBackground"
               tools:context=".Fragments.SearchFragment">
 
     <LinearLayout
             android:orientation="horizontal"
-            android:background="#ffffff"
+            android:background="?attr/mainBackground"
             android:elevation="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -21,6 +21,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:src="@drawable/back_arrow"
+                android:tint="?attr/iconsTint"
                 android:layout_width="?attr/actionBarSize"
                 android:layout_height="?attr/actionBarSize"/>
 
@@ -29,9 +30,9 @@
                 android:maxLines="1"
                 android:hint="Search your notes..."
                 android:textColorHint="#757575"
-                android:textColor="#000000"
+                android:textColor="?attr/theTextColor"
                 android:inputType="textCapSentences"
-                android:background="#ffffff"
+                android:background="?attr/overlayBackground"
                 android:padding="14dp"
                 android:textSize="16sp"
                 android:textCursorDrawable="@null"

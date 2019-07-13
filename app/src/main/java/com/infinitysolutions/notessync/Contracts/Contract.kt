@@ -9,5 +9,7 @@ class Contract{
         const val LIST_ARCHIVED = 4
         const val FILE_TYPE_FOLDER = "application/vnd.google-apps.folder"
         const val FILE_TYPE_TEXT = "text/plain"
+        const val SHARED_PREFS_NAME = "com.infinitySolutions.notesSync.sharedPrefs"
+        const val PREF_THEME = "sharedPrefs.currentTheme"
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CTAppTheme">
+        <attr name="mainBackground" format="color"/>
+        <attr name="toolbarTextColor" format="color"/>
+        <attr name="iconsTint" format="color"/>
+        <attr name="theTextColor" format="color"/>
+        <attr name="overlayBackground" format="color"/>
+        <attr name="navDrawerItemTint" format="color"/>
+        <attr name="syncIcon" format="integer"/>
+        <attr name="deleteMenuIcon" format="integer"/>
+    </declare-styleable>
+</resources>

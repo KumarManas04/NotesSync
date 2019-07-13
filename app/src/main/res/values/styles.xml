@@ -6,7 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:statusBarColor">#ffffff</item>
+        <item name="android:statusBarColor">#000000</item>
+
     </style>
 
     <style name="TitleTextAppearance" >

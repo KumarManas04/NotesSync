@@ -18,6 +18,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -27,7 +29,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val sharedPrefs = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+        if(sharedPrefs.contains(PREF_THEME)){
+            if (sharedPrefs.getInt(PREF_THEME, 0) == 1)
+                setTheme(R.style.AppThemeDark)
+            else
+                setTheme(R.style.AppTheme)
+        }
         setContentView(R.layout.activity_main)
+        Log.d(TAG, "OnCreate: $theme")
         initDataBinding()
     }
 
@@ -84,10 +94,21 @@ class MainActivity : AppCompatActivity() {
                     mainViewModel.setViewMode(4)
                     drawer_layout.closeDrawers()
                 }
+                R.id.settings->{
+                    val sharedPrefs = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+                    val editor = sharedPrefs.edit()
+                    if (sharedPrefs.contains(PREF_THEME)){
+                        if (sharedPrefs.getInt(PREF_THEME, 0) == 1)
+                            editor.putInt(PREF_THEME, 0)
+                        else
+                            editor.putInt(PREF_THEME, 1)
+                    }
+                    editor.commit()
+                    recreate()
+                }
             }
             true
         }
-
     }
 
     private fun syncFiles(){

@@ -2,5 +2,5 @@
     <string name="app_name">NotesSync</string>
     <string name="title">Title</string>
     <string name="write_something">Write something…</string>
-    <string name="sync">sync</string>
+    <string name="sync">Sync notes</string>
 </resources>
