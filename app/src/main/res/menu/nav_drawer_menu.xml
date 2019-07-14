@@ -3,7 +3,7 @@
     <group android:id="@+id/destinations" android:checkableBehavior="single">
 
         <item android:id="@+id/all"
-              android:icon="@drawable/all_drawer_item"
+              android:icon="@drawable/all_nav_item"
               android:title="All"/>
 
         <item android:id="@+id/notes"
@@ -27,6 +27,11 @@
             android:id="@+id/settings"
             android:icon="@drawable/settings_drawer_item"
             android:title="Settings"/>
+
+        <item
+            android:id="@+id/support"
+            android:icon="@drawable/support_nav_item"
+            android:title="Support"/>
 
         <item
             android:id="@+id/about"

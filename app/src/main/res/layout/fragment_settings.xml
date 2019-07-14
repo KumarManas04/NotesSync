@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="?attr/mainBackground"
+              tools:context=".Fragments.SettingsFragment">
+
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/mainBackground"/>
+
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:text="Preferences"
+                    style="@style/prefsCategoryTitle"/>
+
+            <LinearLayout
+                    android:id="@+id/lock_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/lock_pref_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="Lock"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="Set a PIN to lock your notes"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/night_mode_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/night_mode_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="Night mode"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="Switch to night mode for better visibility in the dark"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+                <Switch
+                        android:id="@+id/night_mode_toggle"
+                        android:layout_gravity="center_vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <TextView
+                    android:text="Other"
+                    style="@style/prefsCategoryTitle"/>
+
+            <LinearLayout
+                    android:id="@+id/about_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/about_drawer_item"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="About"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="Get details about the app"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/open_source_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/open_source_pref_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="Open source"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="All open source libraries and resources used"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

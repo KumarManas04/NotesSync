@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
-              android:background="?attr/overlayBackground"
+              android:background="?attr/mainBackground"
               android:paddingTop="10dp"
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
@@ -30,7 +30,7 @@
                 android:id="@+id/archive_button_text"
                 android:text="Archive"
                 android:textSize="16sp"
-                android:textColor="?attr/theTextColor"
+                android:textColor="?attr/mainTextColor"
                 android:layout_marginStart="30dp"
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
@@ -60,7 +60,7 @@
         <TextView
                 android:text="Share"
                 android:textSize="16sp"
-                android:textColor="?attr/theTextColor"
+                android:textColor="?attr/mainTextColor"
                 android:layout_marginStart="30dp"
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
@@ -91,7 +91,7 @@
                 android:id="@+id/reminder_text"
                 android:text="Set reminder"
                 android:textSize="16sp"
-                android:textColor="?attr/theTextColor"
+                android:textColor="?attr/mainTextColor"
                 android:layout_marginStart="30dp"
                 android:layout_gravity="center_vertical"
                 android:maxLines="2"
@@ -102,7 +102,7 @@
         <ImageView
                 android:id="@+id/cancel_reminder_button"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/simple_ripple"
+                android:background="@drawable/overlay_simple_ripple"
                 android:src="@drawable/cancel_reminder"
                 android:visibility="gone"
                 android:layout_width="26dp"

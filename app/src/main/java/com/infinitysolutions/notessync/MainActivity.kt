@@ -66,8 +66,7 @@ class MainActivity : AppCompatActivity() {
             .addOnDestinationChangedListener { controller, destination, arguments ->
                 when(destination.id){
                     R.id.mainFragment-> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-                    R.id.noteEditFragment-> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-                    R.id.searchFragment-> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                    else-> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                 }
             }
     }
@@ -94,16 +93,12 @@ class MainActivity : AppCompatActivity() {
                     drawer_layout.closeDrawers()
                 }
                 R.id.settings->{
-                    val sharedPrefs = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-                    val editor = sharedPrefs.edit()
-                    if (sharedPrefs.contains(PREF_THEME)){
-                        if (sharedPrefs.getInt(PREF_THEME, 0) == 1)
-                            editor.putInt(PREF_THEME, 0)
-                        else
-                            editor.putInt(PREF_THEME, 1)
-                    }
-                    editor.commit()
-                    recreate()
+                    Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.action_mainFragment_to_settingsFragment)
+                    drawer_layout.closeDrawers()
+                }
+                R.id.about->{
+                    Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.action_mainFragment_to_aboutFragment)
+                    drawer_layout.closeDrawers()
                 }
             }
             true

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="?attr/mainBackground"
+              tools:context=".Fragments.SettingsFragment">
+
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/mainBackground"/>
+
+    <LinearLayout style="@style/prefsContainer">
+
+        <ImageView
+                android:src="@drawable/about_drawer_item"
+                style="@style/prefsIcon"/>
+
+        <LinearLayout style="@style/prefsTextContainer">
+
+            <TextView
+                    android:text="App version"
+                    style="@style/prefsMain"/>
+
+            <TextView
+                    android:text="1.0.0"
+                    style="@style/prefsSummary"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/rate_button"
+            style="@style/prefsContainer">
+
+        <ImageView
+                android:src="@drawable/rate_icon"
+                style="@style/prefsIcon"/>
+
+        <LinearLayout style="@style/prefsTextContainer">
+
+            <TextView
+                    android:text="Rate"
+                    style="@style/prefsMain"/>
+
+            <TextView
+                    android:text="Leave a positive rating on Google Play if you liked Notes Sync"
+                    style="@style/prefsSummary"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/report_bugs_button"
+            style="@style/prefsContainer">
+
+        <ImageView
+                android:src="@drawable/report_bug"
+                style="@style/prefsIcon"/>
+
+        <LinearLayout style="@style/prefsTextContainer">
+
+            <TextView
+                    android:text="Report bugs"
+                    style="@style/prefsMain"/>
+
+            <TextView
+                    android:text="Report bugs, request new features or say Hi!"
+                    style="@style/prefsSummary"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/translate_button"
+            style="@style/prefsContainer">
+
+        <ImageView
+                android:src="@drawable/translate_icon"
+                style="@style/prefsIcon"/>
+
+        <LinearLayout style="@style/prefsTextContainer">
+
+            <TextView
+                    android:text="Translate"
+                    style="@style/prefsMain"/>
+
+            <TextView
+                    android:text="Help me translate Notes Sync to your native language"
+                    style="@style/prefsSummary"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/more_apps_button"
+            style="@style/prefsContainer">
+
+        <ImageView
+                android:src="@drawable/more_apps_icon"
+                style="@style/prefsIcon"/>
+
+        <LinearLayout style="@style/prefsTextContainer">
+
+            <TextView
+                    android:text="More apps"
+                    style="@style/prefsMain"/>
+
+            <TextView
+                    android:text="Check out my other applications on Google Play"
+                    style="@style/prefsSummary"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/changelog_button"
+            style="@style/prefsContainer">
+
+        <ImageView
+                android:src="@drawable/changelog_icon"
+                style="@style/prefsIcon"/>
+
+        <LinearLayout style="@style/prefsTextContainer">
+
+            <TextView
+                    android:text="Changelog"
+                    style="@style/prefsMain"/>
+
+            <TextView
+                    android:text="View the changelog of Notes Sync"
+                    style="@style/prefsSummary"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout style="@style/prefsContainer">
+
+        <ImageView
+                android:src="@drawable/developer_icon"
+                style="@style/prefsIcon"/>
+
+        <LinearLayout style="@style/prefsTextContainer">
+
+            <TextView
+                    android:text="Developer"
+                    style="@style/prefsMain"/>
+
+            <TextView
+                    android:text="Kumar Manas"
+                    style="@style/prefsSummary"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

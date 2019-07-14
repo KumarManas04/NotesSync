@@ -4,7 +4,7 @@
         <attr name="mainBackground" format="color"/>
         <attr name="toolbarTextColor" format="color"/>
         <attr name="iconsTint" format="color"/>
-        <attr name="theTextColor" format="color"/>
+        <attr name="mainTextColor" format="color"/>
         <attr name="overlayBackground" format="color"/>
         <attr name="navDrawerItemTint" format="color"/>
         <attr name="syncIcon" format="integer"/>

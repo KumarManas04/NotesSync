@@ -3,4 +3,7 @@
     <string name="title">Title</string>
     <string name="write_something">Write something…</string>
     <string name="sync">Sync notes</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -41,7 +41,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.1.0-beta01'
+    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
     implementation 'androidx.core:core-ktx:1.2.0-alpha02'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -89,9 +89,10 @@ dependencies {
     //Guava(Required as Drive REST api dependency)
     api 'com.google.guava:guava:27.1-android'
 
+    //For Bottom Sheet
     implementation 'com.android.support:design:28.0.0'
 
-    //CheckList
+    //CheckLists
     implementation 'com.github.federicoiosue:checklistview:3.2.1'
 
     //Workmanager

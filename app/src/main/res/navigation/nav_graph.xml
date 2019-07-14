@@ -8,7 +8,8 @@
               android:label="fragment_main" tools:layout="@layout/fragment_main">
         <action android:id="@+id/action_mainFragment_to_noteEditFragment" app:destination="@id/noteEditFragment"/>
         <action android:id="@+id/action_mainFragment_to_searchFragment" app:destination="@id/searchFragment"/>
-        <action android:id="@+id/action_mainFragment_to_listEditFragment" app:destination="@id/listEditFragment"/>
+        <action android:id="@+id/action_mainFragment_to_settingsFragment" app:destination="@id/settingsFragment"/>
+        <action android:id="@+id/action_mainFragment_to_aboutFragment" app:destination="@id/aboutFragment"/>
     </fragment>
     <fragment android:id="@+id/noteEditFragment"
               android:name="com.infinitysolutions.notessync.Fragments.NoteEditFragment"
@@ -17,7 +18,19 @@
               android:label="fragment_search" tools:layout="@layout/fragment_search">
         <action android:id="@+id/action_searchFragment_to_noteEditFragment" app:destination="@id/noteEditFragment"/>
     </fragment>
-    <fragment android:id="@+id/listEditFragment"
-              android:name="com.infinitysolutions.notessync.Fragments.ListEditFragment"
-              android:label="ListEditFragment"/>
+    <fragment android:id="@+id/settingsFragment"
+              android:name="com.infinitysolutions.notessync.Fragments.SettingsFragment"
+              android:label="fragment_settings" tools:layout="@layout/fragment_settings">
+        <action android:id="@+id/action_settingsFragment_to_aboutFragment" app:destination="@id/aboutFragment"/>
+        <action android:id="@+id/action_settingsFragment_to_lockFragment" app:destination="@id/lockFragment"/>
+        <action android:id="@+id/action_settingsFragment_to_openSourceFragment"
+                app:destination="@id/openSourceFragment"/>
+    </fragment>
+    <fragment android:id="@+id/aboutFragment" android:name="com.infinitysolutions.notessync.Fragments.AboutFragment"
+              android:label="fragment_about" tools:layout="@layout/fragment_about"/>
+    <fragment android:id="@+id/lockFragment" android:name="com.infinitysolutions.notessync.Fragments.LockFragment"
+              android:label="fragment_lock" tools:layout="@layout/fragment_lock"/>
+    <fragment android:id="@+id/openSourceFragment"
+              android:name="com.infinitysolutions.notessync.Fragments.OpenSourceFragment"
+              android:label="fragment_open_source" tools:layout="@layout/fragment_open_source"/>
 </navigation>

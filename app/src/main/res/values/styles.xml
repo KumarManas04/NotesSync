@@ -1,13 +1,33 @@
 <resources>
 
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:statusBarColor">#000000</item>
+        <item name="mainBackground">#ffffff</item>
+        <item name="toolbarTextColor">#000000</item>
+        <item name="iconsTint">#000000</item>
+        <item name="mainTextColor">#000000</item>
+        <item name="syncIcon">@drawable/sync_notes</item>
+        <item name="overlayBackground">#ffffff</item>
+        <item name="navDrawerItemTint">#3c4043</item>
+        <item name="deleteMenuIcon">@drawable/delete_menu_icon</item>
+    </style>
 
+    <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="mainBackground">#171717</item>
+        <item name="toolbarTextColor">#ffffff</item>
+        <item name="iconsTint">#ffffff</item>
+        <item name="mainTextColor">#ffffff</item>
+        <item name="syncIcon">@drawable/sync_notes_dark</item>
+        <item name="overlayBackground">#2a2a2a</item>
+        <item name="navDrawerItemTint">#ffffff</item>
+        <item name="deleteMenuIcon">@drawable/delete_menu_icon_dark</item>
     </style>
 
     <style name="TitleTextAppearance" >
@@ -22,4 +42,69 @@
         <item name="android:listPreferredItemHeightSmall">50dp</item>
     </style>
 
+    <style name="prefsMain">
+        <item name="android:textSize">16sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">?attr/mainTextColor</item>
+    </style>
+
+    <style name="prefsSummary">
+        <item name="android:textSize">14sp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textColor">#757575</item>
+    </style>
+
+    <style name="prefsIcon">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:layout_gravity">top</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:tint">?attr/iconsTint</item>
+    </style>
+
+    <style name="prefsContainer">
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">@drawable/main_simple_ripple</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="prefsTextContainer">
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_marginStart">12dp</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="prefsCategoryTitle">
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:layout_marginStart">62dp</item>
+        <item name="android:layout_marginEnd">20dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="openLinks">
+        <item name="android:background">@drawable/text_underline</item>
+        <item name="android:layout_margin">10dp</item>
+        <item name="android:textColor">?attr/mainTextColor</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:ellipsize">end</item>
+    </style>
 </resources>

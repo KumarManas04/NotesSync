@@ -100,7 +100,7 @@ class NoteEditFragment : Fragment() {
                 dialogView.cancel_reminder_button.visibility = View.GONE
                 dialogView.reminder_text.text = "Set reminder"
                 val typedValue = TypedValue()
-                context?.theme?.resolveAttribute(R.attr.theTextColor, typedValue, true)
+                context?.theme?.resolveAttribute(R.attr.mainTextColor, typedValue, true)
                 val textColor = typedValue.data
                 dialogView.reminder_text.setTextColor(textColor)
             }

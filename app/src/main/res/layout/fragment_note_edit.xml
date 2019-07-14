@@ -11,7 +11,7 @@
             app:navigationIcon="?attr/homeAsUpIndicator"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/overlayBackground"/>
+            android:background="?attr/mainBackground"/>
 
     <EditText
             android:id="@+id/note_title"
@@ -42,7 +42,7 @@
                 android:textSize="18sp"
                 android:hint="@string/write_something"
                 android:gravity="top|start"
-                android:textColor="?attr/theTextColor"
+                android:textColor="?attr/mainTextColor"
                 android:fontFamily="sans-serif-condensed"
                 android:inputType="textCapSentences|textMultiLine"
                 android:layout_width="match_parent"
@@ -74,7 +74,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:tint="?attr/iconsTint"
-                android:background="@drawable/simple_ripple"
+                android:background="@drawable/overlay_simple_ripple"
                 android:layout_gravity="center_vertical"
                 android:contentDescription="More options"/>
     </LinearLayout>
