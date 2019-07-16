@@ -11,10 +11,14 @@ class MainViewModel: ViewModel(){
     private var selectedNote: Note? = null
     private val selectedColor = MutableLiveData<String>()
     private val shouldOpenEditor = MutableLiveData<Boolean>()
-    private val syncNotes = MutableLiveData<Event<Boolean>>()
+    private val syncNotes = MutableLiveData<Event<Int>>()
     private val mToolbar = MutableLiveData<Toolbar>()
     private val viewMode = MutableLiveData<Int>()
     var reminderTime = -1L
+
+    init{
+        viewMode.value = 1
+    }
 
     fun setViewMode(mode: Int){
         viewMode.value = mode
@@ -61,11 +65,11 @@ class MainViewModel: ViewModel(){
         return shouldOpenEditor
     }
 
-    fun setSyncNotes(){
-        syncNotes.value = Event(true)
+    fun setSyncNotes(noteType: Int){
+        syncNotes.value = Event(noteType)
     }
 
-    fun getSyncNotes(): LiveData<Event<Boolean>>{
+    fun getSyncNotes(): LiveData<Event<Int>>{
         return syncNotes
     }
 }

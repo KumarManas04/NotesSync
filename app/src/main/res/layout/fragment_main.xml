@@ -26,6 +26,35 @@
             android:layout_height="0dp"/>
 
     <LinearLayout
+            android:id="@+id/empty_items"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        <ImageView
+                android:id="@+id/empty_image"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="100dp"
+                android:layout_height="100dp"/>
+
+        <TextView
+                android:id="@+id/empty_text"
+                android:fontFamily="sans-serif-condensed"
+                android:textSize="20sp"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="?attr/mainTextColor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
             android:id="@+id/bottom_bar"
             android:background="?attr/overlayBackground"
             android:padding="0dp"

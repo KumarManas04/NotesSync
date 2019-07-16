@@ -79,6 +79,30 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                    android:id="@+id/logout_button"
+                    android:visibility="gone"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/logout_prefs_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="Logout"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:id="@+id/logout_text"
+                            android:text="Logout from your cloud storage account"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
             <TextView
                     android:text="Other"
                     style="@style/prefsCategoryTitle"/>

@@ -1,6 +1,7 @@
 package com.infinitysolutions.notessync.Fragments
 
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -51,7 +52,11 @@ class AboutFragment : Fragment() {
         }
 
         rootView.changelog_button.setOnClickListener {
-
+            AlertDialog.Builder(context)
+                .setTitle("Changelog")
+                .setMessage("VERSION 1.0  JULY 20,2019\n\n -Initial release")
+                .setPositiveButton("Close", null)
+                .show()
         }
     }
 
@@ -60,6 +65,6 @@ class AboutFragment : Fragment() {
         if (browserIntent.resolveActivity(activity!!.packageManager) != null)
             startActivity(browserIntent)
         else
-            Toast.makeText(activity, "Incorrect link", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "No browser found!", Toast.LENGTH_SHORT).show()
     }
 }

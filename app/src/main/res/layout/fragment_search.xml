@@ -49,4 +49,34 @@
             android:layout_height="0dp"
             android:layout_weight="1"/>
 
+    <LinearLayout
+            android:id="@+id/empty_items"
+            android:visibility="gone"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+        <ImageView
+                android:id="@+id/empty_image"
+                android:src="@drawable/search_empty"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="100dp"
+                android:layout_height="100dp"/>
+
+        <TextView
+                android:id="@+id/empty_text"
+                android:text="No match found"
+                android:fontFamily="sans-serif-condensed"
+                android:textSize="20sp"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="?attr/mainTextColor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
 </LinearLayout>

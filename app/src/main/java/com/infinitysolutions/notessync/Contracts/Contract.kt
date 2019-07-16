@@ -9,7 +9,12 @@ class Contract{
         const val LIST_ARCHIVED = 4
         const val FILE_TYPE_FOLDER = "application/vnd.google-apps.folder"
         const val FILE_TYPE_TEXT = "text/plain"
+        const val CLOUD_GOOGLE_DRIVE = 0
+        const val CLOUD_DROPBOX = 1
         const val SHARED_PREFS_NAME = "com.infinitySolutions.notesSync.sharedPrefs"
         const val PREF_THEME = "sharedPrefs.currentTheme"
+        const val PREF_CLOUD_TYPE = "sharedPrefs.cloudType"
+        const val PREF_ACCESS_TOKEN = "sharedPrefs.accessToken"
+        const val FILE_SYSTEM_FILENAME = "notes_files_system.txt"
     }
 }

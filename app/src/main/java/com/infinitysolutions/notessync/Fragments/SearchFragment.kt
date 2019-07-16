@@ -5,6 +5,8 @@ import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.core.widget.addTextChangedListener
@@ -52,8 +54,13 @@ class SearchFragment : Fragment() {
         }, 50)
 
         databaseViewModel.searchResultList.observe(this, Observer {resultList->
-            if(resultList != null){
+            if(resultList != null && resultList.isNotEmpty()){
+                searchRecyclerView.visibility = VISIBLE
+                rootView.empty_items.visibility = GONE
                 searchRecyclerView.adapter = NotesAdapter(mainViewModel, resultList, context!!)
+            }else{
+                searchRecyclerView.visibility = GONE
+                rootView.empty_items.visibility = VISIBLE
             }
         })
 

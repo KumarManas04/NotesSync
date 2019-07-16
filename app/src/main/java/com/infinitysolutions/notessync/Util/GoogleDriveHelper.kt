@@ -11,6 +11,8 @@ import java.util.*
 class GoogleDriveHelper(driveService: Drive) {
     private var googleDriveService: Drive = driveService
     private val TAG = "DriveHelperClass"
+    lateinit var appFolderId: String
+    lateinit var fileSystemId: String
 
     fun getFileContent(fileId: String?): String?{
         if(fileId == null || fileId == "-1")

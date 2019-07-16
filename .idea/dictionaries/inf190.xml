@@ -2,6 +2,7 @@
   <dictionary name="inf190">
     <words>
       <w>coroutines</w>
+      <w>dropbox</w>
       <w>gson</w>
       <w>jetpack</w>
       <w>workmanager</w>

@@ -5,6 +5,9 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
+import com.dropbox.core.DbxRequestConfig
+import com.dropbox.core.http.OkHttp3Requestor
+import com.dropbox.core.v2.DbxClientV2
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
@@ -12,14 +15,19 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.gson.Gson
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_SYSTEM_FILENAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_TYPE_FOLDER
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_TYPE_TEXT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Model.NoteContent
 import com.infinitysolutions.notessync.Model.NoteFile
 import com.infinitysolutions.notessync.Model.NotesRoomDatabase
+import com.infinitysolutions.notessync.Util.DropboxHelper
 import com.infinitysolutions.notessync.Util.GoogleDriveHelper
 import com.infinitysolutions.notessync.Util.NotificationHelper
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
@@ -32,6 +40,8 @@ class NotesSyncService : Service() {
     private val TAG = "NotesSyncService"
     private lateinit var mNotesList: List<Note>
     private lateinit var googleDriveHelper: GoogleDriveHelper
+    private lateinit var dropboxHelper: DropboxHelper
+    private var mDriveType: Int = CLOUD_GOOGLE_DRIVE
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -39,6 +49,9 @@ class NotesSyncService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "Service onStart")
+        val driveType = intent?.getIntExtra("Drive", CLOUD_GOOGLE_DRIVE)
+        if (driveType != null)
+            mDriveType = driveType
         startForegroundService()
         return START_NOT_STICKY
     }
@@ -75,41 +88,70 @@ class NotesSyncService : Service() {
         }
     }
 
-    private fun getCloudData() {
-        Log.d(TAG, "Initializing cloud fetch...")
-        val googleDriveService = getGoogleDriveService()
-
-        if (googleDriveService != null) {
-            googleDriveHelper = GoogleDriveHelper(googleDriveService)
-            GlobalScope.launch(Dispatchers.Default) {
-                Log.d(TAG, "Getting appFolderID")
-                val folderId = getAppFolderId()
-                if (folderId != null) {
-                    val fileSystemId = getFileSystemId(folderId)
-                    val filesList = getFilesListGDrive(fileSystemId)
-                    if (filesList != null && fileSystemId != null) {
-                        compareAndSync(fileSystemId, filesList, folderId)
-                    }
-                }
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@NotesSyncService, "Sync successful", Toast.LENGTH_SHORT).show()
-                    stopSelf()
-                }
-            }
+    private fun getDropboxClient(): DbxClientV2? {
+        val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        val accessToken = prefs.getString(PREF_ACCESS_TOKEN, null)
+        return if (accessToken != null) {
+            val requestConfig = DbxRequestConfig.newBuilder("Notes-Sync")
+                .withHttpRequestor(OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
+                .build()
+            DbxClientV2(requestConfig, accessToken)
         } else {
-            Toast.makeText(this, "Couldn't connect to Google Drive", Toast.LENGTH_SHORT).show()
-            stopSelf()
+            null
         }
     }
 
-    private fun compareAndSync(fileSystemId: String, cloudFilesList: List<NoteFile>, parentFolderId: String) {
+    private fun getCloudData() {
+        Log.d(TAG, "Initializing cloud fetch...")
+        if (mDriveType == CLOUD_GOOGLE_DRIVE) {
+            val googleDriveService = getGoogleDriveService()
+            if (googleDriveService == null)
+                return
+            else
+                googleDriveHelper = GoogleDriveHelper(googleDriveService)
+        } else {
+            val dropboxClient = getDropboxClient()
+            if (dropboxClient == null)
+                return
+            else
+                dropboxHelper = DropboxHelper(dropboxClient)
+        }
+
+        GlobalScope.launch(Dispatchers.Default) {
+            val filesList = if (mDriveType == CLOUD_GOOGLE_DRIVE) {
+                Log.d(TAG, "Getting appFolderID")
+                val appFolderId = getAppFolderId()
+                if (appFolderId != null) {
+                    val fileSystemId = getFileSystemId(appFolderId)
+                    if (fileSystemId != null){
+                        googleDriveHelper.appFolderId = appFolderId
+                        googleDriveHelper.fileSystemId = fileSystemId
+                    }
+                    getFilesListGD(fileSystemId)
+                }else{
+                    null
+                }
+            }else{
+                getFilesListDB()
+            }
+            if (filesList != null){
+                compareAndSync(filesList)
+            }
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@NotesSyncService, "Sync successful", Toast.LENGTH_SHORT).show()
+                stopSelf()
+            }
+        }
+    }
+
+    private fun compareAndSync(cloudFilesList: List<NoteFile>) {
         Log.d(TAG, "Initializing compare and sync...")
         if (mNotesList.isEmpty()) {
             restoreNotes(cloudFilesList)
             return
         }
         if (cloudFilesList.isEmpty()) {
-            writeFileSystemGDrive(parentFolderId)
+            writeFileSystem()
             return
         }
 
@@ -128,9 +170,9 @@ class NotesSyncService : Service() {
         while (localCounter < localNotesList.size && cloudCounter < cloudFilesList.size) {
             if (localNotesList[localCounter].nId == cloudFilesList[cloudCounter].nId) {
                 //Notes with same Id
-                if(localNotesList[localCounter].dateCreated != cloudFilesList[cloudCounter].dateCreated){
+                if (localNotesList[localCounter].dateCreated != cloudFilesList[cloudCounter].dateCreated) {
                     //Notes created on different devices
-                    fileContent = googleDriveHelper.getFileContent(cloudFilesList[cloudCounter].gDriveId)
+                    fileContent = getFileContent(cloudFilesList[cloudCounter])
                     noteData = gson.fromJson(fileContent, NoteContent::class.java)
                     if (localNotesList[localCounter].noteType != NOTE_DELETED)
                         extraNotesLocal.add(localNotesList[localCounter])
@@ -144,16 +186,19 @@ class NotesSyncService : Service() {
                     localNotesList[localCounter].noteType = noteData.noteType!!
                     localNotesList[localCounter].reminderTime = noteData.reminderTime
                     if (localNotesList[localCounter].reminderTime != -1L)
-                        workScheduler.setReminder(localNotesList[localCounter].nId, localNotesList[localCounter].reminderTime)
+                        workScheduler.setReminder(
+                            localNotesList[localCounter].nId,
+                            localNotesList[localCounter].reminderTime
+                        )
                     else
                         workScheduler.cancelReminder(localNotesList[localCounter].nId)
                     isLocalDbChanged = true
                     continue
                 }
 
-                if (localNotesList[localCounter].noteType == NOTE_DELETED){
+                if (localNotesList[localCounter].noteType == NOTE_DELETED) {
                     //If note deleted from device then delete from cloud too
-                    googleDriveHelper.deleteFile(localNotesList[localCounter].gDriveId)
+                    deleteFile(localNotesList[localCounter])
                     isCloudDbChanged = true
                     localCounter++
                     cloudCounter++
@@ -162,13 +207,19 @@ class NotesSyncService : Service() {
 
                 if (localNotesList[localCounter].dateModified > cloudFilesList[cloudCounter].dateModified) {
                     //Local note is more recent
-                    noteData = NoteContent(localNotesList[localCounter].noteTitle, localNotesList[localCounter].noteContent, localNotesList[localCounter].noteColor, localNotesList[localCounter].noteType, localNotesList[localCounter].reminderTime)
+                    noteData = NoteContent(
+                        localNotesList[localCounter].noteTitle,
+                        localNotesList[localCounter].noteContent,
+                        localNotesList[localCounter].noteColor,
+                        localNotesList[localCounter].noteType,
+                        localNotesList[localCounter].reminderTime
+                    )
                     fileContent = gson.toJson(noteData)
-                    googleDriveHelper.updateFile(cloudFilesList[cloudCounter].gDriveId!!, fileContent)
+                    updateFile(cloudFilesList[cloudCounter], fileContent)
                     isCloudDbChanged = true
                 } else if (localNotesList[localCounter].dateModified < cloudFilesList[cloudCounter].dateModified) {
                     //Cloud note is more recent
-                    fileContent = googleDriveHelper.getFileContent(cloudFilesList[cloudCounter].gDriveId)
+                    fileContent = getFileContent(cloudFilesList[cloudCounter])
                     noteData = gson.fromJson(fileContent, NoteContent::class.java)
                     localNotesList[localCounter].noteTitle = noteData.noteTitle
                     localNotesList[localCounter].noteContent = noteData.noteContent
@@ -199,21 +250,22 @@ class NotesSyncService : Service() {
                 cloudCounter++
             } else if (localNotesList[localCounter].nId!! < cloudFilesList[cloudCounter].nId!!) {
                 //Note exists on the device but not online
-                if ((localNotesList[localCounter].noteType == NOTE_DELETED) || localNotesList[localCounter].synced){
+                if ((localNotesList[localCounter].noteType == NOTE_DELETED) || localNotesList[localCounter].synced) {
                     //The note was deleted from another device or it was never synced and deleted from device
                     deleteByNoteId(localNotesList[localCounter].nId)
                     localNotesList.removeAt(localCounter)
                     continue
                 }
 
-                noteData = NoteContent(localNotesList[localCounter].noteTitle, localNotesList[localCounter].noteContent, localNotesList[localCounter].noteColor, localNotesList[localCounter].noteType, localNotesList[localCounter].reminderTime)
-                fileContent = gson.toJson(noteData)
-                val fileId = googleDriveHelper.createFile(
-                    parentFolderId,
-                    "${localNotesList[localCounter].nId}.txt",
-                    FILE_TYPE_TEXT,
-                    fileContent
+                noteData = NoteContent(
+                    localNotesList[localCounter].noteTitle,
+                    localNotesList[localCounter].noteContent,
+                    localNotesList[localCounter].noteColor,
+                    localNotesList[localCounter].noteType,
+                    localNotesList[localCounter].reminderTime
                 )
+                fileContent = gson.toJson(noteData)
+                val fileId = createFile(localNotesList[localCounter], fileContent)
 
                 newFilesList.add(
                     NoteFile(
@@ -229,7 +281,7 @@ class NotesSyncService : Service() {
                 localCounter++
             } else {
                 //Note exists online but not on the device
-                fileContent = googleDriveHelper.getFileContent(cloudFilesList[cloudCounter].gDriveId)
+                fileContent = getFileContent(cloudFilesList[cloudCounter])
                 noteData = gson.fromJson(fileContent, NoteContent::class.java)
                 localNotesList.add(
                     Note(
@@ -246,8 +298,9 @@ class NotesSyncService : Service() {
                     )
                 )
                 //If there is a reminder then set it
-                if(noteData.reminderTime != -1L)
+                if (noteData.reminderTime != -1L)
                     workScheduler.setReminder(localNotesList[localCounter].nId, noteData.reminderTime)
+
                 newFilesList.add(
                     NoteFile(
                         cloudFilesList[cloudCounter].nId,
@@ -265,7 +318,7 @@ class NotesSyncService : Service() {
         if (localNotesList.size - localCounter <= 0 && cloudFilesList.size - cloudCounter > 0) {
             //Some notes exist online but not on device
             for (i in cloudCounter until cloudFilesList.size) {
-                fileContent = googleDriveHelper.getFileContent(cloudFilesList[i].gDriveId)
+                fileContent = getFileContent(cloudFilesList[i])
                 noteData = gson.fromJson(fileContent, NoteContent::class.java)
                 localNotesList.add(
                     Note(
@@ -282,8 +335,9 @@ class NotesSyncService : Service() {
                     )
                 )
                 //If there is a reminder then set it
-                if(noteData.reminderTime != -1L)
+                if (noteData.reminderTime != -1L)
                     workScheduler.setReminder(localNotesList[localCounter].nId, noteData.reminderTime)
+
                 newFilesList.add(
                     NoteFile(
                         cloudFilesList[i].nId,
@@ -297,28 +351,28 @@ class NotesSyncService : Service() {
         } else if (localNotesList.size - localCounter > 0 && cloudFilesList.size - cloudCounter <= 0) {
             //Some notes exists on the device but not online
             var i = localCounter
-            while (i < localNotesList.size){
-                if ((localNotesList[i].noteType == NOTE_DELETED) || localNotesList[i].synced){
+            while (i < localNotesList.size) {
+                if ((localNotesList[i].noteType == NOTE_DELETED) || localNotesList[i].synced) {
                     deleteByNoteId(localNotesList[i].nId)
                     localNotesList.removeAt(i)
                     continue
                 }
-                noteData = NoteContent(localNotesList[i].noteTitle, localNotesList[i].noteContent, localNotesList[i].noteColor, localNotesList[i].noteType, localNotesList[i].reminderTime)
-                fileContent = gson.toJson(noteData)
-                val fileId = googleDriveHelper.createFile(
-                    parentFolderId,
-                    "${localNotesList[i].nId}.txt",
-                    FILE_TYPE_TEXT,
-                    fileContent
+                noteData = NoteContent(
+                    localNotesList[i].noteTitle,
+                    localNotesList[i].noteContent,
+                    localNotesList[i].noteColor,
+                    localNotesList[i].noteType,
+                    localNotesList[i].reminderTime
                 )
+                fileContent = gson.toJson(noteData)
+                localNotesList[i].gDriveId = createFile(localNotesList[i], fileContent)
 
-                localNotesList[i].gDriveId = fileId
                 newFilesList.add(
                     NoteFile(
                         localNotesList[i].nId,
                         localNotesList[i].dateCreated,
                         localNotesList[i].dateModified,
-                        fileId
+                        localNotesList[i].gDriveId
                     )
                 )
                 i++
@@ -326,19 +380,32 @@ class NotesSyncService : Service() {
             isCloudDbChanged = true
         }
 
-        if (extraNotesLocal.isNotEmpty()){
+        if (extraNotesLocal.isNotEmpty()) {
             val lastId = localNotesList[localNotesList.size - 1].nId?.plus(1)
-            var fileId: String?
-            for (i in 0 until extraNotesLocal.size){
+            for (i in 0 until extraNotesLocal.size) {
                 extraNotesLocal[i].nId = lastId?.plus(i)
-                noteData = NoteContent(extraNotesLocal[i].noteTitle, extraNotesLocal[i].noteContent, extraNotesLocal[i].noteColor, extraNotesLocal[i].noteType, extraNotesLocal[i].reminderTime)
+                noteData = NoteContent(
+                    extraNotesLocal[i].noteTitle,
+                    extraNotesLocal[i].noteContent,
+                    extraNotesLocal[i].noteColor,
+                    extraNotesLocal[i].noteType,
+                    extraNotesLocal[i].reminderTime
+                )
                 fileContent = gson.toJson(noteData)
-                fileId = googleDriveHelper.createFile(parentFolderId, "${extraNotesLocal[i].nId}.txt", FILE_TYPE_TEXT, fileContent)
-                extraNotesLocal[i].gDriveId = fileId
+                extraNotesLocal[i].gDriveId = createFile(extraNotesLocal[i], fileContent)
                 localNotesList.add(extraNotesLocal[i])
+
                 if (extraNotesLocal[i].reminderTime != -1L)
                     workScheduler.setReminder(extraNotesLocal[i].nId, extraNotesLocal[i].reminderTime)
-                newFilesList.add(NoteFile(extraNotesLocal[i].nId, extraNotesLocal[i].dateCreated, extraNotesLocal[i].dateModified, extraNotesLocal[i].gDriveId))
+
+                newFilesList.add(
+                    NoteFile(
+                        extraNotesLocal[i].nId,
+                        extraNotesLocal[i].dateCreated,
+                        extraNotesLocal[i].dateModified,
+                        extraNotesLocal[i].gDriveId
+                    )
+                )
             }
             isCloudDbChanged = true
             isLocalDbChanged = true
@@ -353,7 +420,41 @@ class NotesSyncService : Service() {
         //Updating cloud file system
         if (isCloudDbChanged) {
             val fileSystemJson = Gson().toJson(newFilesList)
-            googleDriveHelper.updateFile(fileSystemId, fileSystemJson)
+            if (mDriveType == CLOUD_GOOGLE_DRIVE)
+                googleDriveHelper.updateFile(googleDriveHelper.fileSystemId, fileSystemJson)
+            else
+                dropboxHelper.writeFile(FILE_SYSTEM_FILENAME, fileSystemJson)
+        }
+    }
+
+    private fun createFile(note: Note, fileContent: String) : String{
+        return if (mDriveType == CLOUD_GOOGLE_DRIVE) {
+            googleDriveHelper.createFile(googleDriveHelper.appFolderId, "${note.nId}.txt", FILE_TYPE_TEXT, fileContent)
+        }else{
+            dropboxHelper.writeFile("${note.nId}.txt", fileContent)
+            "-1"
+        }
+    }
+
+    private fun updateFile(file: NoteFile, fileContent: String) {
+        if (mDriveType == CLOUD_GOOGLE_DRIVE)
+            googleDriveHelper.updateFile(file.gDriveId!!, fileContent)
+        else
+            dropboxHelper.writeFile("${file.nId}.txt", fileContent)
+    }
+
+    private fun deleteFile(note: Note) {
+        if (mDriveType == CLOUD_GOOGLE_DRIVE)
+            googleDriveHelper.deleteFile(note.gDriveId)
+        else
+            dropboxHelper.deleteFile("${note.nId}.txt")
+    }
+
+    private fun getFileContent(file: NoteFile): String? {
+        return if (mDriveType == CLOUD_GOOGLE_DRIVE) {
+            googleDriveHelper.getFileContent(file.gDriveId)
+        } else {
+            dropboxHelper.getFileContent("${file.nId}.txt")
         }
     }
 
@@ -364,7 +465,7 @@ class NotesSyncService : Service() {
         val gson = Gson()
         val workScheduler = WorkSchedulerHelper()
         for (file in filesList) {
-            fileContent = googleDriveHelper.getFileContent(file.gDriveId)
+            fileContent = getFileContent(file)
             noteData = gson.fromJson(fileContent, NoteContent::class.java)
             notesList.add(
                 Note(
@@ -374,7 +475,7 @@ class NotesSyncService : Service() {
                     file.dateCreated,
                     file.dateModified,
                     file.gDriveId,
-                    NOTE_DEFAULT,
+                    noteData.noteType!!,
                     true,
                     noteData.noteColor,
                     noteData.reminderTime
@@ -386,6 +487,8 @@ class NotesSyncService : Service() {
         mNotesList = notesList
         updateLocalDatabase()
     }
+
+
 
     private fun getFileSystemId(parentFolderId: String): String? {
         var fileSystemId: String? = googleDriveHelper.searchFile("notes_files_system.txt", FILE_TYPE_TEXT)
@@ -399,14 +502,26 @@ class NotesSyncService : Service() {
         return fileSystemId
     }
 
-    private fun getFilesListGDrive(fileSystemId: String?): List<NoteFile>? {
+    private fun getFilesListGD(fileSystemId: String?): List<NoteFile>? {
         if (fileSystemId == null)
             return null
         val fileContent = googleDriveHelper.getFileContent(fileSystemId)
         return Gson().fromJson(fileContent, Array<NoteFile>::class.java).asList()
     }
 
-    private fun deleteByNoteId(nId: Long?){
+    private fun getFilesListDB(): List<NoteFile>? {
+        return if (dropboxHelper.checkIfFileExists(FILE_SYSTEM_FILENAME)) {
+            val fileContent = dropboxHelper.getFileContent(FILE_SYSTEM_FILENAME)
+            Gson().fromJson(fileContent, Array<NoteFile>::class.java).asList()
+        } else {
+            val filesList = ArrayList<NoteFile>()
+            val fileContent = Gson().toJson(filesList)
+            dropboxHelper.writeFile(FILE_SYSTEM_FILENAME, fileContent)
+            filesList
+        }
+    }
+
+    private fun deleteByNoteId(nId: Long?) {
         if (nId == null)
             return
         GlobalScope.launch(Dispatchers.IO) {
@@ -421,13 +536,12 @@ class NotesSyncService : Service() {
 
         GlobalScope.launch(Dispatchers.IO) {
             val notesDao = NotesRoomDatabase.getDatabase(application).notesDao()
-            for (note in mNotesList) {
+            for (note in mNotesList)
                 notesDao.insert(note)
-            }
         }
     }
 
-    private fun writeFileSystemGDrive(parentFolderId: String) {
+    private fun writeFileSystem() {
         val gson = Gson()
         val noteContent = NoteContent(null, null, null, null, -1L)
         var jsonData: String?
@@ -436,7 +550,7 @@ class NotesSyncService : Service() {
         val newNotesList: MutableList<Note> = ArrayList()
         newNotesList.addAll(mNotesList)
         var i = 0
-        while( i < newNotesList.size){
+        while (i < newNotesList.size) {
             if (newNotesList[i].noteType != NOTE_DELETED) {
                 noteContent.noteTitle = newNotesList[i].noteTitle
                 noteContent.noteContent = newNotesList[i].noteContent
@@ -444,9 +558,8 @@ class NotesSyncService : Service() {
                 noteContent.noteType = newNotesList[i].noteType
                 noteContent.reminderTime = newNotesList[i].reminderTime
                 jsonData = gson.toJson(noteContent)
-                fileId =
-                    googleDriveHelper.createFile(parentFolderId, "${newNotesList[i].nId}.txt", FILE_TYPE_TEXT, jsonData)
-                newNotesList[i].gDriveId = fileId
+                newNotesList[i].gDriveId = createFile(newNotesList[i], jsonData)
+
                 filesList.add(
                     NoteFile(
                         newNotesList[i].nId,
@@ -455,7 +568,7 @@ class NotesSyncService : Service() {
                         newNotesList[i].gDriveId
                     )
                 )
-            }else{
+            } else {
                 deleteByNoteId(newNotesList[i].nId)
                 newNotesList.removeAt(i)
                 i--
@@ -465,14 +578,17 @@ class NotesSyncService : Service() {
 
         mNotesList = newNotesList
         val fileSystemJson = gson.toJson(filesList)
-        googleDriveHelper.createFile(parentFolderId, "notes_files_system.txt", FILE_TYPE_TEXT, fileSystemJson)
+        if (mDriveType == CLOUD_GOOGLE_DRIVE)
+            googleDriveHelper.updateFile(googleDriveHelper.fileSystemId, fileSystemJson)
+        else
+            dropboxHelper.writeFile(FILE_SYSTEM_FILENAME, fileSystemJson)
         updateLocalDatabase()
     }
 
     private fun getAppFolderId(): String? {
-        var folderId = googleDriveHelper.searchFile("notes_sync_data_folder_19612", FILE_TYPE_FOLDER)
+        var folderId = googleDriveHelper.searchFile("notes_sync_data_folder_19268", FILE_TYPE_FOLDER)
         if (folderId == null)
-            folderId = googleDriveHelper.createFile(null, "notes_sync_data_folder_19612", FILE_TYPE_FOLDER, null)
+            folderId = googleDriveHelper.createFile(null, "notes_sync_data_folder_19268", FILE_TYPE_FOLDER, null)
         return folderId
     }
 
