@@ -9,7 +9,7 @@ import com.infinitysolutions.notessync.Util.Event
 
 class MainViewModel: ViewModel(){
     private var selectedNote: Note? = null
-    private val selectedColor = MutableLiveData<String>()
+    private val selectedColor = MutableLiveData<Int>()
     private val shouldOpenEditor = MutableLiveData<Boolean>()
     private val syncNotes = MutableLiveData<Event<Int>>()
     private val mToolbar = MutableLiveData<Toolbar>()
@@ -44,16 +44,16 @@ class MainViewModel: ViewModel(){
         return selectedNote
     }
 
-    fun setSelectedColor(color: String?){
+    fun setSelectedColor(color: Int?){
         if (color == null)
-            selectedColor.value = "#3d81f4"
+            selectedColor.value = 0
         else
             selectedColor.value = color
     }
 
-    fun getSelectedColor() : LiveData<String>{
+    fun getSelectedColor() : LiveData<Int>{
         if (selectedColor.value == null)
-            selectedColor.value = "#3d81f4"
+            selectedColor.value = 0
         return selectedColor
     }
 

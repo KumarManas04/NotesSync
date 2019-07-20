@@ -14,6 +14,6 @@ data class Note(
     @ColumnInfo(name = "g_drive_id") var gDriveId: String?,
     @ColumnInfo(name = "type") var noteType: Int,
     @ColumnInfo(name = "synced") var synced: Boolean,
-    @ColumnInfo(name = "color") var noteColor: String?,
+    @ColumnInfo(name = "color") var noteColor: Int?,
     @ColumnInfo(name = "reminder_time") var reminderTime: Long
 )

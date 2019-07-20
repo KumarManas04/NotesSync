@@ -9,19 +9,23 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ListView
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.ChecklistGenerator
+import com.infinitysolutions.notessync.Util.ColorsUtil
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.notes_list_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NotesAdapter(val mainViewModel: MainViewModel, val items: List<Note>, val context: Context): RecyclerView.Adapter<NotesAdapter.ViewHolder>(){
+class NotesAdapter(private val mainViewModel: MainViewModel, private val items: List<Note>, val context: Context): RecyclerView.Adapter<NotesAdapter.ViewHolder>(){
     private val formatter = SimpleDateFormat("E, MMM d", Locale.ENGLISH)
+    private val colorsUtil = ColorsUtil()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(context).inflate(R.layout.notes_list_item, parent, false)
@@ -31,7 +35,7 @@ class NotesAdapter(val mainViewModel: MainViewModel, val items: List<Note>, val 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.titleTextView.text = items[position].noteTitle
         holder.dateModifiedTextView.text = formatter.format(items[position].dateModified)
-        holder.parentView.backgroundTintList = ColorStateList.valueOf(Color.parseColor(items[position].noteColor))
+        holder.parentView.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorsUtil.getColor(items[position].noteColor)))
 
         if (items[position].noteType == LIST_DEFAULT || items[position].noteType == LIST_ARCHIVED){
             holder.contentListView.visibility = VISIBLE
@@ -39,8 +43,8 @@ class NotesAdapter(val mainViewModel: MainViewModel, val items: List<Note>, val 
             val itemsList = ChecklistGenerator.generateList(items[position].noteContent)
             holder.contentListView.adapter = ListPreviewAdapter(context, itemsList)
             setListViewHeightBasedOnChildren(holder.contentListView)
-            holder.contentListView.setOnItemClickListener { _, view, _, _ ->
-                mainViewModel.setSelectedNote(items.get(position))
+            holder.contentListView.setOnItemClickListener { _, _, _, _ ->
+                mainViewModel.setSelectedNote(items[position])
                 mainViewModel.setShouldOpenEditor(true)
             }
         }else{
@@ -50,17 +54,17 @@ class NotesAdapter(val mainViewModel: MainViewModel, val items: List<Note>, val 
         }
 
         holder.itemContainer.setOnClickListener{
-            mainViewModel.setSelectedNote(items.get(position))
+            mainViewModel.setSelectedNote(items[position])
             mainViewModel.setShouldOpenEditor(true)
         }
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
-        val titleTextView = itemView.title_text
-        val contentTextView = itemView.content_preview_text
-        val contentListView= itemView.list_view
-        val dateModifiedTextView = itemView.date_modified_text
-        val parentView = itemView.parent_view
+        val titleTextView: TextView = itemView.title_text
+        val contentTextView: TextView = itemView.content_preview_text
+        val contentListView: ListView = itemView.list_view
+        val dateModifiedTextView: TextView = itemView.date_modified_text
+        val parentView: ConstraintLayout = itemView.parent_view
         val itemContainer = itemView
     }
 

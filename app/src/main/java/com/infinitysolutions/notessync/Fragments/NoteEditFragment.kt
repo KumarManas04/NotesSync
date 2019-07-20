@@ -27,6 +27,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.Util.ColorsUtil
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
@@ -49,6 +50,7 @@ class NoteEditFragment : Fragment() {
     private lateinit var noteTitle: EditText
     private lateinit var noteContent: EditText
     private lateinit var mChecklistManager: ChecklistManager
+    private val colorsUtil = ColorsUtil()
     private var switchView: View? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -82,7 +84,7 @@ class NoteEditFragment : Fragment() {
                 dialogView.cancel_reminder_button.visibility = View.VISIBLE
                 val formatter = SimpleDateFormat("h:mm a MMM d, YYYY", Locale.ENGLISH)
                 dialogView.reminder_text.text = "Reminder set:\n${formatter.format(mainViewModel.reminderTime)}"
-                dialogView.reminder_text.setTextColor(Color.parseColor(mainViewModel.getSelectedColor().value))
+                dialogView.reminder_text.setTextColor(Color.parseColor(colorsUtil.getColor(mainViewModel.getSelectedColor().value)))
                 dialogView.cancel_reminder_button.setOnClickListener {
                     AlertDialog.Builder(context)
                         .setTitle("Cancel reminder")
@@ -95,7 +97,7 @@ class NoteEditFragment : Fragment() {
                         .setNegativeButton("No", null)
                         .show()
                 }
-                dialogView.cancel_reminder_button.setColorFilter(Color.parseColor(mainViewModel.getSelectedColor().value))
+                dialogView.cancel_reminder_button.setColorFilter(Color.parseColor(colorsUtil.getColor(mainViewModel.getSelectedColor().value)))
             }else{
                 dialogView.cancel_reminder_button.visibility = View.GONE
                 dialogView.reminder_text.text = "Set reminder"
@@ -140,8 +142,8 @@ class NoteEditFragment : Fragment() {
         noteContent = rootView.note_content
 
         mainViewModel.getSelectedColor().observe(this, androidx.lifecycle.Observer { selectedColor ->
-            noteTitle.setTextColor(Color.parseColor(selectedColor))
-            rootView.last_edited_text.setTextColor(Color.parseColor(selectedColor))
+            noteTitle.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
+            rootView.last_edited_text.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
         })
 
         val toolbar = rootView.toolbar

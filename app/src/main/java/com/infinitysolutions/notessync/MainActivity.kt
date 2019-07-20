@@ -18,8 +18,6 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
-
-
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
 
@@ -55,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         Navigation.findNavController(this, R.id.nav_host_fragment)
-            .addOnDestinationChangedListener { controller, destination, arguments ->
+            .addOnDestinationChangedListener { _, destination, _ ->
                 when(destination.id){
                     R.id.mainFragment-> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                     else-> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)

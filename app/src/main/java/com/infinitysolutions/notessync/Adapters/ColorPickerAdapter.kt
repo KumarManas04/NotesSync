@@ -10,30 +10,16 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.Util.ColorsUtil
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.color_picker_item.view.*
 
 class ColorPickerAdapter(val context: Context, val mainViewModel: MainViewModel) : RecyclerView.Adapter<ColorPickerAdapter.ViewHolder>(){
     private var selectedColor = 0
-    private val colorsList = arrayOfNulls<String>(8)
+    private val colorsUtil = ColorsUtil()
 
     init{
-        colorsList[0] = "#3d81f4"
-        colorsList[1] = "#940044"
-        colorsList[2] = "#ff5b3a"
-        colorsList[3] = "#ac00ae"
-        colorsList[4] = "#5e7c8a"
-        colorsList[5] = "#009d88"
-        colorsList[6] = "#ff0071"
-        colorsList[7] = "#7b5448"
-
-        val color = mainViewModel.getSelectedColor().value
-        for (i in 0 until colorsList.size){
-            if (color == colorsList[i]){
-                selectedColor = i
-                break
-            }
-        }
+        selectedColor = mainViewModel.getSelectedColor().value!!
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -48,12 +34,12 @@ class ColorPickerAdapter(val context: Context, val mainViewModel: MainViewModel)
             holder.colorImageView.setImageResource(0)
 
         val drawable = ContextCompat.getDrawable(context, R.drawable.round_color)
-        drawable?.colorFilter = PorterDuffColorFilter(Color.parseColor(colorsList[position]), PorterDuff.Mode.SRC)
+        drawable?.colorFilter = PorterDuffColorFilter(Color.parseColor(colorsUtil.getColor(position)), PorterDuff.Mode.SRC)
         holder.colorImageView.background = drawable
 
         holder.colorImageView.setOnClickListener{
             selectedColor = position
-            mainViewModel.setSelectedColor(colorsList[position])
+            mainViewModel.setSelectedColor(position)
             notifyDataSetChanged()
         }
     }
@@ -63,6 +49,6 @@ class ColorPickerAdapter(val context: Context, val mainViewModel: MainViewModel)
     }
 
     override fun getItemCount(): Int {
-        return colorsList.size
+        return colorsUtil.getSize()
     }
 }
