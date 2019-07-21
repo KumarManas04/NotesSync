@@ -44,11 +44,11 @@ class AboutFragment : Fragment() {
         }
 
         rootView.translate_button.setOnClickListener {
-            openLink("")
+            openLink("https://oschmmt.oneskyapp.com/collaboration/project?id=161514")
         }
 
         rootView.more_apps_button.setOnClickListener {
-            openLink("")
+            openLink("https://play.google.com/store/apps/developer?id=Kumar+Manas")
         }
 
         rootView.changelog_button.setOnClickListener {

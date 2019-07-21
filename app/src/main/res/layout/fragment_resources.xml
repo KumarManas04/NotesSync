@@ -93,8 +93,18 @@
                     style="@style/openLinks"/>
 
             <TextView
+                    android:id="@+id/flat_icon"
+                    android:text="Flat Icon"
+                    style="@style/openLinks"/>
+
+            <TextView
                     android:id="@+id/drive_rest"
                     android:text="Drive REST API v3"
+                    style="@style/openLinks"/>
+
+            <TextView
+                    android:id="@+id/dropbox_api"
+                    android:text="Dropbox API v2"
                     style="@style/openLinks"/>
 
             <TextView

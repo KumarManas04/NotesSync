@@ -75,8 +75,16 @@ class ResourcesFragment : Fragment() {
             openLink("https://icons8.com/icons/")
         }
 
+        rootView.flat_icon.setOnClickListener {
+            openLink("https://www.flaticon.com/")
+        }
+
         rootView.drive_rest.setOnClickListener {
             openLink("https://developers.google.com/drive/api/v3/about-sdk")
+        }
+
+        rootView.dropbox_api.setOnClickListener {
+            openLink("https://www.dropbox.com/developers/documentation/java")
         }
 
         rootView.google_oauth.setOnClickListener {
