@@ -5,7 +5,9 @@ import android.app.AlertDialog
 import android.app.TimePickerDialog
 import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +32,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class SettingsFragment : Fragment() {
+    private val TAG = "SettingsFragment"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
@@ -67,20 +70,22 @@ class SettingsFragment : Fragment() {
             rootView.auto_sync_time.text = sdf.format(syncTime)
         } else {
             rootView.auto_sync_toggle.isChecked = false
-            rootView.auto_sync_time.text = "Off"
+            rootView.auto_sync_time.text = getString(R.string.off_text)
         }
+
         rootView.auto_sync_toggle.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked) {
                 WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
-                rootView.auto_sync_time.text = "Off"
+                rootView.auto_sync_time.text = getString(R.string.off_text)
+                if (sharedPrefs.contains(PREF_SCHEDULE_TIME))
+                    sharedPrefs.edit().remove(PREF_SCHEDULE_TIME).apply()
             } else {
                 if (getLoginStatus(sharedPrefs) == -1) {
                     Toast.makeText(activity, "Please login first", Toast.LENGTH_SHORT).show()
                     rootView.auto_sync_toggle.isChecked = false
                 } else {
                     val c = Calendar.getInstance()
-                    rootView.auto_sync_toggle.isChecked = false
-                    TimePickerDialog(context, { _, hourOfDay, minute ->
+                    val timePicker = TimePickerDialog(context, { _, hourOfDay, minute ->
                         c.set(
                             c.get(Calendar.YEAR),
                             c.get(Calendar.MONTH),
@@ -91,9 +96,13 @@ class SettingsFragment : Fragment() {
                         )
                         val sdf = SimpleDateFormat("h:mm a", Locale.ENGLISH)
                         rootView.auto_sync_time.text = sdf.format(c.timeInMillis)
-                        rootView.auto_sync_toggle.isChecked = true
                         WorkSchedulerHelper().setAutoSync(AUTO_SYNC_WORK_ID, c.timeInMillis)
-                    }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show()
+                        sharedPrefs.edit().putLong(PREF_SCHEDULE_TIME, c.timeInMillis).apply()
+                    }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false)
+                    timePicker.setOnCancelListener{
+                        rootView.auto_sync_toggle.isChecked = false
+                    }
+                    timePicker.show()
                 }
             }
         }
@@ -110,8 +119,12 @@ class SettingsFragment : Fragment() {
             Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_aboutFragment)
         }
 
+        rootView.resources_button.setOnClickListener {
+            Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_resourcesFragment)
+        }
+
         rootView.open_source_button.setOnClickListener {
-            Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_openSourceFragment)
+            openLink("https://github.com/KumarManas04/NotesSync")
         }
 
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
@@ -119,7 +132,7 @@ class SettingsFragment : Fragment() {
         if (prefs != null) {
             if (loginStatus != -1) {
                 if (loginStatus == CLOUD_DROPBOX) {
-                    rootView.logout_text.text = "Logout from your Dropbox account"
+                    rootView.logout_text.text = getString(R.string.dropbox_logout_text)
                     rootView.logout_button.setOnClickListener {
                         AlertDialog.Builder(context)
                             .setTitle("Logout")
@@ -132,7 +145,7 @@ class SettingsFragment : Fragment() {
                             .show()
                     }
                 } else {
-                    rootView.logout_text.text = "Logout from your Google Drive account"
+                    rootView.logout_text.text = getString(R.string.gdrive_logout_text)
                     rootView.logout_button.setOnClickListener {
                         AlertDialog.Builder(context)
                             .setTitle("Logout")
@@ -154,13 +167,13 @@ class SettingsFragment : Fragment() {
     }
 
     private fun resetLoginButton(rootView: View) {
-        rootView.logout_title.text = "Login"
-        rootView.logout_text.text = "Login to your preferred cloud storage"
+        rootView.logout_title.text = getString(R.string.login)
+        rootView.logout_text.text = getString(R.string.login_pref_summary)
         rootView.logout_icon.setImageResource(R.drawable.lock_pref_icon)
         WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
         val sharedPrefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         sharedPrefs?.edit()?.remove(PREF_SCHEDULE_TIME)?.commit()
-        rootView.auto_sync_time.text = "Off"
+        rootView.auto_sync_time.text = getString(R.string.off_text)
         rootView.auto_sync_toggle.isChecked = false
         rootView.logout_button.setOnClickListener {
             Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_cloudPickerFragment)
@@ -178,5 +191,13 @@ class SettingsFragment : Fragment() {
             }
         }
         return -1
+    }
+
+    private fun openLink(link: String){
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+        if (browserIntent.resolveActivity(activity!!.packageManager) != null)
+            startActivity(browserIntent)
+        else
+            Toast.makeText(activity, "No browser found!", Toast.LENGTH_SHORT).show()
     }
 }

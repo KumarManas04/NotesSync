@@ -24,11 +24,12 @@
                 android:src="@drawable/archive_drawer_item"
                 android:tint="?attr/iconsTint"
                 android:layout_width="26dp"
-                android:layout_height="26dp"/>
+                android:layout_height="26dp"
+                android:contentDescription="@string/archive"/>
 
         <TextView
                 android:id="@+id/archive_button_text"
-                android:text="Archive"
+                android:text="@string/archive"
                 android:textSize="16sp"
                 android:textColor="?attr/mainTextColor"
                 android:layout_marginStart="30dp"
@@ -55,10 +56,11 @@
                 android:src="@drawable/share_menu_item"
                 android:tint="?attr/iconsTint"
                 android:layout_width="26dp"
-                android:layout_height="26dp"/>
+                android:layout_height="26dp"
+                android:contentDescription="@string/share"/>
 
         <TextView
-                android:text="Share"
+                android:text="@string/share"
                 android:textSize="16sp"
                 android:textColor="?attr/mainTextColor"
                 android:layout_marginStart="30dp"
@@ -78,18 +80,20 @@
             android:paddingEnd="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" android:focusable="true">
+            android:orientation="horizontal"
+            android:focusable="true">
 
         <ImageView
                 android:src="@drawable/reminder_icon"
                 android:layout_gravity="center_vertical"
                 android:tint="?attr/iconsTint"
                 android:layout_width="26dp"
-                android:layout_height="26dp"/>
+                android:layout_height="26dp"
+                android:contentDescription="@string/set_reminder"/>
 
         <TextView
                 android:id="@+id/reminder_text"
-                android:text="Set reminder"
+                android:text="@string/set_reminder"
                 android:textSize="16sp"
                 android:textColor="?attr/mainTextColor"
                 android:layout_marginStart="30dp"
@@ -106,7 +110,8 @@
                 android:src="@drawable/cancel_reminder"
                 android:visibility="gone"
                 android:layout_width="26dp"
-                android:layout_height="26dp"/>
+                android:layout_height="26dp"
+                android:contentDescription="@string/cancel_reminder"/>
 
     </LinearLayout>
 

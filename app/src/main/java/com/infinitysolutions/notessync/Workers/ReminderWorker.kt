@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync
+package com.infinitysolutions.notessync.Workers
 
 import android.app.NotificationManager
 import android.content.Context
@@ -7,6 +7,7 @@ import androidx.navigation.NavDeepLinkBuilder
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.infinitysolutions.notessync.Model.NotesRoomDatabase
+import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.NotificationHelper
 import java.text.SimpleDateFormat
 import java.util.*

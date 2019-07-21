@@ -28,7 +28,7 @@
         <EditText
                 android:id="@+id/search_edit_text"
                 android:maxLines="1"
-                android:hint="Search your notes..."
+                android:hint="@string/search_notes"
                 android:textColorHint="#757575"
                 android:textColor="?attr/mainTextColor"
                 android:inputType="textCapSentences"
@@ -68,7 +68,7 @@
 
         <TextView
                 android:id="@+id/empty_text"
-                android:text="No match found"
+                android:text="@string/no_match_found"
                 android:fontFamily="sans-serif-condensed"
                 android:textSize="20sp"
                 android:layout_marginTop="20dp"

@@ -20,13 +20,13 @@
         android:focusable="true">
 
     <ImageView
-          android:layout_width="20dp"
-          android:layout_height="20dp"
-          android:layout_marginTop="2dp"
-          android:tint="#ffffff"
-          app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintTop_toTopOf="parent"
-          android:id="@+id/indicator_view"/>
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="2dp"
+            android:tint="#ffffff"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/indicator_view"/>
 
     <TextView
             android:id="@+id/title_text"
@@ -79,7 +79,7 @@
             app:layout_constraintTop_toBottomOf="@id/content_preview"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:contentDescription="Last modified indicator"/>
+            android:contentDescription="@string/last_modified_indicator"/>
 
     <TextView
             android:id="@+id/date_modified_text"

@@ -10,12 +10,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.infinitysolutions.notessync.R
-import kotlinx.android.synthetic.main.fragment_open_source.view.*
+import kotlinx.android.synthetic.main.fragment_resources.view.*
 
-class OpenSourceFragment : Fragment() {
+class ResourcesFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_open_source, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_resources, container, false)
         setupView(rootView)
         return rootView
     }

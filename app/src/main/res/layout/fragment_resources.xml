@@ -5,7 +5,7 @@
               android:layout_width="match_parent" android:layout_height="match_parent"
               android:orientation="vertical"
               android:background="?attr/mainBackground"
-              tools:context=".Fragments.OpenSourceFragment">
+              tools:context=".Fragments.ResourcesFragment">
 
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -15,7 +15,7 @@
             android:background="?attr/mainBackground"/>
 
     <TextView
-            android:text="List of resources used in Notes Sync"
+            android:text="@string/resources_used"
             android:textColor="@color/colorAccent"
             android:layout_margin="10dp"
             android:textSize="16sp"

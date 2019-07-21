@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync
+package com.infinitysolutions.notessync.Workers
 
 import android.app.ActivityManager
 import android.content.Context
@@ -12,6 +12,7 @@ import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SCHEDULE_TIME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.NotesSyncService
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import java.util.*
 

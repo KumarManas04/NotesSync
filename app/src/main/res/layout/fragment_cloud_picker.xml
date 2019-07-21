@@ -26,7 +26,7 @@
             app:layout_constraintTop_toBottomOf="@id/image_cloud"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:text="Choose your preferred cloud storage"
+            android:text="@string/select_cloud_storage"
             android:textSize="20sp"
             android:layout_marginTop="20dp"
             android:textColor="?attr/mainTextColor"
@@ -70,7 +70,7 @@
                     android:layout_height="match_parent"/>
 
             <TextView
-                    android:text="Google Drive"
+                    android:text="@string/google_drive"
                     android:textSize="22sp"
                     android:textColor="#616161"
                     android:layout_marginStart="10dp"
@@ -108,7 +108,7 @@
                     android:layout_height="match_parent"/>
 
             <TextView
-                    android:text="Dropbox"
+                    android:text="@string/dropbox"
                     android:textSize="22sp"
                     android:textColor="#ffffff"
                     android:layout_marginStart="10dp"
@@ -143,7 +143,7 @@
         <TextView
                 android:layout_marginStart="20dp"
                 android:textColor="#7cb342"
-                android:text="Login successful"
+                android:text="@string/login_success"
                 android:textSize="24sp"
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"

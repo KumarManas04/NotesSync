@@ -67,7 +67,7 @@
 
         <TextView
                 android:id="@+id/new_note_button"
-                android:text="Take a note..."
+                android:text="@string/new_note"
                 android:ellipsize="end"
                 android:textAllCaps="false"
                 android:background="@drawable/overlay_simple_ripple"
@@ -92,7 +92,8 @@
                 android:scaleType="fitXY"
                 android:adjustViewBounds="true"
                 android:layout_height="match_parent"
-                android:focusable="true"/>
+                android:focusable="true"
+                android:contentDescription="@string/new_list"/>
 
         <ImageView
                 android:id="@+id/search_button"
@@ -106,7 +107,8 @@
                 android:scaleType="fitXY"
                 android:adjustViewBounds="true"
                 android:layout_height="match_parent"
-                android:focusable="true"/>
+                android:focusable="true"
+                android:contentDescription="@string/search_button"/>
 
     </LinearLayout>
 

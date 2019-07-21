@@ -26,7 +26,7 @@
                 android:layout_height="wrap_content">
 
             <TextView
-                    android:text="Preferences"
+                    android:text="@string/preferences"
                     style="@style/prefsCategoryTitle"/>
 
             <LinearLayout
@@ -40,11 +40,11 @@
                 <LinearLayout style="@style/prefsTextContainer">
 
                     <TextView
-                            android:text="Night mode"
+                            android:text="@string/night_mode"
                             style="@style/prefsMain"/>
 
                     <TextView
-                            android:text="Switch to night mode for better visibility in the dark"
+                            android:text="@string/night_mode_prefs_summary"
                             style="@style/prefsSummary"/>
 
                 </LinearLayout>
@@ -70,12 +70,12 @@
 
                     <TextView
                             android:id="@+id/logout_title"
-                            android:text="Logout"
+                            android:text="@string/logout"
                             style="@style/prefsMain"/>
 
                     <TextView
                             android:id="@+id/logout_text"
-                            android:text="Logout from your cloud storage account"
+                            android:text="@string/logout_prefs_summary"
                             style="@style/prefsSummary"/>
 
                 </LinearLayout>
@@ -93,11 +93,11 @@
                 <LinearLayout style="@style/prefsTextContainer">
 
                     <TextView
-                            android:text="Auto sync"
+                            android:text="@string/auto_sync"
                             style="@style/prefsMain"/>
 
                     <TextView
-                            android:text="Auto sync your notes everyday to your preferred cloud storage"
+                            android:text="@string/auto_sync_pref_summary"
                             style="@style/prefsSummary"/>
 
                 </LinearLayout>
@@ -117,7 +117,7 @@
 
                     <TextView
                             android:id="@+id/auto_sync_time"
-                            android:text="Off"
+                            android:text="@string/off_text"
                             android:layout_margin="10dp"
                             android:textColor="?attr/mainTextColor"
                             android:layout_width="wrap_content"
@@ -128,7 +128,7 @@
             </LinearLayout>
 
             <TextView
-                    android:text="Other"
+                    android:text="@string/other"
                     style="@style/prefsCategoryTitle"/>
 
             <LinearLayout
@@ -142,15 +142,36 @@
                 <LinearLayout style="@style/prefsTextContainer">
 
                     <TextView
-                            android:text="About"
+                            android:text="@string/about"
                             style="@style/prefsMain"/>
 
                     <TextView
-                            android:text="Get details about the app"
+                            android:text="@string/about_pref_summary"
                             style="@style/prefsSummary"/>
 
                 </LinearLayout>
 
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/resources_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/resources_pref_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="@string/resources"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="@string/resources_pref_summary"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -164,11 +185,11 @@
                 <LinearLayout style="@style/prefsTextContainer">
 
                     <TextView
-                            android:text="Open source"
+                            android:text="@string/open_source"
                             style="@style/prefsMain"/>
 
                     <TextView
-                            android:text="All open source libraries and resources used"
+                            android:text="@string/open_source_prefs_summary"
                             style="@style/prefsSummary"/>
 
                 </LinearLayout>

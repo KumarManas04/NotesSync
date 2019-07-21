@@ -76,7 +76,7 @@
                 android:tint="?attr/iconsTint"
                 android:background="@drawable/overlay_simple_ripple"
                 android:layout_gravity="center_vertical"
-                android:contentDescription="More options"/>
+                android:contentDescription="@string/more_options"/>
     </LinearLayout>
 
 </LinearLayout>

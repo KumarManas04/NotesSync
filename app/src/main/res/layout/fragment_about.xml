@@ -24,7 +24,7 @@
         <LinearLayout style="@style/prefsTextContainer">
 
             <TextView
-                    android:text="App version"
+                    android:text="@string/app_version"
                     style="@style/prefsMain"/>
 
             <TextView
@@ -46,11 +46,11 @@
         <LinearLayout style="@style/prefsTextContainer">
 
             <TextView
-                    android:text="Rate"
+                    android:text="@string/rate"
                     style="@style/prefsMain"/>
 
             <TextView
-                    android:text="Leave a positive rating on Google Play if you liked Notes Sync"
+                    android:text="@string/rate_pref_summary"
                     style="@style/prefsSummary"/>
 
         </LinearLayout>
@@ -68,11 +68,11 @@
         <LinearLayout style="@style/prefsTextContainer">
 
             <TextView
-                    android:text="Report bugs"
+                    android:text="@string/report_bugs"
                     style="@style/prefsMain"/>
 
             <TextView
-                    android:text="Report bugs, request new features or say Hi!"
+                    android:text="@string/report_bugs_pref_summary"
                     style="@style/prefsSummary"/>
 
         </LinearLayout>
@@ -90,11 +90,11 @@
         <LinearLayout style="@style/prefsTextContainer">
 
             <TextView
-                    android:text="Translate"
+                    android:text="@string/translate"
                     style="@style/prefsMain"/>
 
             <TextView
-                    android:text="Help me translate Notes Sync to your native language"
+                    android:text="@string/translate_pref_summary"
                     style="@style/prefsSummary"/>
 
         </LinearLayout>
@@ -112,11 +112,11 @@
         <LinearLayout style="@style/prefsTextContainer">
 
             <TextView
-                    android:text="More apps"
+                    android:text="@string/more_apps"
                     style="@style/prefsMain"/>
 
             <TextView
-                    android:text="Check out my other applications on Google Play"
+                    android:text="@string/more_apps_prefs_summary"
                     style="@style/prefsSummary"/>
 
         </LinearLayout>
@@ -134,11 +134,11 @@
         <LinearLayout style="@style/prefsTextContainer">
 
             <TextView
-                    android:text="Changelog"
+                    android:text="@string/changelog"
                     style="@style/prefsMain"/>
 
             <TextView
-                    android:text="View the changelog of Notes Sync"
+                    android:text="@string/changelog_pref_summary"
                     style="@style/prefsSummary"/>
 
         </LinearLayout>
@@ -154,7 +154,7 @@
         <LinearLayout style="@style/prefsTextContainer">
 
             <TextView
-                    android:text="Developer"
+                    android:text="@string/developer"
                     style="@style/prefsMain"/>
 
             <TextView

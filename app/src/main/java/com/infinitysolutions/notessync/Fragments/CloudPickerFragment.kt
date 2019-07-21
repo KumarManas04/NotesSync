@@ -113,7 +113,7 @@ class CloudPickerFragment : Fragment() {
         c.set(
             c.get(Calendar.YEAR),
             c.get(Calendar.MONTH),
-            c.get(Calendar.DATE) + 1,
+            c.get(Calendar.DATE),
             10,
             0,
             0

@@ -4,8 +4,8 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.infinitysolutions.notessync.AutoSyncWorker
-import com.infinitysolutions.notessync.ReminderWorker
+import com.infinitysolutions.notessync.Workers.AutoSyncWorker
+import com.infinitysolutions.notessync.Workers.ReminderWorker
 import java.util.*
 import java.util.concurrent.TimeUnit
 
