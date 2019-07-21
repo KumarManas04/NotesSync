@@ -9,6 +9,7 @@
         tools:context=".Fragments.CloudPickerFragment">
 
     <ImageView
+            android:id="@+id/image_cloud"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -20,75 +21,130 @@
             android:layout_width="150dp"
             android:layout_height="150dp"/>
 
-    <LinearLayout
+    <TextView
+            android:id="@+id/cloud_select_text"
+            app:layout_constraintTop_toBottomOf="@id/image_cloud"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/dropbox"
-            android:id="@+id/g_drive"
-            android:orientation="horizontal"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="@drawable/gdrive_button_background"
-            android:padding="10dp"
-            android:layout_margin="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="Choose your preferred cloud storage"
+            android:textSize="20sp"
+            android:layout_marginTop="20dp"
+            android:textColor="?attr/mainTextColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    <LinearLayout
+            android:id="@+id/login_select_panel"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <ImageView
-                android:src="@drawable/google_drive_icon"
-                android:layout_marginStart="10dp"
-                android:layout_width="40dp"
-                android:layout_height="40dp"/>
+        <LinearLayout
+                android:id="@+id/g_drive"
+                android:orientation="horizontal"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/gdrive_button_background"
+                android:padding="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <View
-                android:background="#616161"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"/>
+            <ImageView
+                    android:src="@drawable/google_drive_icon"
+                    android:layout_marginStart="10dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"/>
 
-        <TextView
-                android:text="Google Drive"
-                android:textSize="22sp"
-                android:textColor="#616161"
-                android:layout_marginStart="10dp"
-                android:layout_gravity="center_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+            <View
+                    android:background="#616161"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"/>
+
+            <TextView
+                    android:text="Google Drive"
+                    android:textSize="22sp"
+                    android:textColor="#616161"
+                    android:layout_marginStart="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:id="@+id/dropbox"
+                android:orientation="horizontal"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/dropbox_button_background"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <ImageView
+                    android:src="@drawable/dropbox_icon"
+                    android:tint="#ffffff"
+                    android:layout_marginStart="10dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"/>
+
+            <View
+                    android:background="#f5f5f5"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"/>
+
+            <TextView
+                    android:text="Dropbox"
+                    android:textSize="22sp"
+                    android:textColor="#ffffff"
+                    android:layout_marginStart="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
     <LinearLayout
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:id="@+id/dropbox"
+            android:id="@+id/success_panel"
+            android:visibility="gone"
+            android:gravity="center"
             android:orientation="horizontal"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             android:layout_margin="20dp"
-            android:background="@drawable/dropbox_button_background"
+            android:padding="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
         <ImageView
-                android:src="@drawable/dropbox_icon"
-                android:tint="#ffffff"
-                android:layout_marginStart="10dp"
-                android:layout_width="40dp"
-                android:layout_height="40dp"/>
-
-        <View
-                android:background="#f5f5f5"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"/>
+                android:src="@drawable/check_circle"
+                android:tint="#7cb342"
+                android:layout_gravity="center_vertical"
+                android:layout_width="50dp"
+                android:layout_height="50dp"/>
 
         <TextView
-                android:text="Dropbox"
-                android:textSize="22sp"
-                android:textColor="#ffffff"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="20dp"
+                android:textColor="#7cb342"
+                android:text="Login successful"
+                android:textSize="24sp"
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

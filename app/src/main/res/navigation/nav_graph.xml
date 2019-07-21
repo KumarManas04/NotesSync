@@ -28,16 +28,15 @@
               android:label="fragment_settings" tools:layout="@layout/fragment_settings">
         <action android:id="@+id/action_settingsFragment_to_aboutFragment" app:destination="@id/aboutFragment"
                 app:enterAnim="@anim/fade_in" app:popExitAnim="@anim/fade_out"/>
-        <action android:id="@+id/action_settingsFragment_to_lockFragment" app:destination="@id/lockFragment"
-        />
         <action android:id="@+id/action_settingsFragment_to_openSourceFragment"
                 app:destination="@id/openSourceFragment" app:enterAnim="@anim/fade_in"
+                app:popExitAnim="@anim/fade_out"/>
+        <action android:id="@+id/action_settingsFragment_to_cloudPickerFragment"
+                app:destination="@id/cloudPickerFragment" app:enterAnim="@anim/fade_in"
                 app:popExitAnim="@anim/fade_out"/>
     </fragment>
     <fragment android:id="@+id/aboutFragment" android:name="com.infinitysolutions.notessync.Fragments.AboutFragment"
               android:label="fragment_about" tools:layout="@layout/fragment_about"/>
-    <fragment android:id="@+id/lockFragment" android:name="com.infinitysolutions.notessync.Fragments.LockFragment"
-              android:label="fragment_lock" tools:layout="@layout/fragment_lock"/>
     <fragment android:id="@+id/openSourceFragment"
               android:name="com.infinitysolutions.notessync.Fragments.OpenSourceFragment"
               android:label="fragment_open_source" tools:layout="@layout/fragment_open_source"/>

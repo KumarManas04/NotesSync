@@ -15,6 +15,8 @@ class Contract{
         const val PREF_THEME = "sharedPrefs.currentTheme"
         const val PREF_CLOUD_TYPE = "sharedPrefs.cloudType"
         const val PREF_ACCESS_TOKEN = "sharedPrefs.accessToken"
+        const val PREF_SCHEDULE_TIME = "sharedPrefs.scheduleTime"
         const val FILE_SYSTEM_FILENAME = "notes_files_system.txt"
+        const val AUTO_SYNC_WORK_ID = "autoSync"
     }
 }

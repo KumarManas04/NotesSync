@@ -30,28 +30,6 @@
                     style="@style/prefsCategoryTitle"/>
 
             <LinearLayout
-                    android:id="@+id/lock_button"
-                    style="@style/prefsContainer">
-
-                <ImageView
-                        android:src="@drawable/lock_pref_icon"
-                        style="@style/prefsIcon"/>
-
-                <LinearLayout style="@style/prefsTextContainer">
-
-                    <TextView
-                            android:text="Lock"
-                            style="@style/prefsMain"/>
-
-                    <TextView
-                            android:text="Set a PIN to lock your notes"
-                            style="@style/prefsSummary"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
                     android:id="@+id/night_mode_button"
                     style="@style/prefsContainer">
 
@@ -81,16 +59,17 @@
 
             <LinearLayout
                     android:id="@+id/logout_button"
-                    android:visibility="gone"
                     style="@style/prefsContainer">
 
                 <ImageView
+                        android:id="@+id/logout_icon"
                         android:src="@drawable/logout_prefs_icon"
                         style="@style/prefsIcon"/>
 
                 <LinearLayout style="@style/prefsTextContainer">
 
                     <TextView
+                            android:id="@+id/logout_title"
                             android:text="Logout"
                             style="@style/prefsMain"/>
 
@@ -98,6 +77,51 @@
                             android:id="@+id/logout_text"
                             android:text="Logout from your cloud storage account"
                             style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/auto_sync_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/sync_notes"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="Auto sync"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="Auto sync your notes everyday to your preferred cloud storage"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                        android:layout_gravity="center_vertical"
+                        android:padding="10dp"
+                        android:orientation="vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                    <Switch
+                            android:id="@+id/auto_sync_toggle"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    <TextView
+                            android:id="@+id/auto_sync_time"
+                            android:text="Off"
+                            android:layout_margin="10dp"
+                            android:textColor="?attr/mainTextColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
 
                 </LinearLayout>
 

@@ -191,7 +191,7 @@ class NotesSyncService : Service() {
                             localNotesList[localCounter].reminderTime
                         )
                     else
-                        workScheduler.cancelReminder(localNotesList[localCounter].nId)
+                        workScheduler.cancelReminderByNoteId(localNotesList[localCounter].nId)
                     isLocalDbChanged = true
                     continue
                 }
@@ -232,7 +232,7 @@ class NotesSyncService : Service() {
                         if (noteData.reminderTime != -1L)
                             workScheduler.setReminder(localNotesList[localCounter].nId, noteData.reminderTime)
                         else
-                            workScheduler.cancelReminder(localNotesList[localCounter].nId)
+                            workScheduler.cancelReminderByNoteId(localNotesList[localCounter].nId)
                     }
                     isLocalDbChanged = true
                 }

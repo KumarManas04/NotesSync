@@ -4,6 +4,7 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.infinitysolutions.notessync.AutoSyncWorker
 import com.infinitysolutions.notessync.ReminderWorker
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -26,8 +27,21 @@ class WorkSchedulerHelper {
         }
     }
 
-    fun cancelReminder(noteId: Long?) {
+    fun setAutoSync(workId: String, syncTime: Long){
+        val delay = syncTime - Calendar.getInstance().timeInMillis
+        val syncBuilder = OneTimeWorkRequestBuilder<AutoSyncWorker>()
+            .addTag(workId)
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+            .build()
+        WorkManager.getInstance().enqueueUniqueWork(workId, ExistingWorkPolicy.REPLACE, syncBuilder)
+    }
+
+    fun cancelReminderByNoteId(noteId: Long?) {
         if (noteId != null)
             WorkManager.getInstance().cancelUniqueWork(noteId.toString())
+    }
+
+    fun cancelUniqueWork(workId: String) {
+        WorkManager.getInstance().cancelUniqueWork(workId)
     }
 }

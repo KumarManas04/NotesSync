@@ -90,7 +90,7 @@ class NoteEditFragment : Fragment() {
                         .setTitle("Cancel reminder")
                         .setMessage("Are you sure you want to cancel the reminder?")
                         .setPositiveButton("Yes"){ _: DialogInterface, _: Int ->
-                            WorkSchedulerHelper().cancelReminder(selectedNote.nId)
+                            WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
                             mainViewModel.reminderTime = -1L
                             dialog.hide()
                         }
@@ -338,7 +338,7 @@ class NoteEditFragment : Fragment() {
                     )
 
                     if (selectedNote.reminderTime != -1L){
-                        WorkSchedulerHelper().cancelReminder(selectedNote.nId)
+                        WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
                     }
                 }
             }

@@ -14,11 +14,12 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
-import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
@@ -126,9 +127,9 @@ class MainFragment : Fragment() {
     private fun syncFiles(rootView: View){
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
         if (prefs != null){
-            if(prefs.contains(Contract.PREF_CLOUD_TYPE)) {
-                if (prefs.getInt(Contract.PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE) == CLOUD_DROPBOX) {
-                    if (prefs.getString(Contract.PREF_ACCESS_TOKEN, null) != null)
+            if(prefs.contains(PREF_CLOUD_TYPE)) {
+                if (prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE) == CLOUD_DROPBOX) {
+                    if (prefs.getString(PREF_ACCESS_TOKEN, null) != null)
                         mainViewModel.setSyncNotes(CLOUD_DROPBOX)
                     else
                         Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_cloudPickerFragment)

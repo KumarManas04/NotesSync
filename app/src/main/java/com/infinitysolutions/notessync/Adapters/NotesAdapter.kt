@@ -8,12 +8,15 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.ChecklistGenerator
@@ -38,6 +41,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val items: 
         holder.parentView.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorsUtil.getColor(items[position].noteColor)))
 
         if (items[position].noteType == LIST_DEFAULT || items[position].noteType == LIST_ARCHIVED){
+            holder.indicatorView.setImageResource(R.drawable.todo_indicator)
             holder.contentListView.visibility = VISIBLE
             holder.contentTextView.visibility = GONE
             val itemsList = ChecklistGenerator.generateList(items[position].noteContent)
@@ -51,6 +55,9 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val items: 
             holder.contentListView.visibility = GONE
             holder.contentTextView.visibility = VISIBLE
             holder.contentTextView.text = items[position].noteContent
+            if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == NOTE_ARCHIVED) {
+                holder.indicatorView.setImageResource(R.drawable.note_indicator)
+            }
         }
 
         holder.itemContainer.setOnClickListener{
@@ -65,6 +72,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val items: 
         val contentListView: ListView = itemView.list_view
         val dateModifiedTextView: TextView = itemView.date_modified_text
         val parentView: ConstraintLayout = itemView.parent_view
+        val indicatorView: ImageView = itemView.indicator_view
         val itemContainer = itemView
     }
 
