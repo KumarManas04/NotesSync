@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -63,52 +64,56 @@ class SettingsFragment : Fragment() {
             activity?.recreate()
         }
 
+        rootView.auto_sync_toggle.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (!isChecked) {
+                if (buttonView.isPressed) {
+                    Log.d(TAG, "Hello 3")
+                    WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
+                    rootView.auto_sync_time.text = getString(R.string.off_text)
+                    if (sharedPrefs.contains(PREF_SCHEDULE_TIME))
+                        sharedPrefs.edit().remove(PREF_SCHEDULE_TIME).apply()
+                }
+            } else {
+                if (buttonView.isPressed) {
+                    Log.d(TAG, "Hello 4")
+                    if (getLoginStatus(sharedPrefs) == -1) {
+                        Toast.makeText(activity, "Please login first", Toast.LENGTH_SHORT).show()
+                        rootView.auto_sync_toggle.isChecked = false
+                    } else {
+                        val c = Calendar.getInstance()
+                        val timePicker = TimePickerDialog(context, { _, hourOfDay, minute ->
+                            c.set(
+                                c.get(Calendar.YEAR),
+                                c.get(Calendar.MONTH),
+                                c.get(Calendar.DATE),
+                                hourOfDay,
+                                minute,
+                                0
+                            )
+                            val sdf = SimpleDateFormat("h:mm a", Locale.ENGLISH)
+                            rootView.auto_sync_time.text = sdf.format(c.timeInMillis)
+                            WorkSchedulerHelper().setAutoSync(AUTO_SYNC_WORK_ID, c.timeInMillis)
+                            sharedPrefs.edit().putLong(PREF_SCHEDULE_TIME, c.timeInMillis).apply()
+                        }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false)
+                        timePicker.setOnCancelListener {
+                            rootView.auto_sync_toggle.isChecked = false
+                        }
+                        timePicker.show()
+                    }
+                }
+            }
+        }
+
         if (sharedPrefs.contains(PREF_SCHEDULE_TIME)) {
+            Log.d(TAG, "Hello 1")
             rootView.auto_sync_toggle.isChecked = true
             val syncTime = sharedPrefs.getLong(PREF_SCHEDULE_TIME, 0L)
             val sdf = SimpleDateFormat("h:mm a", Locale.ENGLISH)
             rootView.auto_sync_time.text = sdf.format(syncTime)
         } else {
+            Log.d(TAG, "Hello 2")
             rootView.auto_sync_toggle.isChecked = false
             rootView.auto_sync_time.text = getString(R.string.off_text)
-        }
-
-        rootView.auto_sync_toggle.setOnCheckedChangeListener { _, isChecked ->
-            if (!isChecked) {
-                WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
-                rootView.auto_sync_time.text = getString(R.string.off_text)
-                if (sharedPrefs.contains(PREF_SCHEDULE_TIME))
-                    sharedPrefs.edit().remove(PREF_SCHEDULE_TIME).apply()
-            } else {
-                if (getLoginStatus(sharedPrefs) == -1) {
-                    Toast.makeText(activity, "Please login first", Toast.LENGTH_SHORT).show()
-                    rootView.auto_sync_toggle.isChecked = false
-                } else {
-                    val c = Calendar.getInstance()
-                    val timePicker = TimePickerDialog(context, { _, hourOfDay, minute ->
-                        c.set(
-                            c.get(Calendar.YEAR),
-                            c.get(Calendar.MONTH),
-                            c.get(Calendar.DATE),
-                            hourOfDay,
-                            minute,
-                            0
-                        )
-                        val sdf = SimpleDateFormat("h:mm a", Locale.ENGLISH)
-                        rootView.auto_sync_time.text = sdf.format(c.timeInMillis)
-                        WorkSchedulerHelper().setAutoSync(AUTO_SYNC_WORK_ID, c.timeInMillis)
-                        sharedPrefs.edit().putLong(PREF_SCHEDULE_TIME, c.timeInMillis).apply()
-                    }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false)
-                    timePicker.setOnCancelListener{
-                        rootView.auto_sync_toggle.isChecked = false
-                    }
-                    timePicker.show()
-                }
-            }
-        }
-
-        rootView.auto_sync_button.setOnClickListener {
-            rootView.auto_sync_toggle.toggle()
         }
 
         rootView.night_mode_button.setOnClickListener {

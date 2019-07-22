@@ -18,12 +18,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
+import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SCHEDULE_TIME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
@@ -118,8 +118,8 @@ class CloudPickerFragment : Fragment() {
             0,
             0
         )
+        sharedPrefs?.edit()?.putLong(Contract.PREF_SCHEDULE_TIME, c.timeInMillis)?.commit()
         WorkSchedulerHelper().setAutoSync(AUTO_SYNC_WORK_ID, c.timeInMillis)
-        sharedPrefs?.edit()?.putLong(PREF_SCHEDULE_TIME, c.timeInMillis)?.commit()
         rootView.login_select_panel.visibility = GONE
         rootView.cloud_select_text.visibility = GONE
         rootView.success_panel.visibility = VISIBLE
