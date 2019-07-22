@@ -3,7 +3,7 @@
     <string name="title">Title</string>
     <string name="write_something">Write something...</string>
     <string name="sync">Sync notes</string>
-    <string name="app_key" translatable="false">3fmvjj9psqa1yi1</string>
+    <string name="app_key" translatable="false">YOUR_APP_KEY_HERE</string>
     <string name="archive">Archive</string>
     <string name="share">Share</string>
     <string name="set_reminder">Set reminder</string>
