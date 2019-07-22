@@ -48,7 +48,6 @@ class NotesSyncService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "Service onStart")
         val driveType = intent?.getIntExtra("Drive", CLOUD_GOOGLE_DRIVE)
         if (driveType != null)
             mDriveType = driveType
@@ -69,7 +68,12 @@ class NotesSyncService : Service() {
             val notesList = notesDao.getCurrentData()
             withContext(Dispatchers.Main) {
                 mNotesList = notesList
-                getCloudData()
+                try {
+                    getCloudData()
+                } catch (e: Exception) {
+                    Toast.makeText(this@NotesSyncService, "Sync error", Toast.LENGTH_SHORT).show()
+                    stopSelf()
+                }
             }
         }
     }
@@ -118,28 +122,35 @@ class NotesSyncService : Service() {
         }
 
         GlobalScope.launch(Dispatchers.Default) {
-            val filesList = if (mDriveType == CLOUD_GOOGLE_DRIVE) {
-                Log.d(TAG, "Getting appFolderID")
-                val appFolderId = getAppFolderId()
-                if (appFolderId != null) {
-                    val fileSystemId = getFileSystemId(appFolderId)
-                    if (fileSystemId != null){
-                        googleDriveHelper.appFolderId = appFolderId
-                        googleDriveHelper.fileSystemId = fileSystemId
+            try {
+                val filesList = if (mDriveType == CLOUD_GOOGLE_DRIVE) {
+                    Log.d(TAG, "Getting appFolderID")
+                    val appFolderId = getAppFolderId()
+                    if (appFolderId != null) {
+                        val fileSystemId = getFileSystemId(appFolderId)
+                        if (fileSystemId != null) {
+                            googleDriveHelper.appFolderId = appFolderId
+                            googleDriveHelper.fileSystemId = fileSystemId
+                        }
+                        getFilesListGD(fileSystemId)
+                    } else {
+                        null
                     }
-                    getFilesListGD(fileSystemId)
-                }else{
-                    null
+                } else {
+                    getFilesListDB()
                 }
-            }else{
-                getFilesListDB()
-            }
-            if (filesList != null){
-                compareAndSync(filesList)
-            }
-            withContext(Dispatchers.Main) {
-                Toast.makeText(this@NotesSyncService, "Sync successful", Toast.LENGTH_SHORT).show()
-                stopSelf()
+                if (filesList != null) {
+                    compareAndSync(filesList)
+                }
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@NotesSyncService, "Sync successful", Toast.LENGTH_SHORT).show()
+                    stopSelf()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@NotesSyncService, "Sync error", Toast.LENGTH_SHORT).show()
+                    stopSelf()
+                }
             }
         }
     }
@@ -427,10 +438,10 @@ class NotesSyncService : Service() {
         }
     }
 
-    private fun createFile(note: Note, fileContent: String) : String{
+    private fun createFile(note: Note, fileContent: String): String {
         return if (mDriveType == CLOUD_GOOGLE_DRIVE) {
             googleDriveHelper.createFile(googleDriveHelper.appFolderId, "${note.nId}.txt", FILE_TYPE_TEXT, fileContent)
-        }else{
+        } else {
             dropboxHelper.writeFile("${note.nId}.txt", fileContent)
             "-1"
         }
@@ -489,7 +500,6 @@ class NotesSyncService : Service() {
     }
 
 
-
     private fun getFileSystemId(parentFolderId: String): String? {
         var fileSystemId: String? = googleDriveHelper.searchFile("notes_files_system.txt", FILE_TYPE_TEXT)
         if (fileSystemId == null) {
@@ -545,7 +555,6 @@ class NotesSyncService : Service() {
         val gson = Gson()
         val noteContent = NoteContent(null, null, null, null, -1L)
         var jsonData: String?
-        var fileId: String?
         val filesList: MutableList<NoteFile> = ArrayList()
         val newNotesList: MutableList<Note> = ArrayList()
         newNotesList.addAll(mNotesList)
