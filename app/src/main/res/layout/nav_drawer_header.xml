@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:paddingTop="40dp"
+              android:paddingBottom="10dp"
+              android:paddingStart="10dp"
+              android:paddingEnd="10dp"
+              android:background="@drawable/header_gradient"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <ImageView
+            android:src="@drawable/ic_launcher_foreground"
+            android:layout_margin="10dp"
+            android:layout_gravity="center_vertical"
+            android:layout_width="80dp"
+            android:layout_height="80dp"/>
+
+    <TextView
+            android:text="Notes Sync"
+            android:textSize="22sp"
+            android:layout_gravity="center_vertical"
+            android:textColor="#ffffff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+</LinearLayout>

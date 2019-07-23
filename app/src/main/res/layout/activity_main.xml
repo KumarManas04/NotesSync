@@ -4,6 +4,8 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/drawer_layout"
+        android:fitsSystemWindows="true"
+        android:background="?attr/mainBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -23,6 +25,7 @@
             android:theme="@style/NavigationDrawerStyle"
             app:itemTextColor="?attr/navDrawerItemTint"
             app:itemIconTint="?attr/navDrawerItemTint"
+            app:headerLayout="@layout/nav_drawer_header"
             app:menu="@menu/nav_drawer_menu"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

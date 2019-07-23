@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -164,7 +165,6 @@ class NoteEditFragment : Fragment() {
 
         if (arguments != null){
             val noteId = arguments?.getLong("NOTE_ID")
-            Log.d(TAG, "Note id = $noteId")
             if (noteId != null) {
                 GlobalScope.launch(Dispatchers.IO) {
                     val note = databaseViewModel.getNoteById(noteId)
@@ -187,9 +187,9 @@ class NoteEditFragment : Fragment() {
     private fun prepareNoteView(rootView: View) {
         val selectedNote = mainViewModel.getSelectedNote()
         if (selectedNote != null) {
+            noteContent.setText(selectedNote.noteContent)
             if (selectedNote.nId != -1L) {
                 noteTitle.setText(selectedNote.noteTitle)
-                noteContent.setText(selectedNote.noteContent)
                 mainViewModel.setSelectedColor(selectedNote.noteColor)
                 val formatter = SimpleDateFormat("MMM d, YYYY", Locale.ENGLISH)
                 rootView.last_edited_text.text = "Edited  ${formatter.format(Calendar.getInstance().timeInMillis)}"
@@ -229,8 +229,12 @@ class NoteEditFragment : Fragment() {
                     minute,
                     0
                 )
-                WorkSchedulerHelper().setReminder(noteId, cal.timeInMillis)
-                mainViewModel.reminderTime = cal.timeInMillis
+                if (cal.timeInMillis > Calendar.getInstance().timeInMillis) {
+                    WorkSchedulerHelper().setReminder(noteId, cal.timeInMillis)
+                    mainViewModel.reminderTime = cal.timeInMillis
+                }else{
+                    Toast.makeText(activity, "Reminder cannot be set before present time", Toast.LENGTH_SHORT).show()
+                }
             }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false)
 
             val datePickerDialog = DatePickerDialog(context!!, { _, year, month, dayOfMonth ->

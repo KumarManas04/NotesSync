@@ -13,8 +13,10 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
+import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -37,6 +39,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun initDataBinding(){
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+
+        if (intent != null){
+            val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+            if (text != null){
+                mainViewModel.setSelectedNote(Note(-1L, "", text, 0, 0, "-1", Contract.NOTE_DEFAULT, false, null, -1L))
+                mainViewModel.setShouldOpenEditor(true)
+            }
+        }
 
         mainViewModel.getSyncNotes().observe(this, Observer {
             it.getContentIfNotHandled()?.let {noteType-> syncFiles(noteType) }
@@ -89,6 +99,13 @@ class MainActivity : AppCompatActivity() {
                 R.id.settings->{
                     Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.action_mainFragment_to_settingsFragment)
                     drawer_layout.closeDrawers()
+                }
+                R.id.share->{
+                    val message = "Hey there! Try Notes Sync. It is really fast, easy to use and privacy focused with lots of cool features."
+                    val shareIntent = Intent(Intent.ACTION_SEND)
+                    shareIntent.type = "text/plain"
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, message)
+                    startActivity(Intent.createChooser(shareIntent, "Share..."))
                 }
                 R.id.about->{
                     Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.action_mainFragment_to_aboutFragment)

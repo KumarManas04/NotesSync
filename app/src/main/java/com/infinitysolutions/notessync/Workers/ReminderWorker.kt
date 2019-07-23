@@ -9,6 +9,9 @@ import androidx.work.WorkerParameters
 import com.infinitysolutions.notessync.Model.NotesRoomDatabase
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.NotificationHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,6 +40,10 @@ class ReminderWorker(private val context: Context, params: WorkerParameters): Wo
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(noteId.toInt(), notifyBuilder.build())
 
+        note.reminderTime = -1L
+        GlobalScope.launch(Dispatchers.IO) {
+            notesDao.insert(note)
+        }
         return Result.success()
     }
 }

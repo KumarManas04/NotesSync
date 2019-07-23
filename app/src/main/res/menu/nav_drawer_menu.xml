@@ -29,9 +29,9 @@
             android:title="Settings"/>
 
         <item
-            android:id="@+id/support"
-            android:icon="@drawable/support_nav_item"
-            android:title="Support"/>
+            android:id="@+id/share"
+            android:icon="@drawable/share_menu_item"
+            android:title="Share app"/>
 
         <item
             android:id="@+id/about"
