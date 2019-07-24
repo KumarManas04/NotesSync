@@ -282,7 +282,7 @@ class NoteEditFragment : Fragment() {
         val selectedNote = mainViewModel.getSelectedNote()
         if (selectedNote != null) {
             if (selectedNote.nId == -1L) {
-                if (noteContent.text.isNotEmpty()) {
+                if (noteContent.text.isNotEmpty() || noteTitle.text.isNotEmpty()) {
                     databaseViewModel.insert(
                         Note(
                             null,
@@ -323,8 +323,12 @@ class NoteEditFragment : Fragment() {
             .setTitle("Delete note")
             .setMessage("Are you sure you want to delete this note?")
             .setPositiveButton("Yes") { _, _ ->
-                activity!!.onBackPressed()
                 val selectedNote = mainViewModel.getSelectedNote()
+                if (selectedNote?.nId == -1L){
+                    noteContent.setText("")
+                    noteTitle.setText("")
+                }
+                activity!!.onBackPressed()
                 if (selectedNote != null) {
                     databaseViewModel.insert(
                         Note(
@@ -348,7 +352,6 @@ class NoteEditFragment : Fragment() {
             }
             .setNegativeButton("No", null)
             .show()
-
     }
 
     private fun getNoteText(selectedNote: Note): String {

@@ -17,7 +17,7 @@ No server is required for syncing the data from the app. Everything goes directl
    - Set App Name to Notes Sync
    - Click on Create App
    - From the next screen copy your App Key
-   - In your strings.xml and AndroidManifest.xml replace `YOUR_APP_KEY` with the key copied in previous step
+   - In your strings.xml and AndroidManifest.xml replace `YOUR_APP_KEY_HERE` with the key copied in previous step
 6. Build and run the app
 
 ## Developed by
