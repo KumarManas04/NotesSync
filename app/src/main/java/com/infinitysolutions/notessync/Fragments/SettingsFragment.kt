@@ -3,6 +3,8 @@ package com.infinitysolutions.notessync.Fragments
 
 import android.app.AlertDialog
 import android.app.TimePickerDialog
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.content.Intent
@@ -61,6 +63,7 @@ class SettingsFragment : Fragment() {
                 editor.putInt(PREF_THEME, 0)
 
             editor.commit()
+            updateWidgets()
             activity?.recreate()
         }
 
@@ -207,5 +210,14 @@ class SettingsFragment : Fragment() {
             startActivity(browserIntent)
         else
             Toast.makeText(activity, "No browser found!", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun updateWidgets() {
+        val intent = Intent(activity, NotesWidget::class.java)
+        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        val ids =
+            AppWidgetManager.getInstance(activity).getAppWidgetIds(ComponentName(activity!!, NotesWidget::class.java))
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        activity?.sendBroadcast(intent)
     }
 }

@@ -4,6 +4,8 @@ package com.infinitysolutions.notessync.Fragments
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
@@ -273,6 +275,7 @@ class NoteEditFragment : Fragment() {
                     )
                 )
             }
+            updateWidgets()
             activity?.onBackPressed()
         }
     }
@@ -315,7 +318,18 @@ class NoteEditFragment : Fragment() {
                     )
                 )
             }
+
+            updateWidgets()
         }
+    }
+
+    private fun updateWidgets() {
+        val intent = Intent(activity, NotesWidget::class.java)
+        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        val ids =
+            AppWidgetManager.getInstance(activity).getAppWidgetIds(ComponentName(activity!!, NotesWidget::class.java))
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        activity?.sendBroadcast(intent)
     }
 
     private fun deleteNote() {
@@ -348,6 +362,7 @@ class NoteEditFragment : Fragment() {
                     if (selectedNote.reminderTime != -1L){
                         WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
                     }
+                    updateWidgets()
                 }
             }
             .setNegativeButton("No", null)

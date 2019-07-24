@@ -12,6 +12,9 @@ interface NotesDao {
     @Query("SELECT * FROM notes_table WHERE type = 1 OR type = 3 ORDER BY date_modified DESC")
     fun getAll(): LiveData<List<Note>>
 
+    @Query("SELECT * FROM notes_table WHERE type = 1 OR type = 3 ORDER BY date_modified DESC")
+    fun getAllPresent(): List<Note>
+
     @Query("SELECT * FROM notes_table WHERE type = 1 ORDER BY date_modified DESC")
     fun getNotesOnly(): LiveData<List<Note>>
 

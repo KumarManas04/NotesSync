@@ -1,6 +1,8 @@
 package com.infinitysolutions.notessync
 
 import android.app.Service
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
@@ -16,6 +18,7 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.DRIVE_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_SYSTEM_FILENAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_TYPE_FOLDER
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_TYPE_TEXT
@@ -23,6 +26,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.Fragments.NotesWidget
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Model.NoteContent
 import com.infinitysolutions.notessync.Model.NoteFile
@@ -48,7 +52,7 @@ class NotesSyncService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val driveType = intent?.getIntExtra("Drive", CLOUD_GOOGLE_DRIVE)
+        val driveType = intent?.getIntExtra(DRIVE_EXTRA, CLOUD_GOOGLE_DRIVE)
         if (driveType != null)
             mDriveType = driveType
         startForegroundService()
@@ -144,6 +148,7 @@ class NotesSyncService : Service() {
                 }
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@NotesSyncService, "Sync successful", Toast.LENGTH_SHORT).show()
+                    updateWidgets()
                     stopSelf()
                 }
             } catch (e: Exception) {
@@ -599,6 +604,14 @@ class NotesSyncService : Service() {
         if (folderId == null)
             folderId = googleDriveHelper.createFile(null, "notes_sync_data_folder_19268", FILE_TYPE_FOLDER, null)
         return folderId
+    }
+
+    private fun updateWidgets() {
+        val intent = Intent(this, NotesWidget::class.java)
+        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        val ids = AppWidgetManager.getInstance(this).getAppWidgetIds(ComponentName(this, NotesWidget::class.java))
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        sendBroadcast(intent)
     }
 
     override fun onDestroy() {

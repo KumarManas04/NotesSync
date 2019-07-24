@@ -14,9 +14,15 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
-import com.infinitysolutions.notessync.Contracts.Contract
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.DRIVE_EXTRA
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ID_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_BUTTON_EXTRA
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_LIST
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_NOTE
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
@@ -42,10 +48,32 @@ class MainActivity : AppCompatActivity() {
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
         if (intent != null){
-            val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+            var text = intent.getStringExtra(Intent.EXTRA_TEXT)
             if (text != null){
-                mainViewModel.setSelectedNote(Note(-1L, "", text, 0, 0, "-1", Contract.NOTE_DEFAULT, false, null, -1L))
+                mainViewModel.setSelectedNote(Note(-1L, "", text, 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
                 mainViewModel.setShouldOpenEditor(true)
+            }
+
+            text = intent.getStringExtra(WIDGET_BUTTON_EXTRA)
+            if (text != null){
+                if (text == WIDGET_NEW_NOTE){
+                    mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
+                    mainViewModel.setShouldOpenEditor(true)
+                }else if (text == WIDGET_NEW_LIST){
+                    mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", LIST_DEFAULT, false, null, -1L))
+                    mainViewModel.setShouldOpenEditor(true)
+                }
+            }
+
+            val noteId = intent.getLongExtra(NOTE_ID_EXTRA, -1L)
+            if (noteId != -1L){
+                Log.d(TAG, "Flag = ${intent.flags}")
+                if (intent.flags != Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) {
+                    Log.d(TAG, "Note id has been called")
+                    val bundle = Bundle()
+                    bundle.putLong("NOTE_ID", noteId)
+                    Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.noteEditFragment, bundle)
+                }
             }
         }
 
@@ -130,7 +158,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Service not running. Starting it...")
             Toast.makeText(this, "Syncing...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, NotesSyncService::class.java)
-            intent.putExtra("Drive", noteType)
+            intent.putExtra(DRIVE_EXTRA, noteType)
             startService(intent)
         }else{
             Toast.makeText(this, "Already syncing. Please wait...", Toast.LENGTH_SHORT).show()
