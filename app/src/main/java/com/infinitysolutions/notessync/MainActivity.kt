@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
                 when(destination.id){
                     R.id.mainFragment-> {
                         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+                        //Hide keyboard
                         val view = this.currentFocus
                         view?.let { v ->
                             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
@@ -139,9 +140,8 @@ class MainActivity : AppCompatActivity() {
     private fun isServiceRunning(serviceName: String): Boolean {
         val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceName == service.service.className) {
+            if (serviceName == service.service.className)
                 return true
-            }
         }
         return false
     }

@@ -143,7 +143,10 @@ class SettingsFragment : Fragment() {
                             .setTitle("Logout")
                             .setMessage("Are you sure you want to logout from your Dropbox account?")
                             .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
-                                prefs.edit().putString(PREF_ACCESS_TOKEN, null).commit()
+                                val editor = prefs.edit()
+                                editor.putString(PREF_ACCESS_TOKEN, null)
+                                editor.remove(PREF_CLOUD_TYPE)
+                                editor.commit()
                                 resetLoginButton(rootView)
                             }
                             .setNegativeButton("No", null)
