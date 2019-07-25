@@ -54,7 +54,7 @@ class AboutFragment : Fragment() {
         rootView.changelog_button.setOnClickListener {
             AlertDialog.Builder(context)
                 .setTitle("Changelog")
-                .setMessage("VERSION 1.0  JULY 23,2019\n\n - Initial release\n\nVERSION 1.1 JULY 24,2019\n\n - Added widget\n\nVERSION 1.2 JULY 25,2019\n\n - Improved Performance")
+                .setMessage("VERSION 1.0  JULY 23,2019\n\n - Initial release\n\nVERSION 1.1 JULY 24,2019\n\n - Added widget\n\nVERSION 1.2 JULY 25,2019\n\n - Improved Performance\n\nVERSION 1.3 JULY 25, 2019\n\n - Reduced size")
                 .setPositiveButton("Close", null)
                 .show()
         }
