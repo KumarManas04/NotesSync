@@ -30,7 +30,7 @@ class AboutFragment : Fragment() {
         }
 
         rootView.rate_button.setOnClickListener {
-            openLink("")
+            openLink("https://play.google.com/store/apps/details?id=com.infinitysolutions.notessync")
         }
 
         rootView.report_bugs_button.setOnClickListener {
@@ -54,7 +54,7 @@ class AboutFragment : Fragment() {
         rootView.changelog_button.setOnClickListener {
             AlertDialog.Builder(context)
                 .setTitle("Changelog")
-                .setMessage("VERSION 1.0  JULY 20,2019\n\n -Initial release")
+                .setMessage("VERSION 1.0  JULY 23,2019\n\n - Initial release\n\nVERSION 1.1 JULY 24,2019\n\n - Added widget\n\nVERSION 1.2 JULY 25,2019\n\n - Improved Performance")
                 .setPositiveButton("Close", null)
                 .show()
         }

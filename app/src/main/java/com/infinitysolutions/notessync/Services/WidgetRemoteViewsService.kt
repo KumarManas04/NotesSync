@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync
+package com.infinitysolutions.notessync.Services
 
 import android.content.Intent
 import android.widget.RemoteViewsService

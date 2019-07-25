@@ -15,7 +15,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_L
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_NOTE
 import com.infinitysolutions.notessync.MainActivity
 import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.WidgetRemoteViewsService
+import com.infinitysolutions.notessync.Services.WidgetRemoteViewsService
 
 class NotesWidget : AppWidgetProvider() {
 

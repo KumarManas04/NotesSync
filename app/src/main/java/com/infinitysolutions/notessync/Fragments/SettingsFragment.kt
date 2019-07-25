@@ -11,7 +11,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -70,7 +69,6 @@ class SettingsFragment : Fragment() {
         rootView.auto_sync_toggle.setOnCheckedChangeListener { buttonView, isChecked ->
             if (!isChecked) {
                 if (buttonView.isPressed) {
-                    Log.d(TAG, "Hello 3")
                     WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
                     rootView.auto_sync_time.text = getString(R.string.off_text)
                     if (sharedPrefs.contains(PREF_SCHEDULE_TIME))
@@ -78,7 +76,6 @@ class SettingsFragment : Fragment() {
                 }
             } else {
                 if (buttonView.isPressed) {
-                    Log.d(TAG, "Hello 4")
                     if (getLoginStatus(sharedPrefs) == -1) {
                         Toast.makeText(activity, "Please login first", Toast.LENGTH_SHORT).show()
                         rootView.auto_sync_toggle.isChecked = false
@@ -108,13 +105,11 @@ class SettingsFragment : Fragment() {
         }
 
         if (sharedPrefs.contains(PREF_SCHEDULE_TIME)) {
-            Log.d(TAG, "Hello 1")
             rootView.auto_sync_toggle.isChecked = true
             val syncTime = sharedPrefs.getLong(PREF_SCHEDULE_TIME, 0L)
             val sdf = SimpleDateFormat("h:mm a", Locale.ENGLISH)
             rootView.auto_sync_time.text = sdf.format(syncTime)
         } else {
-            Log.d(TAG, "Hello 2")
             rootView.auto_sync_toggle.isChecked = false
             rootView.auto_sync_time.text = getString(R.string.off_text)
         }

@@ -12,7 +12,7 @@ import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SCHEDULE_TIME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
-import com.infinitysolutions.notessync.NotesSyncService
+import com.infinitysolutions.notessync.Services.NotesSyncService
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import java.util.*
 
@@ -21,7 +21,7 @@ class AutoSyncWorker(private val context: Context, params: WorkerParameters) : W
     override fun doWork(): Result {
         val loginStatus = getLoginStatus()
         if (loginStatus != -1) {
-            if (!isServiceRunning("com.infinitysolutions.notessync.NotesSyncService")) {
+            if (!isServiceRunning("com.infinitysolutions.notessync.Services.NotesSyncService")) {
                 val intent = Intent(context, NotesSyncService::class.java)
                 intent.putExtra("Drive", loginStatus)
                 context.startService(intent)

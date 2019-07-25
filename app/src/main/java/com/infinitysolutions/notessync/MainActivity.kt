@@ -24,6 +24,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_BUTTO
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_LIST
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_NOTE
 import com.infinitysolutions.notessync.Model.Note
+import com.infinitysolutions.notessync.Services.NotesSyncService
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -67,9 +68,7 @@ class MainActivity : AppCompatActivity() {
 
             val noteId = intent.getLongExtra(NOTE_ID_EXTRA, -1L)
             if (noteId != -1L){
-                Log.d(TAG, "Flag = ${intent.flags}")
                 if (intent.flags != Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) {
-                    Log.d(TAG, "Note id has been called")
                     val bundle = Bundle()
                     bundle.putLong("NOTE_ID", noteId)
                     Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.noteEditFragment, bundle)
@@ -138,7 +137,7 @@ class MainActivity : AppCompatActivity() {
                     drawer_layout.closeDrawers()
                 }
                 R.id.share->{
-                    val message = "Hey there! Try Notes Sync. It is really fast, easy to use and privacy focused with lots of cool features."
+                    val message = "Hey there!\nTry Notes Sync.\nIt is really fast, easy to use and privacy focused with lots of cool features. https://play.google.com/store/apps/details?id=com.infinitysolutions.notessync"
                     val shareIntent = Intent(Intent.ACTION_SEND)
                     shareIntent.type = "text/plain"
                     shareIntent.putExtra(Intent.EXTRA_TEXT, message)
@@ -154,7 +153,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun syncFiles(noteType: Int){
-        if (!isServiceRunning("com.infinitysolutions.notessync.NotesSyncService")){
+        if (!isServiceRunning("com.infinitysolutions.notessync.Services.NotesSyncService")){
             Log.d(TAG, "Service not running. Starting it...")
             Toast.makeText(this, "Syncing...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, NotesSyncService::class.java)

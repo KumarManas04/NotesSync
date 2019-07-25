@@ -16,31 +16,26 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
-
             <meta-data
                     android:name="android.appwidget.provider"
                     android:resource="@xml/notes_widget_info"/>
         </receiver>
 
         <service
-                android:name=".NotesSyncService"
+                android:name=".Services.NotesSyncService"
                 android:enabled="true"
                 android:exported="false">
         </service>
-        <service android:name=".WidgetRemoteViewsService" android:permission="android.permission.BIND_REMOTEVIEWS"/>
+        <service android:name=".Services.WidgetRemoteViewsService" android:permission="android.permission.BIND_REMOTEVIEWS"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
-
-
                 <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>

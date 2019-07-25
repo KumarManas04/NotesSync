@@ -15,153 +15,165 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/mainBackground"/>
 
-    <LinearLayout style="@style/prefsContainer">
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-        <ImageView
-                android:src="@drawable/about_drawer_item"
-                style="@style/prefsIcon"/>
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <LinearLayout style="@style/prefsTextContainer">
+            <LinearLayout style="@style/prefsContainer">
 
-            <TextView
-                    android:text="@string/app_version"
-                    style="@style/prefsMain"/>
+                <ImageView
+                        android:src="@drawable/about_drawer_item"
+                        style="@style/prefsIcon"/>
 
-            <TextView
-                    android:text="1.0.0"
-                    style="@style/prefsSummary"/>
+                <LinearLayout style="@style/prefsTextContainer">
 
+                    <TextView
+                            android:text="@string/app_version"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="1.2"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/rate_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/rate_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="@string/rate"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="@string/rate_pref_summary"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/report_bugs_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/report_bug"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="@string/report_bugs"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="@string/report_bugs_pref_summary"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/translate_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/translate_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="@string/translate"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="@string/translate_pref_summary"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/more_apps_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/more_apps_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="@string/more_apps"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="@string/more_apps_prefs_summary"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/changelog_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/changelog_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="@string/changelog"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="@string/changelog_pref_summary"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/developer_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="@string/developer"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="Kumar Manas"
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
         </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:id="@+id/rate_button"
-            style="@style/prefsContainer">
-
-        <ImageView
-                android:src="@drawable/rate_icon"
-                style="@style/prefsIcon"/>
-
-        <LinearLayout style="@style/prefsTextContainer">
-
-            <TextView
-                    android:text="@string/rate"
-                    style="@style/prefsMain"/>
-
-            <TextView
-                    android:text="@string/rate_pref_summary"
-                    style="@style/prefsSummary"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:id="@+id/report_bugs_button"
-            style="@style/prefsContainer">
-
-        <ImageView
-                android:src="@drawable/report_bug"
-                style="@style/prefsIcon"/>
-
-        <LinearLayout style="@style/prefsTextContainer">
-
-            <TextView
-                    android:text="@string/report_bugs"
-                    style="@style/prefsMain"/>
-
-            <TextView
-                    android:text="@string/report_bugs_pref_summary"
-                    style="@style/prefsSummary"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:id="@+id/translate_button"
-            style="@style/prefsContainer">
-
-        <ImageView
-                android:src="@drawable/translate_icon"
-                style="@style/prefsIcon"/>
-
-        <LinearLayout style="@style/prefsTextContainer">
-
-            <TextView
-                    android:text="@string/translate"
-                    style="@style/prefsMain"/>
-
-            <TextView
-                    android:text="@string/translate_pref_summary"
-                    style="@style/prefsSummary"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:id="@+id/more_apps_button"
-            style="@style/prefsContainer">
-
-        <ImageView
-                android:src="@drawable/more_apps_icon"
-                style="@style/prefsIcon"/>
-
-        <LinearLayout style="@style/prefsTextContainer">
-
-            <TextView
-                    android:text="@string/more_apps"
-                    style="@style/prefsMain"/>
-
-            <TextView
-                    android:text="@string/more_apps_prefs_summary"
-                    style="@style/prefsSummary"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:id="@+id/changelog_button"
-            style="@style/prefsContainer">
-
-        <ImageView
-                android:src="@drawable/changelog_icon"
-                style="@style/prefsIcon"/>
-
-        <LinearLayout style="@style/prefsTextContainer">
-
-            <TextView
-                    android:text="@string/changelog"
-                    style="@style/prefsMain"/>
-
-            <TextView
-                    android:text="@string/changelog_pref_summary"
-                    style="@style/prefsSummary"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout style="@style/prefsContainer">
-
-        <ImageView
-                android:src="@drawable/developer_icon"
-                style="@style/prefsIcon"/>
-
-        <LinearLayout style="@style/prefsTextContainer">
-
-            <TextView
-                    android:text="@string/developer"
-                    style="@style/prefsMain"/>
-
-            <TextView
-                    android:text="Kumar Manas"
-                    style="@style/prefsSummary"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
+    </ScrollView>
 </LinearLayout>

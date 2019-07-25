@@ -29,6 +29,9 @@
             android:text="@string/select_cloud_storage"
             android:textSize="20sp"
             android:layout_marginTop="20dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:textAlignment="center"
             android:textColor="?attr/mainTextColor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

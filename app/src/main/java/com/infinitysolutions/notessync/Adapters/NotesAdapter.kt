@@ -5,11 +5,8 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.ListView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
@@ -42,18 +39,9 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val items: 
 
         if (items[position].noteType == LIST_DEFAULT || items[position].noteType == LIST_ARCHIVED){
             holder.indicatorView.setImageResource(R.drawable.todo_indicator)
-            holder.contentListView.visibility = VISIBLE
-            holder.contentTextView.visibility = GONE
             val itemsList = ChecklistGenerator.generateList(items[position].noteContent)
-            holder.contentListView.adapter = ListPreviewAdapter(context, itemsList)
-            setListViewHeightBasedOnChildren(holder.contentListView)
-            holder.contentListView.setOnItemClickListener { _, _, _, _ ->
-                mainViewModel.setSelectedNote(items[position])
-                mainViewModel.setShouldOpenEditor(true)
-            }
+            holder.contentTextView.text = itemsList
         }else{
-            holder.contentListView.visibility = GONE
-            holder.contentTextView.visibility = VISIBLE
             holder.contentTextView.text = items[position].noteContent
             if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == NOTE_ARCHIVED) {
                 holder.indicatorView.setImageResource(R.drawable.note_indicator)
@@ -69,30 +57,10 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val items: 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val titleTextView: TextView = itemView.title_text
         val contentTextView: TextView = itemView.content_preview_text
-        val contentListView: ListView = itemView.list_view
         val dateModifiedTextView: TextView = itemView.date_modified_text
         val parentView: ConstraintLayout = itemView.parent_view
         val indicatorView: ImageView = itemView.indicator_view
         val itemContainer = itemView
-    }
-
-    private fun setListViewHeightBasedOnChildren(listView: ListView) {
-        val listAdapter = listView.adapter ?: return
-
-        val desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.width, View.MeasureSpec.UNSPECIFIED)
-        var totalHeight = 0
-        var view: View? = null
-        for (i in 0 until listAdapter.count) {
-            view = listAdapter.getView(i, view, listView)
-            if (i == 0)
-                view!!.layoutParams = ViewGroup.LayoutParams(desiredWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-            view!!.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED)
-            totalHeight += view.measuredHeight
-        }
-        val params = listView.layoutParams
-        params.height = totalHeight + listView.dividerHeight * (listAdapter.count - 1)
-        listView.layoutParams = params
     }
 
     override fun getItemCount(): Int {

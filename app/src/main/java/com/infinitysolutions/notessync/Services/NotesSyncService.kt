@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync
+package com.infinitysolutions.notessync.Services
 
 import android.app.Service
 import android.appwidget.AppWidgetManager
@@ -31,6 +31,7 @@ import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Model.NoteContent
 import com.infinitysolutions.notessync.Model.NoteFile
 import com.infinitysolutions.notessync.Model.NotesRoomDatabase
+import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.DropboxHelper
 import com.infinitysolutions.notessync.Util.GoogleDriveHelper
 import com.infinitysolutions.notessync.Util.NotificationHelper

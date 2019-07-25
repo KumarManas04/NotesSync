@@ -6,10 +6,12 @@ import android.os.Binder
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.infinitysolutions.notessync.Contracts.Contract
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ID_EXTRA
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Model.NotesRoomDatabase
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.Util.ChecklistGenerator
 
 class WidgetRemoteViewsFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
     private lateinit var notesList: List<Note>
@@ -18,7 +20,12 @@ class WidgetRemoteViewsFactory(private val context: Context) : RemoteViewsServic
     override fun getViewAt(position: Int): RemoteViews {
         val rv = RemoteViews(context.packageName, selectedLayout)
         rv.setTextViewText(R.id.title_text, notesList[position].noteTitle)
-        rv.setTextViewText(R.id.content_preview_text, notesList[position].noteContent)
+        if (notesList[position].noteType == LIST_DEFAULT){
+            val noteContent = ChecklistGenerator.generateList(notesList[position].noteContent)
+            rv.setTextViewText(R.id.content_preview_text, noteContent)
+        }else {
+            rv.setTextViewText(R.id.content_preview_text, notesList[position].noteContent)
+        }
 
         val fillInIntent = Intent()
         fillInIntent.putExtra(NOTE_ID_EXTRA, notesList[position].nId)
