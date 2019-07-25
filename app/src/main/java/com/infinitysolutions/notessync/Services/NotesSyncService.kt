@@ -77,6 +77,7 @@ class NotesSyncService : Service() {
                     getCloudData()
                 } catch (e: Exception) {
                     Toast.makeText(this@NotesSyncService, "Sync error", Toast.LENGTH_SHORT).show()
+                    Log.d(TAG, "Error message = ${e.message}")
                     stopSelf()
                 }
             }
@@ -115,13 +116,13 @@ class NotesSyncService : Service() {
         if (mDriveType == CLOUD_GOOGLE_DRIVE) {
             val googleDriveService = getGoogleDriveService()
             if (googleDriveService == null)
-                return
+                throw NullPointerException("GoogleDriveService was null")
             else
                 googleDriveHelper = GoogleDriveHelper(googleDriveService)
         } else {
             val dropboxClient = getDropboxClient()
             if (dropboxClient == null)
-                return
+                throw NullPointerException("DropboxClient was null")
             else
                 dropboxHelper = DropboxHelper(dropboxClient)
         }

@@ -86,7 +86,7 @@ class CloudPickerFragment : Fragment() {
             if (accessToken == null) {
                 accessToken = Auth.getOAuth2Token()
                 if (accessToken != null) {
-                    prefs.edit().putString(PREF_ACCESS_TOKEN, accessToken).apply()
+                    prefs.edit().putString(PREF_ACCESS_TOKEN, accessToken).commit()
                     Log.d(TAG, "Dropbox login complete")
                     loginSuccess()
                 }
