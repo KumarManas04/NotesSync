@@ -27,6 +27,7 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_SYSTEM_FILENAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_TYPE_TEXT
@@ -35,6 +36,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_T
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SCHEDULE_TIME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Model.NoteFile
 import com.infinitysolutions.notessync.R
@@ -99,7 +101,7 @@ class PasswordFragment : Fragment() {
                     rootView.loading_panel.visibility = VISIBLE
                     rootView.input_bar.visibility = GONE
                     rootView.warning_text_view.visibility = GONE
-                    rootView.loading_message.text = "Checking..."
+                    rootView.loading_message.text = getString(R.string.check_encryption_loading_text)
                     rootView.skip_button.visibility = GONE
                 } else {
                     rootView.loading_panel.visibility = GONE
@@ -111,13 +113,13 @@ class PasswordFragment : Fragment() {
         loginViewModel.getEncryptionCheckResult().observe(this, androidx.lifecycle.Observer {encryptionFound->
             if (encryptionFound != null) {
                 if (encryptionFound) {
-                    rootView.info_text_view.text = "Encryption found. Please enter your password to decrypt your data"
+                    rootView.info_text_view.text = getString(R.string.enter_password_to_decrypt_message)
                     rootView.password_edit_text.hint = "Enter password"
                     rootView.warning_text_view.visibility = GONE
                     rootView.again_password_edit_text.visibility = GONE
                     rootView.skip_button.visibility = GONE
                 } else {
-                    rootView.info_text_view.text = "Would you like to encrypt your data?"
+                    rootView.info_text_view.text = getString(R.string.will_user_encrypt_message)
                     rootView.password_edit_text.hint = "Enter new password"
                     rootView.warning_text_view.visibility = VISIBLE
                     rootView.again_password_edit_text.visibility = VISIBLE
@@ -132,23 +134,25 @@ class PasswordFragment : Fragment() {
                 if (showLoading) {
                     rootView.loading_panel.visibility = VISIBLE
                     rootView.input_bar.visibility = GONE
-                    rootView.loading_message.text = "Verifying password..."
+                    rootView.loading_message.text = getString(R.string.verify_password_loading_text)
                 }
             }
         })
 
         loginViewModel.getVerifyPasswordResult().observe(this, androidx.lifecycle.Observer {result->
             if (result != null){
-                if (result == 1){
-                    finishLogin(rootView.password_edit_text.text.toString(), userId, cloudType)
-                }else if(result == 0){
-                    Toast.makeText(activity, "Incorrect password", LENGTH_SHORT).show()
-                    rootView.loading_panel.visibility = GONE
-                    rootView.input_bar.visibility = VISIBLE
-                }else{
-                    Toast.makeText(activity, "Error occurred", LENGTH_SHORT).show()
-                    rootView.loading_panel.visibility = GONE
-                    rootView.input_bar.visibility = VISIBLE
+                when (result) {
+                    1 -> finishLogin(rootView.password_edit_text.text.toString(), userId, cloudType)
+                    0 -> {
+                        Toast.makeText(activity, "Incorrect password", LENGTH_SHORT).show()
+                        rootView.loading_panel.visibility = GONE
+                        rootView.input_bar.visibility = VISIBLE
+                    }
+                    else -> {
+                        Toast.makeText(activity, "Error occurred", LENGTH_SHORT).show()
+                        rootView.loading_panel.visibility = GONE
+                        rootView.input_bar.visibility = VISIBLE
+                    }
                 }
             }
         })
@@ -158,7 +162,7 @@ class PasswordFragment : Fragment() {
                 if (showLoading) {
                     rootView.loading_panel.visibility = VISIBLE
                     rootView.input_bar.visibility = GONE
-                    rootView.loading_message.text = "Securing your data..."
+                    rootView.loading_message.text = getString(R.string.securing_data_loading_text)
                 }
             }
         })
@@ -251,7 +255,7 @@ class PasswordFragment : Fragment() {
 
     private fun getDropboxClient(): DbxClientV2? {
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, Service.MODE_PRIVATE)
-        val accessToken = prefs?.getString(Contract.PREF_ACCESS_TOKEN, null)
+        val accessToken = prefs?.getString(PREF_ACCESS_TOKEN, null)
         return if (accessToken != null) {
             val requestConfig = DbxRequestConfig.newBuilder("Notes-Sync")
                 .withHttpRequestor(OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
@@ -291,7 +295,7 @@ class PasswordFragment : Fragment() {
             0,
             0
         )
-        WorkSchedulerHelper().setAutoSync(Contract.AUTO_SYNC_WORK_ID, c.timeInMillis)
-        editor?.putLong(Contract.PREF_SCHEDULE_TIME, c.timeInMillis)
+        WorkSchedulerHelper().setAutoSync(AUTO_SYNC_WORK_ID, c.timeInMillis)
+        editor?.putLong(PREF_SCHEDULE_TIME, c.timeInMillis)
     }
 }

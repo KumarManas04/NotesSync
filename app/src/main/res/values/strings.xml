@@ -51,4 +51,10 @@
     <string name="login">Login</string>
     <string name="login_pref_summary">Login to your preferred cloud storage</string>
     <string name="last_modified_indicator">Last modified indicator</string>
+    <string name="check_encryption_loading_text">Checking...</string>
+    <string name="enter_password_to_decrypt_message">Encryption found. Please enter your password to decrypt your data
+    </string>
+    <string name="will_user_encrypt_message">Would you like to encrypt your data?</string>
+    <string name="verify_password_loading_text">Verifying password...</string>
+    <string name="securing_data_loading_text">Securing your data...</string>
 </resources>
