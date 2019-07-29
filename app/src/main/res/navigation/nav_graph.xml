@@ -38,8 +38,15 @@
               android:label="fragment_about" tools:layout="@layout/fragment_about"/>
     <fragment android:id="@+id/cloudPickerFragment"
               android:name="com.infinitysolutions.notessync.Fragments.CloudPickerFragment"
-              android:label="fragment_cloud_picker" tools:layout="@layout/fragment_cloud_picker"/>
+              android:label="fragment_cloud_picker" tools:layout="@layout/fragment_cloud_picker">
+        <action android:id="@+id/action_cloudPickerFragment_to_passwordFragment"
+                app:destination="@id/passwordFragment" app:enterAnim="@anim/fade_in" app:popExitAnim="@anim/fade_out"
+                app:popUpTo="@+id/mainFragment"/>
+    </fragment>
     <fragment android:id="@+id/resourcesFragment"
               android:name="com.infinitysolutions.notessync.Fragments.ResourcesFragment"
               android:label="fragment_resources" tools:layout="@layout/fragment_resources"/>
+    <fragment android:id="@+id/passwordFragment"
+              android:name="com.infinitysolutions.notessync.Fragments.PasswordFragment"
+              android:label="fragment_password" tools:layout="@layout/fragment_password"/>
 </navigation>

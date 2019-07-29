@@ -130,45 +130,42 @@ class SettingsFragment : Fragment() {
             openLink("https://github.com/KumarManas04/NotesSync")
         }
 
-        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        val loginStatus = getLoginStatus(prefs)
-        if (prefs != null) {
-            if (loginStatus != -1) {
-                if (loginStatus == CLOUD_DROPBOX) {
-                    rootView.logout_text.text = getString(R.string.dropbox_logout_text)
-                    rootView.logout_button.setOnClickListener {
-                        AlertDialog.Builder(context)
-                            .setTitle("Logout")
-                            .setMessage("Are you sure you want to logout from your Dropbox account?")
-                            .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
-                                val editor = prefs.edit()
-                                editor.putString(PREF_ACCESS_TOKEN, null)
-                                editor.remove(PREF_CLOUD_TYPE)
-                                editor.commit()
-                                resetLoginButton(rootView)
-                            }
-                            .setNegativeButton("No", null)
-                            .show()
-                    }
-                } else {
-                    rootView.logout_text.text = getString(R.string.gdrive_logout_text)
-                    rootView.logout_button.setOnClickListener {
-                        AlertDialog.Builder(context)
-                            .setTitle("Logout")
-                            .setMessage("Are you sure you want to logout from your Google Drive account?")
-                            .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
-                                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-                                val googleSignInClient = GoogleSignIn.getClient(activity!!, gso)
-                                googleSignInClient.signOut()
-                                resetLoginButton(rootView)
-                            }
-                            .setNegativeButton("No", null)
-                            .show()
-                    }
+        val loginStatus = getLoginStatus(sharedPrefs)
+        if (loginStatus != -1) {
+            if (loginStatus == CLOUD_DROPBOX) {
+                rootView.logout_text.text = getString(R.string.dropbox_logout_text)
+                rootView.logout_button.setOnClickListener {
+                    AlertDialog.Builder(context)
+                        .setTitle("Logout")
+                        .setMessage("Are you sure you want to logout from your Dropbox account?")
+                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                            val editor = sharedPrefs.edit()
+                            editor.putString(PREF_ACCESS_TOKEN, null)
+                            editor.remove(PREF_CLOUD_TYPE)
+                            editor.commit()
+                            resetLoginButton(rootView)
+                        }
+                        .setNegativeButton("No", null)
+                        .show()
                 }
             } else {
-                resetLoginButton(rootView)
+                rootView.logout_text.text = getString(R.string.gdrive_logout_text)
+                rootView.logout_button.setOnClickListener {
+                    AlertDialog.Builder(context)
+                        .setTitle("Logout")
+                        .setMessage("Are you sure you want to logout from your Google Drive account?")
+                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                            val googleSignInClient = GoogleSignIn.getClient(activity!!, gso)
+                            googleSignInClient.signOut()
+                            resetLoginButton(rootView)
+                        }
+                        .setNegativeButton("No", null)
+                        .show()
+                }
             }
+        } else {
+            resetLoginButton(rootView)
         }
     }
 

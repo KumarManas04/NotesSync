@@ -69,73 +69,6 @@ class NoteEditFragment : Fragment() {
         return rootView
     }
 
-    private fun startBottomSheetDialog(container: ViewGroup?) {
-        val dialogView = layoutInflater.inflate(R.layout.bottom_sheet, container, false)
-        val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
-
-        val selectedNote = mainViewModel.getSelectedNote()
-        if (selectedNote != null) {
-            if (selectedNote.noteType == NOTE_DEFAULT || selectedNote.noteType == LIST_DEFAULT) {
-                dialogView.archive_button_icon.setImageResource(R.drawable.archive_drawer_item)
-                dialogView.archive_button_text.text = "Archive note"
-            } else {
-                dialogView.archive_button_icon.setImageResource(R.drawable.unarchive_menu_item)
-                dialogView.archive_button_text.text = "Unarchive note"
-            }
-
-            if (mainViewModel.reminderTime != -1L){
-                dialogView.cancel_reminder_button.visibility = View.VISIBLE
-                val formatter = SimpleDateFormat("h:mm a MMM d, YYYY", Locale.ENGLISH)
-                dialogView.reminder_text.text = "Reminder set:\n${formatter.format(mainViewModel.reminderTime)}"
-                dialogView.reminder_text.setTextColor(Color.parseColor(colorsUtil.getColor(mainViewModel.getSelectedColor().value)))
-                dialogView.cancel_reminder_button.setOnClickListener {
-                    AlertDialog.Builder(context)
-                        .setTitle("Cancel reminder")
-                        .setMessage("Are you sure you want to cancel the reminder?")
-                        .setPositiveButton("Yes"){ _: DialogInterface, _: Int ->
-                            WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
-                            mainViewModel.reminderTime = -1L
-                            dialog.hide()
-                        }
-                        .setNegativeButton("No", null)
-                        .show()
-                }
-                dialogView.cancel_reminder_button.setColorFilter(Color.parseColor(colorsUtil.getColor(mainViewModel.getSelectedColor().value)))
-            }else{
-                dialogView.cancel_reminder_button.visibility = View.GONE
-                dialogView.reminder_text.text = "Set reminder"
-                val typedValue = TypedValue()
-                context?.theme?.resolveAttribute(R.attr.mainTextColor, typedValue, true)
-                val textColor = typedValue.data
-                dialogView.reminder_text.setTextColor(textColor)
-            }
-
-            dialogView.reminder_button.setOnClickListener {
-                pickReminderTime(selectedNote.nId)
-                dialog.hide()
-            }
-
-            dialogView.share_button.setOnClickListener {
-                val shareIntent = Intent(Intent.ACTION_SEND)
-                shareIntent.type = "text/plain"
-                shareIntent.putExtra(Intent.EXTRA_TEXT, "${noteTitle.text}\n${getNoteText(selectedNote)}")
-                shareIntent.putExtra(Intent.EXTRA_SUBJECT, noteTitle.text.toString())
-                startActivity(Intent.createChooser(shareIntent, "Share..."))
-            }
-        }
-
-        dialogView.archive_button.setOnClickListener {
-            archiveNote()
-            dialog.hide()
-        }
-
-        val layoutManager = LinearLayoutManager(this@NoteEditFragment.context!!, RecyclerView.HORIZONTAL, false)
-        dialogView.color_picker.layoutManager = layoutManager
-        dialogView.color_picker.adapter = ColorPickerAdapter(this@NoteEditFragment.context!!, mainViewModel)
-        dialog.setContentView(dialogView)
-        dialog.show()
-    }
-
     private fun initDataBinding(rootView: View) {
         databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
         mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
@@ -215,6 +148,73 @@ class NoteEditFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun startBottomSheetDialog(container: ViewGroup?) {
+        val dialogView = layoutInflater.inflate(R.layout.bottom_sheet, container, false)
+        val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
+
+        val selectedNote = mainViewModel.getSelectedNote()
+        if (selectedNote != null) {
+            if (selectedNote.noteType == NOTE_DEFAULT || selectedNote.noteType == LIST_DEFAULT) {
+                dialogView.archive_button_icon.setImageResource(R.drawable.archive_drawer_item)
+                dialogView.archive_button_text.text = "Archive note"
+            } else {
+                dialogView.archive_button_icon.setImageResource(R.drawable.unarchive_menu_item)
+                dialogView.archive_button_text.text = "Unarchive note"
+            }
+
+            if (mainViewModel.reminderTime != -1L){
+                dialogView.cancel_reminder_button.visibility = View.VISIBLE
+                val formatter = SimpleDateFormat("h:mm a MMM d, YYYY", Locale.ENGLISH)
+                dialogView.reminder_text.text = "Reminder set:\n${formatter.format(mainViewModel.reminderTime)}"
+                dialogView.reminder_text.setTextColor(Color.parseColor(colorsUtil.getColor(mainViewModel.getSelectedColor().value)))
+                dialogView.cancel_reminder_button.setOnClickListener {
+                    AlertDialog.Builder(context)
+                        .setTitle("Cancel reminder")
+                        .setMessage("Are you sure you want to cancel the reminder?")
+                        .setPositiveButton("Yes"){ _: DialogInterface, _: Int ->
+                            WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
+                            mainViewModel.reminderTime = -1L
+                            dialog.hide()
+                        }
+                        .setNegativeButton("No", null)
+                        .show()
+                }
+                dialogView.cancel_reminder_button.setColorFilter(Color.parseColor(colorsUtil.getColor(mainViewModel.getSelectedColor().value)))
+            }else{
+                dialogView.cancel_reminder_button.visibility = View.GONE
+                dialogView.reminder_text.text = "Set reminder"
+                val typedValue = TypedValue()
+                context?.theme?.resolveAttribute(R.attr.mainTextColor, typedValue, true)
+                val textColor = typedValue.data
+                dialogView.reminder_text.setTextColor(textColor)
+            }
+
+            dialogView.reminder_button.setOnClickListener {
+                pickReminderTime(selectedNote.nId)
+                dialog.hide()
+            }
+
+            dialogView.share_button.setOnClickListener {
+                val shareIntent = Intent(Intent.ACTION_SEND)
+                shareIntent.type = "text/plain"
+                shareIntent.putExtra(Intent.EXTRA_TEXT, "${noteTitle.text}\n${getNoteText(selectedNote)}")
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, noteTitle.text.toString())
+                startActivity(Intent.createChooser(shareIntent, "Share..."))
+            }
+        }
+
+        dialogView.archive_button.setOnClickListener {
+            archiveNote()
+            dialog.hide()
+        }
+
+        val layoutManager = LinearLayoutManager(this@NoteEditFragment.context!!, RecyclerView.HORIZONTAL, false)
+        dialogView.color_picker.layoutManager = layoutManager
+        dialogView.color_picker.adapter = ColorPickerAdapter(this@NoteEditFragment.context!!, mainViewModel)
+        dialog.setContentView(dialogView)
+        dialog.show()
     }
 
     private fun pickReminderTime(noteId: Long?){
@@ -342,7 +342,7 @@ class NoteEditFragment : Fragment() {
                     noteContent.setText("")
                     noteTitle.setText("")
                 }
-                activity!!.onBackPressed()
+
                 if (selectedNote != null) {
                     databaseViewModel.insert(
                         Note(
@@ -364,6 +364,7 @@ class NoteEditFragment : Fragment() {
                     }
                     updateWidgets()
                 }
+                activity!!.onBackPressed()
             }
             .setNegativeButton("No", null)
             .show()

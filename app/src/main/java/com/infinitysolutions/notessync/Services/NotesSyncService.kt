@@ -3,6 +3,7 @@ package com.infinitysolutions.notessync.Services
 import android.app.Service
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
@@ -17,6 +18,7 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.gson.Gson
+import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.DRIVE_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_SYSTEM_FILENAME
@@ -25,6 +27,9 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_TYPE_TE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CODE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Fragments.NotesWidget
 import com.infinitysolutions.notessync.Model.Note
@@ -32,10 +37,7 @@ import com.infinitysolutions.notessync.Model.NoteContent
 import com.infinitysolutions.notessync.Model.NoteFile
 import com.infinitysolutions.notessync.Model.NotesRoomDatabase
 import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.Util.DropboxHelper
-import com.infinitysolutions.notessync.Util.GoogleDriveHelper
-import com.infinitysolutions.notessync.Util.NotificationHelper
-import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
+import com.infinitysolutions.notessync.Util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -47,6 +49,8 @@ class NotesSyncService : Service() {
     private lateinit var googleDriveHelper: GoogleDriveHelper
     private lateinit var dropboxHelper: DropboxHelper
     private var mDriveType: Int = CLOUD_GOOGLE_DRIVE
+    private val aesHelper = AES256Helper()
+    private var isEncrypted = false
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -89,7 +93,6 @@ class NotesSyncService : Service() {
         return if (googleAccount != null) {
             val credential = GoogleAccountCredential.usingOAuth2(this, listOf(DriveScopes.DRIVE_FILE))
             credential.selectedAccount = googleAccount.account
-
             Drive.Builder(AndroidHttp.newCompatibleTransport(), JacksonFactory.getDefaultInstance(), credential)
                 .setApplicationName(getString(R.string.app_name))
                 .build()
@@ -113,6 +116,7 @@ class NotesSyncService : Service() {
 
     private fun getCloudData() {
         Log.d(TAG, "Initializing cloud fetch...")
+        //New drive adding Point 1
         if (mDriveType == CLOUD_GOOGLE_DRIVE) {
             val googleDriveService = getGoogleDriveService()
             if (googleDriveService == null)
@@ -129,36 +133,68 @@ class NotesSyncService : Service() {
 
         GlobalScope.launch(Dispatchers.Default) {
             try {
+                checkAndPrepareEncryption()
+                //New drive adding Point 2
+                Log.d(TAG, "Getting files list")
                 val filesList = if (mDriveType == CLOUD_GOOGLE_DRIVE) {
-                    Log.d(TAG, "Getting appFolderID")
                     val appFolderId = getAppFolderId()
-                    if (appFolderId != null) {
-                        val fileSystemId = getFileSystemId(appFolderId)
-                        if (fileSystemId != null) {
-                            googleDriveHelper.appFolderId = appFolderId
-                            googleDriveHelper.fileSystemId = fileSystemId
-                        }
-                        getFilesListGD(fileSystemId)
-                    } else {
-                        null
-                    }
+                    val fileSystemId = getFileSystemId(appFolderId)
+                    googleDriveHelper.appFolderId = appFolderId
+                    googleDriveHelper.fileSystemId = fileSystemId
+                    getFilesListGD(fileSystemId)
                 } else {
                     getFilesListDB()
                 }
-                if (filesList != null) {
-                    compareAndSync(filesList)
-                }
+
+                compareAndSync(filesList)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@NotesSyncService, "Sync successful", Toast.LENGTH_SHORT).show()
                     updateWidgets()
                     stopSelf()
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@NotesSyncService, "Sync error", Toast.LENGTH_SHORT).show()
                     stopSelf()
                 }
             }
+        }
+    }
+
+    private fun checkAndPrepareEncryption() {
+        val prefs = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+        if (prefs.getBoolean(PREF_ENCRYPTED, false)) {
+            val password = prefs.getString(PREF_CODE, null)
+            val userId = prefs.getString(PREF_ID, null)
+            if (password != null && userId != null) {
+                aesHelper.generateKey(password, userId)
+                val cloudKeyEncrypted = getCloudKey()
+                if (cloudKeyEncrypted != null) {
+                    val cloudKey = aesHelper.decrypt(cloudKeyEncrypted)
+                    aesHelper.generateKey(cloudKey, userId)
+                    isEncrypted = true
+                }
+            }
+        }
+    }
+
+    private fun getCloudKey(): String? {
+        if (mDriveType == CLOUD_GOOGLE_DRIVE) {
+            val googleDriveService = getGoogleDriveService() ?: return null
+            val googleDriveHelper = GoogleDriveHelper(googleDriveService)
+            val credentialFileId = googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, FILE_TYPE_TEXT)
+            return if (credentialFileId != null)
+                googleDriveHelper.getFileContent(credentialFileId)
+            else
+                null
+        } else {
+            val dropboxClient = getDropboxClient() ?: return null
+            val dropboxHelper = DropboxHelper(dropboxClient)
+            return if (dropboxHelper.checkIfFileExists(Contract.CREDENTIALS_FILENAME))
+                dropboxHelper.getFileContent(Contract.CREDENTIALS_FILENAME)
+            else
+                null
         }
     }
 
@@ -346,7 +382,7 @@ class NotesSyncService : Service() {
                         cloudFilesList[i].dateCreated,
                         cloudFilesList[i].dateModified,
                         cloudFilesList[i].gDriveId,
-                        NOTE_DEFAULT,
+                        noteData.noteType!!,
                         true,
                         noteData.noteColor,
                         noteData.reminderTime
@@ -437,15 +473,17 @@ class NotesSyncService : Service() {
         }
         //Updating cloud file system
         if (isCloudDbChanged) {
-            val fileSystemJson = Gson().toJson(newFilesList)
-            if (mDriveType == CLOUD_GOOGLE_DRIVE)
-                googleDriveHelper.updateFile(googleDriveHelper.fileSystemId, fileSystemJson)
-            else
-                dropboxHelper.writeFile(FILE_SYSTEM_FILENAME, fileSystemJson)
+            writeFileSystemToCloud(newFilesList)
         }
     }
 
-    private fun createFile(note: Note, fileContent: String): String {
+    private fun createFile(note: Note, fileContentString: String): String {
+        val fileContent = if (isEncrypted)
+            aesHelper.encrypt(fileContentString)
+        else
+            fileContentString
+
+        //New drive adding Point 4
         return if (mDriveType == CLOUD_GOOGLE_DRIVE) {
             googleDriveHelper.createFile(googleDriveHelper.appFolderId, "${note.nId}.txt", FILE_TYPE_TEXT, fileContent)
         } else {
@@ -454,7 +492,12 @@ class NotesSyncService : Service() {
         }
     }
 
-    private fun updateFile(file: NoteFile, fileContent: String) {
+    private fun updateFile(file: NoteFile, fileContentString: String) {
+        val fileContent = if (isEncrypted)
+            aesHelper.encrypt(fileContentString)
+        else
+            fileContentString
+        //New drive adding Point 5
         if (mDriveType == CLOUD_GOOGLE_DRIVE)
             googleDriveHelper.updateFile(file.gDriveId!!, fileContent)
         else
@@ -462,6 +505,7 @@ class NotesSyncService : Service() {
     }
 
     private fun deleteFile(note: Note) {
+        //New drive adding Point 6
         if (mDriveType == CLOUD_GOOGLE_DRIVE)
             googleDriveHelper.deleteFile(note.gDriveId)
         else
@@ -469,11 +513,20 @@ class NotesSyncService : Service() {
     }
 
     private fun getFileContent(file: NoteFile): String? {
-        return if (mDriveType == CLOUD_GOOGLE_DRIVE) {
+        //New drive adding Point 7
+        val fileContent = if (mDriveType == CLOUD_GOOGLE_DRIVE) {
             googleDriveHelper.getFileContent(file.gDriveId)
         } else {
             dropboxHelper.getFileContent("${file.nId}.txt")
         }
+
+        return if (fileContent != null) {
+            if (isEncrypted)
+                aesHelper.decrypt(fileContent)
+            else
+                fileContent
+        } else
+            null
     }
 
     private fun restoreNotes(filesList: List<NoteFile>) {
@@ -506,33 +559,45 @@ class NotesSyncService : Service() {
         updateLocalDatabase()
     }
 
-
-    private fun getFileSystemId(parentFolderId: String): String? {
-        var fileSystemId: String? = googleDriveHelper.searchFile("notes_files_system.txt", FILE_TYPE_TEXT)
+    private fun getFileSystemId(parentFolderId: String): String {
+        var fileSystemId: String? = googleDriveHelper.searchFile(FILE_SYSTEM_FILENAME, FILE_TYPE_TEXT)
         if (fileSystemId == null) {
             Log.d(TAG, "File system not found")
             val filesList = ArrayList<NoteFile>()
-            val fileContent = Gson().toJson(filesList)
-            fileSystemId =
-                googleDriveHelper.createFile(parentFolderId, "notes_files_system.txt", FILE_TYPE_TEXT, fileContent)
+            val fileContent = if (isEncrypted)
+                aesHelper.encrypt(Gson().toJson(filesList))
+            else
+                Gson().toJson(filesList)
+
+            fileSystemId = googleDriveHelper.createFile(parentFolderId, FILE_SYSTEM_FILENAME, FILE_TYPE_TEXT, fileContent)
         }
         return fileSystemId
     }
 
-    private fun getFilesListGD(fileSystemId: String?): List<NoteFile>? {
-        if (fileSystemId == null)
-            return null
-        val fileContent = googleDriveHelper.getFileContent(fileSystemId)
+    private fun getFilesListGD(fileSystemId: String): List<NoteFile> {
+        val fileContentString = googleDriveHelper.getFileContent(fileSystemId) as String
+        val fileContent = if (isEncrypted)
+            aesHelper.decrypt(fileContentString)
+        else
+            fileContentString
+
         return Gson().fromJson(fileContent, Array<NoteFile>::class.java).asList()
     }
 
-    private fun getFilesListDB(): List<NoteFile>? {
+    private fun getFilesListDB(): List<NoteFile> {
         return if (dropboxHelper.checkIfFileExists(FILE_SYSTEM_FILENAME)) {
-            val fileContent = dropboxHelper.getFileContent(FILE_SYSTEM_FILENAME)
+            val fileContentString = dropboxHelper.getFileContent(FILE_SYSTEM_FILENAME) as String
+            val fileContent = if (isEncrypted)
+                aesHelper.decrypt(fileContentString)
+            else
+                fileContentString
             Gson().fromJson(fileContent, Array<NoteFile>::class.java).asList()
         } else {
             val filesList = ArrayList<NoteFile>()
-            val fileContent = Gson().toJson(filesList)
+            val fileContent = if (isEncrypted)
+                aesHelper.encrypt(Gson().toJson(filesList))
+            else
+                Gson().toJson(filesList)
             dropboxHelper.writeFile(FILE_SYSTEM_FILENAME, fileContent)
             filesList
         }
@@ -593,15 +658,24 @@ class NotesSyncService : Service() {
         }
 
         mNotesList = newNotesList
-        val fileSystemJson = gson.toJson(filesList)
+        writeFileSystemToCloud(filesList)
+        updateLocalDatabase()
+    }
+
+    private fun writeFileSystemToCloud(filesList: MutableList<NoteFile>) {
+        val fileSystemJsonString = Gson().toJson(filesList)
+        val fileSystemJson = if (isEncrypted)
+            aesHelper.encrypt(fileSystemJsonString)
+        else
+            fileSystemJsonString
+        //New drive adding Point 8
         if (mDriveType == CLOUD_GOOGLE_DRIVE)
             googleDriveHelper.updateFile(googleDriveHelper.fileSystemId, fileSystemJson)
         else
             dropboxHelper.writeFile(FILE_SYSTEM_FILENAME, fileSystemJson)
-        updateLocalDatabase()
     }
 
-    private fun getAppFolderId(): String? {
+    private fun getAppFolderId(): String {
         var folderId = googleDriveHelper.searchFile("notes_sync_data_folder_19268", FILE_TYPE_FOLDER)
         if (folderId == null)
             folderId = googleDriveHelper.createFile(null, "notes_sync_data_folder_19268", FILE_TYPE_FOLDER, null)
