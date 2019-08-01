@@ -7,7 +7,6 @@ import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -29,7 +28,6 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.ENCRYPTED_CHECK_ERROR
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.ENCRYPTED_NO
@@ -50,7 +48,8 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_T
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SCHEDULE_TIME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_IS_AUTO_SYNC_ENABLED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_LAST_SYNCED_TIME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Model.NoteFile
 import com.infinitysolutions.notessync.R
@@ -63,8 +62,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
-import kotlin.collections.ArrayList
 
 class PasswordFragment : Fragment() {
     private val TAG = "PasswordFragment"
@@ -286,7 +283,6 @@ class PasswordFragment : Fragment() {
     private fun getFileSystemId(parentFolderId: String): String {
         var fileSystemId: String? = loginViewModel.googleDriveHelper.searchFile(FILE_SYSTEM_FILENAME, FILE_TYPE_TEXT)
         if (fileSystemId == null) {
-            Log.d(TAG, "File system not found")
             val filesList = ArrayList<NoteFile>()
             val fileContent = Gson().toJson(filesList)
 
@@ -358,16 +354,11 @@ class PasswordFragment : Fragment() {
     }
 
     private fun setAutoSync(editor: SharedPreferences.Editor?) {
-        val c = Calendar.getInstance()
-        c.set(
-            c.get(Calendar.YEAR),
-            c.get(Calendar.MONTH),
-            c.get(Calendar.DATE),
-            10,
-            0,
-            0
-        )
-        WorkSchedulerHelper().setAutoSync(AUTO_SYNC_WORK_ID, c.timeInMillis)
-        editor?.putLong(PREF_SCHEDULE_TIME, c.timeInMillis)
+        WorkSchedulerHelper().setAutoSync()
+        if (editor != null) {
+            editor.putBoolean(PREF_IS_AUTO_SYNC_ENABLED, true)
+            editor.putLong(PREF_LAST_SYNCED_TIME, 0)
+            editor.commit()
+        }
     }
 }

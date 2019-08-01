@@ -127,28 +127,12 @@
 
                 </LinearLayout>
 
-                <LinearLayout
+                <Switch
+                        android:id="@+id/auto_sync_toggle"
+                        android:layout_margin="10dp"
                         android:layout_gravity="center_vertical"
-                        android:padding="10dp"
-                        android:orientation="vertical"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-
-                    <Switch
-                            android:id="@+id/auto_sync_toggle"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-
-                    <TextView
-                            android:id="@+id/auto_sync_time"
-                            android:text="@string/off_text"
-                            android:layout_margin="10dp"
-                            android:textColor="?attr/mainTextColor"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
-
-                </LinearLayout>
+                        android:layout_height="wrap_content"/>
 
             </LinearLayout>
 

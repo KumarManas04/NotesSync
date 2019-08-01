@@ -2,7 +2,6 @@ package com.infinitysolutions.notessync.Fragments
 
 
 import android.app.AlertDialog
-import android.app.TimePickerDialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context.MODE_PRIVATE
@@ -30,14 +29,12 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_MOD
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SCHEDULE_TIME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_IS_AUTO_SYNC_ENABLED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import kotlinx.android.synthetic.main.fragment_settings.view.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 class SettingsFragment : Fragment() {
     private val TAG = "SettingsFragment"
@@ -56,12 +53,12 @@ class SettingsFragment : Fragment() {
         }
 
         val nightModeToggle = rootView.night_mode_toggle
-        val sharedPrefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (sharedPrefs!!.contains(PREF_THEME))
-            nightModeToggle.isChecked = sharedPrefs.getInt(PREF_THEME, 0) == 1
+        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        if (prefs!!.contains(PREF_THEME))
+            nightModeToggle.isChecked = prefs.getInt(PREF_THEME, 0) == 1
 
         nightModeToggle.setOnCheckedChangeListener { _, isChecked ->
-            val editor = sharedPrefs.edit()
+            val editor = prefs.edit()
             if (isChecked)
                 editor.putInt(PREF_THEME, 1)
             else
@@ -70,54 +67,6 @@ class SettingsFragment : Fragment() {
             editor.commit()
             updateWidgets()
             activity?.recreate()
-        }
-
-        rootView.auto_sync_toggle.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (!isChecked) {
-                if (buttonView.isPressed) {
-                    WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
-                    rootView.auto_sync_time.text = getString(R.string.off_text)
-                    if (sharedPrefs.contains(PREF_SCHEDULE_TIME))
-                        sharedPrefs.edit().remove(PREF_SCHEDULE_TIME).apply()
-                }
-            } else {
-                if (buttonView.isPressed) {
-                    if (getLoginStatus(sharedPrefs) == -1) {
-                        Toast.makeText(activity, "Please login first", Toast.LENGTH_SHORT).show()
-                        rootView.auto_sync_toggle.isChecked = false
-                    } else {
-                        val c = Calendar.getInstance()
-                        val timePicker = TimePickerDialog(context, { _, hourOfDay, minute ->
-                            c.set(
-                                c.get(Calendar.YEAR),
-                                c.get(Calendar.MONTH),
-                                c.get(Calendar.DATE),
-                                hourOfDay,
-                                minute,
-                                0
-                            )
-                            val sdf = SimpleDateFormat("h:mm a", Locale.ENGLISH)
-                            rootView.auto_sync_time.text = sdf.format(c.timeInMillis)
-                            WorkSchedulerHelper().setAutoSync(AUTO_SYNC_WORK_ID, c.timeInMillis)
-                            sharedPrefs.edit().putLong(PREF_SCHEDULE_TIME, c.timeInMillis).apply()
-                        }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false)
-                        timePicker.setOnCancelListener {
-                            rootView.auto_sync_toggle.isChecked = false
-                        }
-                        timePicker.show()
-                    }
-                }
-            }
-        }
-
-        if (sharedPrefs.contains(PREF_SCHEDULE_TIME)) {
-            rootView.auto_sync_toggle.isChecked = true
-            val syncTime = sharedPrefs.getLong(PREF_SCHEDULE_TIME, 0L)
-            val sdf = SimpleDateFormat("h:mm a", Locale.ENGLISH)
-            rootView.auto_sync_time.text = sdf.format(syncTime)
-        } else {
-            rootView.auto_sync_toggle.isChecked = false
-            rootView.auto_sync_time.text = getString(R.string.off_text)
         }
 
         rootView.night_mode_button.setOnClickListener {
@@ -136,7 +85,7 @@ class SettingsFragment : Fragment() {
             openLink("https://github.com/KumarManas04/NotesSync")
         }
 
-        val loginStatus = getLoginStatus(sharedPrefs)
+        val loginStatus = getLoginStatus(prefs)
         if (loginStatus != -1) {
             if (loginStatus == CLOUD_DROPBOX) {
                 rootView.logout_text.text = getString(R.string.dropbox_logout_text)
@@ -145,7 +94,7 @@ class SettingsFragment : Fragment() {
                         .setTitle("Logout")
                         .setMessage("Are you sure you want to logout from your Dropbox account?")
                         .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
-                            val editor = sharedPrefs.edit()
+                            val editor = prefs.edit()
                             editor.putString(PREF_ACCESS_TOKEN, null)
                             editor.remove(PREF_CLOUD_TYPE)
                             editor.commit()
@@ -171,6 +120,7 @@ class SettingsFragment : Fragment() {
                 }
             }
 
+            configureAutoSync(rootView, prefs)
             configureChangePassButton(rootView)
         } else {
             resetLoginButton(rootView)
@@ -201,14 +151,32 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    private fun configureAutoSync(rootView: View, prefs: SharedPreferences){
+        if (prefs.contains(PREF_IS_AUTO_SYNC_ENABLED))
+            rootView.auto_sync_toggle.isChecked = prefs.getBoolean(PREF_IS_AUTO_SYNC_ENABLED, false)
+
+        rootView.auto_sync_toggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                WorkSchedulerHelper().setAutoSync()
+                prefs.edit().putBoolean(PREF_IS_AUTO_SYNC_ENABLED, true).commit()
+            } else {
+                WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
+                prefs.edit().putBoolean(PREF_IS_AUTO_SYNC_ENABLED, false).commit()
+            }
+        }
+
+        rootView.auto_sync_button.setOnClickListener {
+            rootView.auto_sync_toggle.toggle()
+        }
+    }
+
     private fun resetLoginButton(rootView: View) {
         rootView.logout_title.text = getString(R.string.login)
         rootView.logout_text.text = getString(R.string.login_pref_summary)
         rootView.logout_icon.setImageResource(R.drawable.lock_pref_icon)
         WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
-        val sharedPrefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        sharedPrefs?.edit()?.remove(PREF_SCHEDULE_TIME)?.commit()
-        rootView.auto_sync_time.text = getString(R.string.off_text)
+        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        prefs?.edit()?.putBoolean(PREF_IS_AUTO_SYNC_ENABLED, false)?.commit()
         rootView.auto_sync_toggle.isChecked = false
         rootView.logout_button.setOnClickListener {
             Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_cloudPickerFragment)
@@ -218,6 +186,18 @@ class SettingsFragment : Fragment() {
         rootView.change_pass_text.text = "Set a sync password to encrypt your data in the cloud. This is to improve privacy."
         rootView.change_pass_button.setOnClickListener {
             Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
+        }
+
+        rootView.auto_sync_button.setOnClickListener {
+            Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
+        }
+        rootView.auto_sync_toggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                rootView.auto_sync_toggle.isChecked = false
+                Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
+            }
         }
     }
 

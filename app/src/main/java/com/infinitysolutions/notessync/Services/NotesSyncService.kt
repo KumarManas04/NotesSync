@@ -30,6 +30,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_LAST_SYNCED_TIME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Fragments.NotesWidget
 import com.infinitysolutions.notessync.Model.Note
@@ -42,6 +43,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
+import kotlin.collections.ArrayList
 
 class NotesSyncService : Service() {
     private val TAG = "NotesSyncService"
@@ -148,6 +151,9 @@ class NotesSyncService : Service() {
 
                 compareAndSync(filesList)
                 withContext(Dispatchers.Main) {
+                    val cal = Calendar.getInstance()
+                    val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+                    prefs.edit().putLong(PREF_LAST_SYNCED_TIME, cal.timeInMillis).apply()
                     Toast.makeText(this@NotesSyncService, "Sync successful", Toast.LENGTH_SHORT).show()
                     updateWidgets()
                     stopSelf()
