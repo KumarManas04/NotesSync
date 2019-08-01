@@ -3,14 +3,23 @@ package com.infinitysolutions.notessync.ViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ENCRYPTED_CHECK_ERROR
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ENCRYPTED_NO
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ENCRYPTED_YES
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_CHANGE_NETWORK_ERROR
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_CHANGE_OLD_INVALID
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_CHANGE_SUCCESS
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_VERIFY_CORRECT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_VERIFY_ERROR
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_VERIFY_INVALID
 import com.infinitysolutions.notessync.Model.NoteFile
 import com.infinitysolutions.notessync.Util.AES256Helper
 import com.infinitysolutions.notessync.Util.DropboxHelper
 import com.infinitysolutions.notessync.Util.GoogleDriveHelper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.security.SecureRandom
@@ -19,45 +28,115 @@ import javax.crypto.AEADBadTagException
 class LoginViewModel : ViewModel() {
 
     private val encryptionCheckLoading = MutableLiveData<Boolean>()
-    private val encryptionCheckResult = MutableLiveData<Boolean>()
-    private val verifyPasswordLoading = MutableLiveData<Boolean>()
+    private val encryptionCheckResult = MutableLiveData<Int>()
+    private val loadingMessage = MutableLiveData<String>()
     private val verifyPasswordResult = MutableLiveData<Int>()
-    private val secureDataLoading = MutableLiveData<Boolean>()
     private val secureDataResult = MutableLiveData<Boolean>()
+    private val changePasswordResult = MutableLiveData<Int>()
+    var isLoginInitialized = false
+    var encryptionDetected = false
+    var isLoginSuccess = false
     lateinit var googleDriveHelper: GoogleDriveHelper
     lateinit var dropboxHelper: DropboxHelper
+    private val TAG = "LoginViewModel"
 
     fun getEncryptionCheckLoading(): LiveData<Boolean> {
         return encryptionCheckLoading
     }
 
-    fun getEncryptionCheckResult(): LiveData<Boolean> {
+    fun getEncryptionCheckResult(): LiveData<Int> {
         return encryptionCheckResult
-    }
-
-    fun getVerifyPasswordLoading(): LiveData<Boolean> {
-        return verifyPasswordLoading
     }
 
     fun getVerifyPasswordResult(): LiveData<Int> {
         return verifyPasswordResult
     }
 
-    fun getSecureDataLoading(): LiveData<Boolean> {
-        return secureDataLoading
-    }
-
     fun getSecureDataResult(): LiveData<Boolean> {
         return secureDataResult
     }
 
+    fun getLoadingMessage(): LiveData<String> {
+        return loadingMessage
+    }
+
+    fun getChangePasswordResult(): LiveData<Int> {
+        return changePasswordResult
+    }
+
+    fun changePassword(userId: String, cloudType: Int, oldPassword: String, newPassword: String) {
+        loadingMessage.value = "Updating password..."
+        viewModelScope.launch(Dispatchers.IO) {
+            val aesHelper = AES256Helper()
+            aesHelper.generateKey(oldPassword, userId)
+            try {
+                val key = getPresentCredential(aesHelper, cloudType)
+                if (key != null) {
+                    aesHelper.generateKey(newPassword, userId)
+                    val encryptedKey = aesHelper.encrypt(key)
+                    val result = uploadKey(encryptedKey, cloudType)
+                    withContext(Dispatchers.Main) {
+                        loadingMessage.value = null
+                        changePasswordResult.value = if (result) PASSWORD_CHANGE_SUCCESS else PASSWORD_CHANGE_NETWORK_ERROR
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        loadingMessage.value = null
+                        changePasswordResult.value = PASSWORD_CHANGE_OLD_INVALID
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main){
+                    loadingMessage.value = null
+                    changePasswordResult.value = PASSWORD_CHANGE_NETWORK_ERROR
+                }
+            }
+        }
+    }
+
+    private fun getPresentCredential(aesHelper: AES256Helper, cloudType: Int): String? {
+        var content: String? = if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
+            val credentialFileId = googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT)
+            if (credentialFileId != null)
+                googleDriveHelper.getFileContent(credentialFileId)
+            else
+                null
+        } else {
+            if (dropboxHelper.checkIfFileExists(Contract.CREDENTIALS_FILENAME))
+                dropboxHelper.getFileContent(Contract.CREDENTIALS_FILENAME)
+            else
+                null
+        }
+
+        try {
+            if (content != null) {
+                content = aesHelper.decrypt(content)
+            }
+        } catch (e: AEADBadTagException) {
+            return null
+        }
+        return content
+    }
+
     fun checkCloudEncryption(cloudType: Int) {
         encryptionCheckLoading.value = true
-        GlobalScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
+                        try {
             val encryptionFound = checkForEncryption(cloudType)
             withContext(Dispatchers.Main) {
                 encryptionCheckLoading.value = false
-                encryptionCheckResult.value = encryptionFound
+                if (encryptionFound)
+                    encryptionCheckResult.value = ENCRYPTED_YES
+                else
+                    encryptionCheckResult.value = ENCRYPTED_NO
+                encryptionDetected = encryptionFound
+            }
+            }catch (e: Exception){
+                withContext(Dispatchers.Main) {
+                    encryptionCheckLoading.value = false
+                    encryptionCheckResult.value = ENCRYPTED_CHECK_ERROR
+                    encryptionDetected = false
+                }
             }
         }
     }
@@ -80,18 +159,18 @@ class LoginViewModel : ViewModel() {
     }
 
     fun runVerification(userId: String, cloudType: Int, password: String) {
-        verifyPasswordLoading.value = true
-        GlobalScope.launch(Dispatchers.IO) {
+        loadingMessage.value = "Verifying password..."
+        viewModelScope.launch(Dispatchers.IO) {
             val result = verifyPassword(password, userId, cloudType)
             withContext(Dispatchers.Main) {
-                verifyPasswordLoading.value = false
+                loadingMessage.value = null
                 if (result != null) {
                     if (result)
-                        verifyPasswordResult.value = 1
+                        verifyPasswordResult.value = PASSWORD_VERIFY_CORRECT
                     else
-                        verifyPasswordResult.value = 0
+                        verifyPasswordResult.value = PASSWORD_VERIFY_INVALID
                 } else {
-                    verifyPasswordResult.value = 2
+                    verifyPasswordResult.value = PASSWORD_VERIFY_ERROR
                 }
             }
         }
@@ -112,34 +191,34 @@ class LoginViewModel : ViewModel() {
                     } catch (e: AEADBadTagException) {
                         false
                     }
-                }else{
+                } else {
                     null
                 }
-            }else{
+            } else {
                 null
             }
         } else {
-            return if (dropboxHelper.checkIfFileExists(Contract.CREDENTIALS_FILENAME)){
+            return if (dropboxHelper.checkIfFileExists(Contract.CREDENTIALS_FILENAME)) {
                 val content = dropboxHelper.getFileContent(Contract.CREDENTIALS_FILENAME)
-                if (content != null){
-                    try{
+                if (content != null) {
+                    try {
                         aesHelper.decrypt(content)
                         true
-                    }catch(e: AEADBadTagException){
+                    } catch (e: AEADBadTagException) {
                         false
                     }
-                }else{
+                } else {
                     null
                 }
-            }else{
+            } else {
                 null
             }
         }
     }
 
-    fun secureCloudData(userId: String, cloudType: Int, password: String){
-        secureDataLoading.value = true
-        GlobalScope.launch(Dispatchers.IO) {
+    fun secureCloudData(userId: String, cloudType: Int, password: String) {
+        loadingMessage.value = "Securing your data..."
+        viewModelScope.launch(Dispatchers.IO) {
             val secureRandom = SecureRandom()
             val key = ByteArray(32)
             secureRandom.nextBytes(key)
@@ -152,14 +231,14 @@ class LoginViewModel : ViewModel() {
             aesHelper.generateKey(password, userId)
             val encryptedKey = aesHelper.encrypt(key.toString())
             val result = uploadKey(encryptedKey, cloudType)
-            withContext(Dispatchers.Main){
-                secureDataLoading.value = false
+            withContext(Dispatchers.Main) {
+                loadingMessage.value = null
                 secureDataResult.value = result && encryptionResult
             }
         }
     }
 
-    private fun encryptAllCloudData(cloudType: Int, userId: String, password: String): Boolean{
+    private fun encryptAllCloudData(cloudType: Int, userId: String, password: String): Boolean {
         return try {
             val aesHelper = AES256Helper()
             aesHelper.generateKey(password, userId)
@@ -170,12 +249,12 @@ class LoginViewModel : ViewModel() {
             }
             uploadFiles(filesList, aesHelper, cloudType)
             true
-        }catch (e: java.lang.Exception){
+        } catch (e: java.lang.Exception) {
             false
         }
     }
 
-    private fun uploadKey(encryptedKey: String, cloudType: Int): Boolean{
+    private fun uploadKey(encryptedKey: String, cloudType: Int): Boolean {
         return try {
             if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
                 val credentialFileId = googleDriveHelper.searchFile(
@@ -185,26 +264,31 @@ class LoginViewModel : ViewModel() {
                 if (credentialFileId != null) {
                     googleDriveHelper.updateFile(credentialFileId, encryptedKey)
                 } else {
-                    googleDriveHelper.createFile(googleDriveHelper.appFolderId, Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT, encryptedKey)
+                    googleDriveHelper.createFile(
+                        googleDriveHelper.appFolderId,
+                        Contract.CREDENTIALS_FILENAME,
+                        Contract.FILE_TYPE_TEXT,
+                        encryptedKey
+                    )
                 }
             } else {
                 dropboxHelper.writeFile(Contract.CREDENTIALS_FILENAME, encryptedKey)
             }
             true
-        }catch (e: Exception){
+        } catch (e: Exception) {
             false
         }
     }
 
-    private fun uploadFiles(filesList: List<NoteFile>, aesHelper: AES256Helper, cloudType: Int){
+    private fun uploadFiles(filesList: List<NoteFile>, aesHelper: AES256Helper, cloudType: Int) {
         var fileContent: String
-        var fileContentEncrypted : String
-        for (file in filesList){
-            if (cloudType == Contract.CLOUD_GOOGLE_DRIVE){
+        var fileContentEncrypted: String
+        for (file in filesList) {
+            if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
                 fileContent = googleDriveHelper.getFileContent(file.gDriveId) as String
                 fileContentEncrypted = aesHelper.encrypt(fileContent)
                 googleDriveHelper.updateFile(file.gDriveId!!, fileContentEncrypted)
-            }else{
+            } else {
                 fileContent = dropboxHelper.getFileContent("${file.nId}.txt") as String
                 fileContentEncrypted = aesHelper.encrypt(fileContent)
                 dropboxHelper.writeFile("${file.nId}.txt", fileContentEncrypted)
@@ -213,9 +297,9 @@ class LoginViewModel : ViewModel() {
 
         val fileSystemJson = Gson().toJson(filesList)
         val fileSystemJsonEncrypted = aesHelper.encrypt(fileSystemJson)
-        if (cloudType == Contract.CLOUD_GOOGLE_DRIVE){
+        if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
             googleDriveHelper.updateFile(googleDriveHelper.fileSystemId, fileSystemJsonEncrypted)
-        }else{
+        } else {
             dropboxHelper.writeFile(Contract.FILE_SYSTEM_FILENAME, fileSystemJsonEncrypted)
         }
     }
@@ -237,12 +321,14 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun resetViewModel(){
+    fun resetViewModel() {
         encryptionCheckLoading.value = null
         encryptionCheckResult.value = null
-        verifyPasswordLoading.value = null
         verifyPasswordResult.value = null
-        secureDataLoading.value = null
+        loadingMessage.value = null
         secureDataResult.value = null
+        isLoginInitialized = false
+        encryptionDetected = false
+        isLoginSuccess = false
     }
 }

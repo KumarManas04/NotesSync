@@ -83,6 +83,31 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/change_pass_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:id="@+id/change_pass_icon"
+                        android:src="@drawable/password_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:id="@+id/change_pass_title"
+                            android:text="Change password"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:id="@+id/change_pass_text"
+                            android:text="Change the password used to encrypt your data in the cloud."
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
                     android:id="@+id/auto_sync_button"
                     style="@style/prefsContainer">
 

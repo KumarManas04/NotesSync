@@ -33,6 +33,7 @@
                 app:destination="@id/cloudPickerFragment" app:enterAnim="@anim/fade_in"
                 app:popExitAnim="@anim/fade_out"/>
         <action android:id="@+id/action_settingsFragment_to_resourcesFragment" app:destination="@id/resourcesFragment"/>
+        <action android:id="@+id/action_settingsFragment_to_passwordFragment" app:destination="@id/passwordFragment"/>
     </fragment>
     <fragment android:id="@+id/aboutFragment" android:name="com.infinitysolutions.notessync.Fragments.AboutFragment"
               android:label="fragment_about" tools:layout="@layout/fragment_about"/>

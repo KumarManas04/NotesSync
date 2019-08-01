@@ -15,15 +15,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_CHANGE_PASSWORD
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_NEW_PASSWORD
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_MODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SCHEDULE_TIME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
@@ -164,8 +170,34 @@ class SettingsFragment : Fragment() {
                         .show()
                 }
             }
+
+            configureChangePassButton(rootView)
         } else {
             resetLoginButton(rootView)
+        }
+    }
+
+    private fun configureChangePassButton(rootView: View){
+        //This will only be reached when user is logged in
+        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        if (prefs != null){
+            val passwordMode = if (prefs.contains(PREF_ENCRYPTED) && prefs.getBoolean(PREF_ENCRYPTED, false)){
+                rootView.change_pass_title.text = "Change Password"
+                rootView.change_pass_text.text = "Change the password used to encrypt your data in the cloud."
+                MODE_CHANGE_PASSWORD
+            }else{
+                rootView.change_pass_title.text = "Enable encrypted sync"
+                rootView.change_pass_text.text = "Set a sync password to encrypt your data in the cloud. This is to improve privacy."
+                MODE_NEW_PASSWORD
+            }
+
+            rootView.change_pass_button.setOnClickListener {
+                val bundle = Bundle()
+                bundle.putInt(PREF_CLOUD_TYPE, prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE))
+                bundle.putString(Contract.PREF_ID, prefs.getString(Contract.PREF_ID, null))
+                bundle.putInt(PASSWORD_MODE, passwordMode)
+                Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_passwordFragment, bundle)
+            }
         }
     }
 
@@ -180,6 +212,12 @@ class SettingsFragment : Fragment() {
         rootView.auto_sync_toggle.isChecked = false
         rootView.logout_button.setOnClickListener {
             Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_cloudPickerFragment)
+        }
+
+        rootView.change_pass_title.text = "Enable encrypted sync"
+        rootView.change_pass_text.text = "Set a sync password to encrypt your data in the cloud. This is to improve privacy."
+        rootView.change_pass_button.setOnClickListener {
+            Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
         }
     }
 

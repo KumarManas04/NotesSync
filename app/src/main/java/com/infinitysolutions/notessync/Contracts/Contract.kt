@@ -27,5 +27,18 @@ class Contract{
         const val WIDGET_BUTTON_EXTRA = "widgetButtonPressed"
         const val WIDGET_NEW_NOTE = "newNoteButtonPressed"
         const val WIDGET_NEW_LIST = "newListButtonPressed"
+        const val PASSWORD_MODE = "changePasswordMode"
+        const val MODE_CHANGE_PASSWORD = 0
+        const val MODE_NEW_PASSWORD = 1
+        const val MODE_LOGIN_TIME_PASSWORD = 2
+        const val PASSWORD_CHANGE_OLD_INVALID = 0
+        const val PASSWORD_CHANGE_SUCCESS = 1
+        const val PASSWORD_CHANGE_NETWORK_ERROR = 2
+        const val PASSWORD_VERIFY_INVALID = 0
+        const val PASSWORD_VERIFY_CORRECT = 1
+        const val PASSWORD_VERIFY_ERROR = 2
+        const val ENCRYPTED_NO = 0
+        const val ENCRYPTED_YES = 1
+        const val ENCRYPTED_CHECK_ERROR = 2
     }
 }

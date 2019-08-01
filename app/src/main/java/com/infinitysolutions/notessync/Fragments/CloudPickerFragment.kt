@@ -19,6 +19,8 @@ import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_LOGIN_TIME_PASSWORD
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_MODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
@@ -113,6 +115,7 @@ class CloudPickerFragment : Fragment() {
         val bundle = Bundle()
         bundle.putString(PREF_ID, id)
         bundle.putInt(PREF_CLOUD_TYPE, cloudType)
+        bundle.putInt(PASSWORD_MODE, MODE_LOGIN_TIME_PASSWORD)
         Navigation.findNavController(rootView).navigate(R.id.action_cloudPickerFragment_to_passwordFragment, bundle)
     }
 }
