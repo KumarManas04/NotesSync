@@ -1,9 +1,7 @@
 package com.infinitysolutions.notessync.Util
 
-import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
 import com.infinitysolutions.notessync.Workers.AutoSyncWorker
 import com.infinitysolutions.notessync.Workers.ReminderWorker
 import java.util.*
@@ -27,13 +25,12 @@ class WorkSchedulerHelper {
         }
     }
 
-    fun setAutoSync(workId: String, syncTime: Long){
-        val delay = syncTime - Calendar.getInstance().timeInMillis
-        val syncBuilder = OneTimeWorkRequestBuilder<AutoSyncWorker>()
-            .addTag(workId)
-            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+    fun setAutoSync(){
+        val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+        val syncRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(1, TimeUnit.HOURS)
+            .setConstraints(constraints)
             .build()
-        WorkManager.getInstance().enqueueUniqueWork(workId, ExistingWorkPolicy.REPLACE, syncBuilder)
+        WorkManager.getInstance().enqueueUniquePeriodicWork(AUTO_SYNC_WORK_ID, ExistingPeriodicWorkPolicy.REPLACE, syncRequest)
     }
 
     fun cancelReminderByNoteId(noteId: Long?) {

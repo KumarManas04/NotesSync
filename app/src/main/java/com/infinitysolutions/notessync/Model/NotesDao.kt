@@ -38,4 +38,7 @@ interface NotesDao {
 
     @Query("DELETE FROM notes_table WHERE note_id = :noteId")
     suspend fun deleteNoteById(noteId: Long)
+
+    @Query("SELECT date_modified FROM notes_table ORDER BY date_modified DESC LIMIT 1")
+    fun getLastModifiedTime(): Long
 }
