@@ -152,12 +152,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun syncFiles(noteType: Int){
+    private fun syncFiles(driveType: Int){
         if (!isServiceRunning("com.infinitysolutions.notessync.Services.NotesSyncService")){
             Log.d(TAG, "Service not running. Starting it...")
             Toast.makeText(this, "Syncing...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, NotesSyncService::class.java)
-            intent.putExtra(DRIVE_EXTRA, noteType)
+            intent.putExtra(DRIVE_EXTRA, driveType)
             startService(intent)
         }else{
             Toast.makeText(this, "Already syncing. Please wait...", Toast.LENGTH_SHORT).show()

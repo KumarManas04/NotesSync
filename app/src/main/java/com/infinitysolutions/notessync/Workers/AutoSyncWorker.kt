@@ -8,8 +8,12 @@ import android.content.Intent
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.DRIVE_EXTRA
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SCHEDULE_TIME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Services.NotesSyncService
@@ -23,7 +27,7 @@ class AutoSyncWorker(private val context: Context, params: WorkerParameters) : W
         if (loginStatus != -1) {
             if (!isServiceRunning("com.infinitysolutions.notessync.Services.NotesSyncService")) {
                 val intent = Intent(context, NotesSyncService::class.java)
-                intent.putExtra("Drive", loginStatus)
+                intent.putExtra(DRIVE_EXTRA, loginStatus)
                 context.startService(intent)
             }
         }
@@ -63,17 +67,13 @@ class AutoSyncWorker(private val context: Context, params: WorkerParameters) : W
 
     private fun getLoginStatus(): Int {
         val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (prefs != null && prefs.contains(Contract.PREF_CLOUD_TYPE)) {
-            if (prefs.getInt(Contract.PREF_CLOUD_TYPE, Contract.CLOUD_GOOGLE_DRIVE) == Contract.CLOUD_DROPBOX) {
-                if (prefs.contains(Contract.PREF_ACCESS_TOKEN) && prefs.getString(
-                        Contract.PREF_ACCESS_TOKEN,
-                        null
-                    ) != null
-                )
-                    return Contract.CLOUD_DROPBOX
+        if (prefs != null && prefs.contains(PREF_CLOUD_TYPE)) {
+            if (prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE) == CLOUD_DROPBOX) {
+                if (prefs.contains(PREF_ACCESS_TOKEN) && prefs.getString(PREF_ACCESS_TOKEN, null) != null)
+                    return CLOUD_DROPBOX
             } else {
                 if (GoogleSignIn.getLastSignedInAccount(context) != null)
-                    return Contract.CLOUD_GOOGLE_DRIVE
+                    return CLOUD_GOOGLE_DRIVE
             }
         }
         return -1
