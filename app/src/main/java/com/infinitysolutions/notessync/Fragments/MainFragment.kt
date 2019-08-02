@@ -113,12 +113,14 @@ class MainFragment : Fragment() {
         })
 
         mainViewModel.getShouldOpenEditor().observe(this, Observer {should ->
-            if(should){
-                // If we don't put the navigation statement in try-catch block then app crashes due to unable to
-                // find navController. This is an issue in the Navigation components in Jetpack
-                try {
-                    Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_noteEditFragment)
-                }catch (e: Exception){
+            if (should != null) {
+                if (should) {
+                    // If we don't put the navigation statement in try-catch block then app crashes due to unable to
+                    // find navController. This is an issue in the Navigation components in Jetpack
+                    try {
+                        Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_noteEditFragment)
+                    } catch (e: Exception) {
+                    }
                 }
             }
         })

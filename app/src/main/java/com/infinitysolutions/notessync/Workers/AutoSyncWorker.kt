@@ -11,9 +11,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.DRIVE_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_INDICATOR_EXTRA
 import com.infinitysolutions.notessync.Model.NotesRoomDatabase
 import com.infinitysolutions.notessync.Services.NotesSyncService
 
@@ -30,7 +32,8 @@ class AutoSyncWorker(private val context: Context, params: WorkerParameters) : W
             if (loginStatus != -1) {
                 if (!isServiceRunning("com.infinitysolutions.notessync.Services.NotesSyncService")) {
                     val intent = Intent(context, NotesSyncService::class.java)
-                    intent.putExtra(Contract.DRIVE_EXTRA, loginStatus)
+                    intent.putExtra(DRIVE_EXTRA, loginStatus)
+                    intent.putExtra(SYNC_INDICATOR_EXTRA, false)
                     context.startService(intent)
                 }
             }else{

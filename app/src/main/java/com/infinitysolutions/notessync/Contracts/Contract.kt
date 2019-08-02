@@ -10,6 +10,7 @@ class Contract{
         const val FILE_TYPE_FOLDER = "application/vnd.google-apps.folder"
         const val FILE_TYPE_TEXT = "text/plain"
         const val DRIVE_EXTRA = "DriveExtra"
+        const val SYNC_INDICATOR_EXTRA = "syncIndicatorExtra"
         const val NOTE_ID_EXTRA = "noteIdExtra"
         const val CLOUD_GOOGLE_DRIVE = 0
         const val CLOUD_DROPBOX = 1

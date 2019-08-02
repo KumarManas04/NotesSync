@@ -37,7 +37,7 @@
     <string name="logout">Logout</string>
     <string name="logout_prefs_summary">Logout from your cloud storage account</string>
     <string name="auto_sync">Auto sync</string>
-    <string name="auto_sync_pref_summary">Auto sync your notes everyday to your preferred cloud storage</string>
+    <string name="auto_sync_pref_summary">Automatically sync your notes to your preferred cloud storage</string>
     <string name="off_text">Off</string>
     <string name="other">Other</string>
     <string name="about">About</string>

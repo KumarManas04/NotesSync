@@ -32,6 +32,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_LAST_SYNCED_TIME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_INDICATOR_EXTRA
 import com.infinitysolutions.notessync.Fragments.NotesWidget
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Model.NoteContent
@@ -52,6 +53,7 @@ class NotesSyncService : Service() {
     private lateinit var googleDriveHelper: GoogleDriveHelper
     private lateinit var dropboxHelper: DropboxHelper
     private var mDriveType: Int = CLOUD_GOOGLE_DRIVE
+    private var shouldIndicateSync = true
     private val aesHelper = AES256Helper()
     private var isEncrypted = false
 
@@ -60,9 +62,10 @@ class NotesSyncService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val driveType = intent?.getIntExtra(DRIVE_EXTRA, CLOUD_GOOGLE_DRIVE)
-        if (driveType != null)
-            mDriveType = driveType
+        if (intent != null) {
+            mDriveType = intent.getIntExtra(DRIVE_EXTRA, CLOUD_GOOGLE_DRIVE)
+            shouldIndicateSync = intent.getBooleanExtra(SYNC_INDICATOR_EXTRA, true)
+        }
         startForegroundService()
         return START_NOT_STICKY
     }
@@ -83,7 +86,8 @@ class NotesSyncService : Service() {
                 try {
                     getCloudData()
                 } catch (e: Exception) {
-                    Toast.makeText(this@NotesSyncService, "Sync error", Toast.LENGTH_SHORT).show()
+                    if (shouldIndicateSync)
+                        Toast.makeText(this@NotesSyncService, "Sync error", Toast.LENGTH_SHORT).show()
                     Log.d(TAG, "Error message = ${e.message}")
                     stopSelf()
                 }
@@ -154,14 +158,16 @@ class NotesSyncService : Service() {
                     val cal = Calendar.getInstance()
                     val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
                     prefs.edit().putLong(PREF_LAST_SYNCED_TIME, cal.timeInMillis).apply()
-                    Toast.makeText(this@NotesSyncService, "Sync successful", Toast.LENGTH_SHORT).show()
+                    if (shouldIndicateSync)
+                        Toast.makeText(this@NotesSyncService, "Sync successful", Toast.LENGTH_SHORT).show()
                     updateWidgets()
                     stopSelf()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@NotesSyncService, "Sync error", Toast.LENGTH_SHORT).show()
+                    if (shouldIndicateSync)
+                        Toast.makeText(this@NotesSyncService, "Sync error", Toast.LENGTH_SHORT).show()
                     stopSelf()
                 }
             }

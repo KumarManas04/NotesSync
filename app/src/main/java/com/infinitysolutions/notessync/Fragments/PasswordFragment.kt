@@ -130,6 +130,7 @@ class PasswordFragment : Fragment() {
                 rootView.loading_panel.visibility = VISIBLE
                 rootView.input_bar.visibility = GONE
                 rootView.loading_message.text = loadingMessage
+                rootView.skip_button.visibility = GONE
             } else {
                 rootView.loading_panel.visibility = GONE
                 rootView.input_bar.visibility = VISIBLE

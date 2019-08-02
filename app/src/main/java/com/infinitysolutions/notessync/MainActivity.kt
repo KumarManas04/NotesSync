@@ -20,6 +20,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ID_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_INDICATOR_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_BUTTON_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_LIST
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_NOTE
@@ -158,6 +159,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Syncing...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, NotesSyncService::class.java)
             intent.putExtra(DRIVE_EXTRA, driveType)
+            intent.putExtra(SYNC_INDICATOR_EXTRA, true)
             startService(intent)
         }else{
             Toast.makeText(this, "Already syncing. Please wait...", Toast.LENGTH_SHORT).show()

@@ -91,14 +91,14 @@ class NoteEditFragment : Fragment() {
 
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.delete_menu_item ->{
+                R.id.delete_menu_item -> {
                     deleteNote()
                 }
             }
             true
         }
 
-        if (arguments != null){
+        if (arguments != null) {
             val noteId = arguments?.getLong("NOTE_ID")
             if (noteId != null) {
                 GlobalScope.launch(Dispatchers.IO) {
@@ -109,7 +109,7 @@ class NoteEditFragment : Fragment() {
                     }
                 }
             }
-        }else{
+        } else {
             if (mainViewModel.getShouldOpenEditor().value != null) {
                 if (mainViewModel.getShouldOpenEditor().value!!) {
                     mainViewModel.setShouldOpenEditor(false)
@@ -164,7 +164,7 @@ class NoteEditFragment : Fragment() {
                 dialogView.archive_button_text.text = "Unarchive note"
             }
 
-            if (mainViewModel.reminderTime != -1L){
+            if (mainViewModel.reminderTime != -1L) {
                 dialogView.cancel_reminder_button.visibility = View.VISIBLE
                 val formatter = SimpleDateFormat("h:mm a MMM d, YYYY", Locale.ENGLISH)
                 dialogView.reminder_text.text = "Reminder set:\n${formatter.format(mainViewModel.reminderTime)}"
@@ -173,7 +173,7 @@ class NoteEditFragment : Fragment() {
                     AlertDialog.Builder(context)
                         .setTitle("Cancel reminder")
                         .setMessage("Are you sure you want to cancel the reminder?")
-                        .setPositiveButton("Yes"){ _: DialogInterface, _: Int ->
+                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
                             WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
                             mainViewModel.reminderTime = -1L
                             dialog.hide()
@@ -182,7 +182,7 @@ class NoteEditFragment : Fragment() {
                         .show()
                 }
                 dialogView.cancel_reminder_button.setColorFilter(Color.parseColor(colorsUtil.getColor(mainViewModel.getSelectedColor().value)))
-            }else{
+            } else {
                 dialogView.cancel_reminder_button.visibility = View.GONE
                 dialogView.reminder_text.text = "Set reminder"
                 val typedValue = TypedValue()
@@ -217,7 +217,7 @@ class NoteEditFragment : Fragment() {
         dialog.show()
     }
 
-    private fun pickReminderTime(noteId: Long?){
+    private fun pickReminderTime(noteId: Long?) {
         if (noteId != null) {
             val c = Calendar.getInstance()
             val cal = Calendar.getInstance()
@@ -234,7 +234,7 @@ class NoteEditFragment : Fragment() {
                 if (cal.timeInMillis > Calendar.getInstance().timeInMillis) {
                     WorkSchedulerHelper().setReminder(noteId, cal.timeInMillis)
                     mainViewModel.reminderTime = cal.timeInMillis
-                }else{
+                } else {
                     Toast.makeText(activity, "Reminder cannot be set before present time", Toast.LENGTH_SHORT).show()
                 }
             }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false)
@@ -251,11 +251,11 @@ class NoteEditFragment : Fragment() {
     private fun archiveNote() {
         val selectedNote = mainViewModel.getSelectedNote()
         if (selectedNote != null && selectedNote.nId != -1L) {
-            val noteType: Int = when(selectedNote.noteType){
-                NOTE_DEFAULT-> NOTE_ARCHIVED
-                LIST_DEFAULT-> LIST_ARCHIVED
-                NOTE_ARCHIVED-> NOTE_DEFAULT
-                LIST_ARCHIVED-> LIST_DEFAULT
+            val noteType: Int = when (selectedNote.noteType) {
+                NOTE_DEFAULT -> NOTE_ARCHIVED
+                LIST_DEFAULT -> LIST_ARCHIVED
+                NOTE_ARCHIVED -> NOTE_DEFAULT
+                LIST_ARCHIVED -> LIST_DEFAULT
                 else -> -1
             }
 
@@ -338,33 +338,32 @@ class NoteEditFragment : Fragment() {
             .setMessage("Are you sure you want to delete this note?")
             .setPositiveButton("Yes") { _, _ ->
                 val selectedNote = mainViewModel.getSelectedNote()
-                if (selectedNote?.nId == -1L){
-                    noteContent.setText("")
-                    noteTitle.setText("")
-                }
-
-                if (selectedNote != null) {
-                    databaseViewModel.insert(
-                        Note(
-                            selectedNote.nId,
-                            selectedNote.noteTitle,
-                            selectedNote.noteContent,
-                            selectedNote.dateCreated,
-                            Calendar.getInstance().timeInMillis,
-                            selectedNote.gDriveId,
-                            NOTE_DELETED,
-                            selectedNote.synced,
-                            mainViewModel.getSelectedColor().value,
-                            -1L
+                if (selectedNote?.nId == -1L) {
+                    mainViewModel.setSelectedNote(null)
+                } else {
+                    if (selectedNote != null) {
+                        databaseViewModel.insert(
+                            Note(
+                                selectedNote.nId,
+                                selectedNote.noteTitle,
+                                selectedNote.noteContent,
+                                selectedNote.dateCreated,
+                                Calendar.getInstance().timeInMillis,
+                                selectedNote.gDriveId,
+                                NOTE_DELETED,
+                                selectedNote.synced,
+                                mainViewModel.getSelectedColor().value,
+                                -1L
+                            )
                         )
-                    )
 
-                    if (selectedNote.reminderTime != -1L){
-                        WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
+                        if (selectedNote.reminderTime != -1L) {
+                            WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
+                        }
+                        updateWidgets()
                     }
-                    updateWidgets()
                 }
-                activity!!.onBackPressed()
+                activity?.onBackPressed()
             }
             .setNegativeButton("No", null)
             .show()
