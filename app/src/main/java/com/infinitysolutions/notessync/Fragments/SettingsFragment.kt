@@ -20,6 +20,7 @@ import androidx.navigation.Navigation
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.infinitysolutions.notessync.Contracts.Contract
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
@@ -27,11 +28,14 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_CHANGE_
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_NEW_PASSWORD
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_MODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_APP_LOCK_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_IS_AUTO_SYNC_ENABLED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.STATE_CHANGE_PIN
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.STATE_NEW_PIN
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import kotlinx.android.synthetic.main.fragment_settings.view.*
@@ -72,6 +76,8 @@ class SettingsFragment : Fragment() {
         rootView.night_mode_button.setOnClickListener {
             nightModeToggle.toggle()
         }
+
+        configureAppLockButtons(rootView, prefs)
 
         rootView.about_button.setOnClickListener {
             Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_aboutFragment)
@@ -127,6 +133,40 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    private fun configureAppLockButtons(rootView: View, prefs: SharedPreferences){
+        if (prefs.contains(PREF_APP_LOCK_CODE)){
+            rootView.app_lock_toggle.isChecked = true
+            rootView.change_pin_button.setOnClickListener {
+                val bundle = Bundle()
+                bundle.putInt(APP_LOCK_STATE, STATE_CHANGE_PIN)
+                Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_appLockFragment, bundle)
+            }
+        }else{
+            rootView.app_lock_toggle.isChecked = false
+            rootView.change_pin_button.setOnClickListener {
+                Toast.makeText(activity, "Please enable app lock first", LENGTH_SHORT).show()
+            }
+        }
+
+        rootView.app_lock_toggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked){
+                val bundle = Bundle()
+                bundle.putInt(APP_LOCK_STATE, STATE_NEW_PIN)
+                try {
+                    Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_appLockFragment, bundle)
+                }catch (e: Exception){
+                    rootView.app_lock_toggle.isChecked = false
+                }
+            }else{
+                prefs.edit().remove(PREF_APP_LOCK_CODE).commit()
+            }
+        }
+
+        rootView.app_lock_button.setOnClickListener {
+            rootView.app_lock_toggle.toggle()
+        }
+    }
+
     private fun configureChangePassButton(rootView: View){
         //This will only be reached when user is logged in
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
@@ -173,7 +213,7 @@ class SettingsFragment : Fragment() {
     private fun resetLoginButton(rootView: View) {
         rootView.logout_title.text = getString(R.string.login)
         rootView.logout_text.text = getString(R.string.login_pref_summary)
-        rootView.logout_icon.setImageResource(R.drawable.lock_pref_icon)
+        rootView.logout_icon.setImageResource(R.drawable.pref_login_icon)
         WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         prefs?.edit()?.putBoolean(PREF_IS_AUTO_SYNC_ENABLED, false)?.commit()

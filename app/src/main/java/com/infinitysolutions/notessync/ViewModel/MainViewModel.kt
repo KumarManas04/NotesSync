@@ -1,5 +1,6 @@
 package com.infinitysolutions.notessync.ViewModel
 
+import android.content.Intent
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -14,6 +15,7 @@ class MainViewModel: ViewModel(){
     private val syncNotes = MutableLiveData<Event<Int>>()
     private val mToolbar = MutableLiveData<Toolbar>()
     private val viewMode = MutableLiveData<Int>()
+    var intent: Intent? = null
     var reminderTime = -1L
 
     init{

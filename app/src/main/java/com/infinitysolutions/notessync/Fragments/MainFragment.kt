@@ -1,6 +1,7 @@
 package com.infinitysolutions.notessync.Fragments
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
+import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
@@ -124,6 +126,40 @@ class MainFragment : Fragment() {
                 }
             }
         })
+
+        if (mainViewModel.intent == null) {
+            val intent = activity?.intent
+            if (intent != null && (intent.hasExtra(Intent.EXTRA_TEXT) || intent.hasExtra(Contract.WIDGET_BUTTON_EXTRA)
+                        || intent.hasExtra(Contract.NOTE_ID_EXTRA))) {
+                if (intent.flags != Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) {
+                    mainViewModel.intent = intent
+                    var text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                    if (text != null) {
+                        mainViewModel.setSelectedNote(Note(-1L, "", text, 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
+                        mainViewModel.setShouldOpenEditor(true)
+                    }
+
+                    text = intent.getStringExtra(Contract.WIDGET_BUTTON_EXTRA)
+                    if (text != null) {
+                        if (text == Contract.WIDGET_NEW_NOTE) {
+                            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
+                            mainViewModel.setShouldOpenEditor(true)
+                        } else if (text == Contract.WIDGET_NEW_LIST) {
+                            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", LIST_DEFAULT, false, null, -1L))
+                            mainViewModel.setShouldOpenEditor(true)
+                        }
+                    }
+
+                    val noteId = intent.getLongExtra(Contract.NOTE_ID_EXTRA, -1L)
+                    if (noteId != -1L) {
+                        val bundle = Bundle()
+                        bundle.putLong("NOTE_ID", noteId)
+                        Navigation.findNavController(activity!!, R.id.nav_host_fragment)
+                            .navigate(R.id.noteEditFragment, bundle)
+                    }
+                }
+            }
+        }
     }
 
     private fun syncFiles(rootView: View){

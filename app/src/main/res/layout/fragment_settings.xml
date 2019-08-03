@@ -137,6 +137,61 @@
             </LinearLayout>
 
             <TextView
+                    android:text="App lock"
+                    style="@style/prefsCategoryTitle"/>
+
+            <LinearLayout
+                    android:id="@+id/app_lock_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/lock_pref_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="App lock"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="Set a PIN to lock the app."
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+                <Switch
+                        android:id="@+id/app_lock_toggle"
+                        android:layout_margin="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/change_pin_button"
+                    style="@style/prefsContainer">
+
+                <ImageView
+                        android:src="@drawable/password_icon"
+                        style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                            android:text="Change app lock PIN"
+                            style="@style/prefsMain"/>
+
+                    <TextView
+                            android:text="Change the PIN used to lock the app."
+                            style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <TextView
                     android:text="@string/other"
                     style="@style/prefsCategoryTitle"/>
 

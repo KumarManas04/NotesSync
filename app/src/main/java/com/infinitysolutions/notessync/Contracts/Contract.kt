@@ -20,6 +20,7 @@ class Contract{
         const val PREF_ACCESS_TOKEN = "sharedPrefs.accessToken"
         const val PREF_ID = "sharedPrefs.userId"
         const val PREF_CODE = "sharedPrefs.code"
+        const val PREF_APP_LOCK_CODE = "sharedPrefs.appLockCode"
         const val PREF_ENCRYPTED = "sharedPrefs.encryptedStatus"
         const val FILE_SYSTEM_FILENAME = "notes_files_system.txt"
         const val CREDENTIALS_FILENAME = "credentials.txt"
@@ -42,5 +43,8 @@ class Contract{
         const val ENCRYPTED_NO = 0
         const val ENCRYPTED_YES = 1
         const val ENCRYPTED_CHECK_ERROR = 2
+        const val APP_LOCK_STATE = "appLockState"
+        const val STATE_NEW_PIN = 0
+        const val STATE_CHANGE_PIN = 1
     }
 }

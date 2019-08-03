@@ -106,4 +106,25 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:ellipsize">end</item>
     </style>
+
+    <style name="appLockButton">
+        <item name="android:layout_width">80dp</item>
+        <item name="android:layout_height">80dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:layout_marginBottom">20dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">?attr/mainTextColor</item>
+        <item name="android:background">@drawable/pin_btn_background</item>
+    </style>
+
+    <style name="pinIndicator">
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:layout_margin">20dp</item>
+        <item name="android:src">@drawable/circle_stroke</item>
+    </style>
 </resources>
