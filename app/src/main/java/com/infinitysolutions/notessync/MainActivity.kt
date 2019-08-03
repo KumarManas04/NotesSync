@@ -19,6 +19,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_INDICATOR_EXTRA
 import com.infinitysolutions.notessync.Services.NotesSyncService
+import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -28,13 +29,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val sharedPrefs = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-        if(sharedPrefs.contains(PREF_THEME)){
-            if (sharedPrefs.getInt(PREF_THEME, 0) == 1)
+        val prefs = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+        if(prefs.contains(PREF_THEME)){
+            if (prefs.getInt(PREF_THEME, 0) == 1)
                 setTheme(R.style.AppThemeDark)
             else
                 setTheme(R.style.AppTheme)
         }
+
+        WorkSchedulerHelper().setAutoDelete()
         setContentView(R.layout.activity_main)
         initDataBinding()
     }
@@ -96,6 +99,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.archive->{
                     mainViewModel.setViewMode(4)
+                    drawer_layout.closeDrawers()
+                }
+                R.id.trash->{
+                    mainViewModel.setViewMode(5)
                     drawer_layout.closeDrawers()
                 }
                 R.id.settings->{

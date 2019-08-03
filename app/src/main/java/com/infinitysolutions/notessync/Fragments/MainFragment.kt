@@ -99,6 +99,12 @@ class MainFragment : Fragment() {
                         rootView.empty_image.setImageResource(R.drawable.archive_empty)
                         rootView.empty_text.text = "Archived notes appear here"
                     }
+                    5 -> {
+                        toolbar.title = "Trash"
+                        databaseViewModel.setViewMode(5)
+                        rootView.empty_image.setImageResource(R.drawable.trash_empty)
+                        rootView.empty_text.text = "Deleted notes appear here for 30 days"
+                    }
                 }
             }
         })

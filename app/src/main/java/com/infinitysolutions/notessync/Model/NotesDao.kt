@@ -24,6 +24,12 @@ interface NotesDao {
     @Query("SELECT * FROM notes_table WHERE type = 2 OR type = 4 ORDER BY date_modified DESC")
     fun getArchived(): LiveData<List<Note>>
 
+    @Query("SELECT * FROM notes_table WHERE type = 5 OR type = 6 ORDER BY date_modified DESC")
+    fun getTrash(): LiveData<List<Note>>
+
+    @Query("SELECT * FROM notes_table WHERE type = 5 OR type = 6 ORDER BY date_modified DESC")
+    fun getTrashPresent(): List<Note>
+
     @Query("SELECT * FROM notes_table WHERE note_id = :nId LIMIT 1")
     fun getNoteById(nId: Long): Note
 
@@ -35,6 +41,9 @@ interface NotesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: Note)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun simpleInsert(note: Note)
 
     @Query("DELETE FROM notes_table WHERE note_id = :noteId")
     suspend fun deleteNoteById(noteId: Long)

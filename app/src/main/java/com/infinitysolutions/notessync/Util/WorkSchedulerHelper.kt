@@ -1,6 +1,7 @@
 package com.infinitysolutions.notessync.Util
 
 import androidx.work.*
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_DELETE_WORK_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
 import com.infinitysolutions.notessync.Workers.AutoSyncWorker
 import com.infinitysolutions.notessync.Workers.ReminderWorker
@@ -31,6 +32,12 @@ class WorkSchedulerHelper {
             .setConstraints(constraints)
             .build()
         WorkManager.getInstance().enqueueUniquePeriodicWork(AUTO_SYNC_WORK_ID, ExistingPeriodicWorkPolicy.REPLACE, syncRequest)
+    }
+
+    fun setAutoDelete(){
+        val deleteRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(1, TimeUnit.DAYS)
+            .build()
+        WorkManager.getInstance().enqueueUniquePeriodicWork(AUTO_DELETE_WORK_ID, ExistingPeriodicWorkPolicy.REPLACE, deleteRequest)
     }
 
     fun cancelReminderByNoteId(noteId: Long?) {

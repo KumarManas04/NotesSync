@@ -7,6 +7,8 @@ class Contract{
         const val NOTE_ARCHIVED = 2
         const val LIST_DEFAULT = 3
         const val LIST_ARCHIVED = 4
+        const val NOTE_TRASH = 5
+        const val LIST_TRASH = 6
         const val FILE_TYPE_FOLDER = "application/vnd.google-apps.folder"
         const val FILE_TYPE_TEXT = "text/plain"
         const val DRIVE_EXTRA = "DriveExtra"
@@ -25,6 +27,7 @@ class Contract{
         const val FILE_SYSTEM_FILENAME = "notes_files_system.txt"
         const val CREDENTIALS_FILENAME = "credentials.txt"
         const val AUTO_SYNC_WORK_ID = "autoSync"
+        const val AUTO_DELETE_WORK_ID = "autoDelete"
         const val PREF_LAST_SYNCED_TIME = "lastSyncedTime"
         const val PREF_IS_AUTO_SYNC_ENABLED = "isAutoSyncEnabled"
         const val WIDGET_BUTTON_EXTRA = "widgetButtonPressed"

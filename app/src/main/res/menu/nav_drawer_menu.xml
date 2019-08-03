@@ -19,6 +19,11 @@
             android:id="@+id/archive"
             android:icon="@drawable/archive_drawer_item"
             android:title="Archive"/>
+
+        <item
+            android:id="@+id/trash"
+            android:icon="@drawable/delete_menu_icon"
+            android:title="Trash"/>
     </group>
 
     <group android:id="@+id/others">

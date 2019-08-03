@@ -19,10 +19,11 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
     }
     val viewList: LiveData<List<Note>> = Transformations.switchMap(viewMode){mode->
         when (mode) {
-            1 -> repository.allList
-            2 -> repository.notesList
-            3 -> repository.todoList
-            4 -> repository.archiveList
+            1 -> repository.getAllList()
+            2 -> repository.getNotesList()
+            3 -> repository.getTodoList()
+            4 -> repository.getArchiveList()
+            5 -> repository.getTrashList()
             else -> null
         }
     }

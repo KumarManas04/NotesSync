@@ -25,9 +25,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.infinitysolutions.notessync.Adapters.ColorPickerAdapter
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.ColorsUtil
@@ -342,6 +343,11 @@ class NoteEditFragment : Fragment() {
                     mainViewModel.setSelectedNote(null)
                 } else {
                     if (selectedNote != null) {
+                        val noteType = if (selectedNote.noteType == NOTE_DEFAULT || selectedNote.noteType == NOTE_ARCHIVED)
+                            NOTE_TRASH
+                        else
+                            LIST_TRASH
+
                         databaseViewModel.insert(
                             Note(
                                 selectedNote.nId,
@@ -350,7 +356,7 @@ class NoteEditFragment : Fragment() {
                                 selectedNote.dateCreated,
                                 Calendar.getInstance().timeInMillis,
                                 selectedNote.gDriveId,
-                                NOTE_DELETED,
+                                noteType,
                                 selectedNote.synced,
                                 mainViewModel.getSelectedColor().value,
                                 -1L
