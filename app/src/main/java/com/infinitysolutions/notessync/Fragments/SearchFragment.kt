@@ -57,7 +57,7 @@ class SearchFragment : Fragment() {
             if(resultList != null && resultList.isNotEmpty()){
                 searchRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE
-                searchRecyclerView.adapter = NotesAdapter(mainViewModel, resultList, context!!)
+                searchRecyclerView.adapter = NotesAdapter(mainViewModel, databaseViewModel, resultList, context!!)
             }else{
                 searchRecyclerView.visibility = GONE
                 rootView.empty_items.visibility = VISIBLE

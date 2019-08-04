@@ -113,7 +113,7 @@ class MainFragment : Fragment() {
             if (viewList != null && viewList.isNotEmpty()) {
                 notesRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE
-                notesRecyclerView.adapter = NotesAdapter(mainViewModel, viewList, context!!)
+                notesRecyclerView.adapter = NotesAdapter(mainViewModel, databaseViewModel, viewList, context!!)
             }else{
                 notesRecyclerView.visibility = GONE
                 rootView.empty_items.visibility = VISIBLE
