@@ -128,7 +128,7 @@ class NoteEditFragment : Fragment() {
                 noteTitle.setText(selectedNote.noteTitle)
                 mainViewModel.setSelectedColor(selectedNote.noteColor)
                 val formatter = SimpleDateFormat("MMM d, YYYY", Locale.ENGLISH)
-                rootView.last_edited_text.text = "Edited  ${formatter.format(Calendar.getInstance().timeInMillis)}"
+                rootView.last_edited_text.text = getString(R.string.edited_time_stamp, formatter.format(Calendar.getInstance().timeInMillis))
             }
 
             mainViewModel.reminderTime = selectedNote.reminderTime
@@ -159,16 +159,16 @@ class NoteEditFragment : Fragment() {
         if (selectedNote != null) {
             if (selectedNote.noteType == NOTE_DEFAULT || selectedNote.noteType == LIST_DEFAULT) {
                 dialogView.archive_button_icon.setImageResource(R.drawable.archive_drawer_item)
-                dialogView.archive_button_text.text = "Archive note"
+                dialogView.archive_button_text.text = getString(R.string.archive_note)
             } else {
                 dialogView.archive_button_icon.setImageResource(R.drawable.unarchive_menu_item)
-                dialogView.archive_button_text.text = "Unarchive note"
+                dialogView.archive_button_text.text = getString(R.string.unarchive_note)
             }
 
             if (mainViewModel.reminderTime != -1L) {
                 dialogView.cancel_reminder_button.visibility = View.VISIBLE
                 val formatter = SimpleDateFormat("h:mm a MMM d, YYYY", Locale.ENGLISH)
-                dialogView.reminder_text.text = "Reminder set:\n${formatter.format(mainViewModel.reminderTime)}"
+                dialogView.reminder_text.text = getString(R.string.reminder_set, formatter.format(mainViewModel.reminderTime))
                 dialogView.reminder_text.setTextColor(Color.parseColor(colorsUtil.getColor(mainViewModel.getSelectedColor().value)))
                 dialogView.cancel_reminder_button.setOnClickListener {
                     AlertDialog.Builder(context)
@@ -185,7 +185,7 @@ class NoteEditFragment : Fragment() {
                 dialogView.cancel_reminder_button.setColorFilter(Color.parseColor(colorsUtil.getColor(mainViewModel.getSelectedColor().value)))
             } else {
                 dialogView.cancel_reminder_button.visibility = View.GONE
-                dialogView.reminder_text.text = "Set reminder"
+                dialogView.reminder_text.text = getString(R.string.set_reminder)
                 val typedValue = TypedValue()
                 context?.theme?.resolveAttribute(R.attr.mainTextColor, typedValue, true)
                 val textColor = typedValue.data

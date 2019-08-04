@@ -34,10 +34,10 @@ class AppLockFragment : Fragment() {
         val type = arguments?.getInt(APP_LOCK_STATE)
         if (type != null) {
             if (type == STATE_NEW_PIN) {
-                rootView.message_text_view.text = "Enter new PIN"
+                rootView.message_text_view.text = getString(R.string.enter_new_pin)
                 prepareButtons(rootView)
             } else {
-                rootView.message_text_view.text = "Enter old PIN"
+                rootView.message_text_view.text = getString(R.string.enter_old_pin)
                 prepareButtons(rootView)
             }
         } else {
@@ -131,7 +131,7 @@ class AppLockFragment : Fragment() {
                 if (pass2 == "") {
                     pass2 = code
                     passCode.value = ""
-                    rootView.message_text_view.text = "Re-enter PIN"
+                    rootView.message_text_view.text = getString(R.string.re_enter_pin)
                 } else {
                     if (code == pass2) {
                         if (prefs != null) {
@@ -142,7 +142,7 @@ class AppLockFragment : Fragment() {
                         Toast.makeText(activity, "PINs don't match. Try again", LENGTH_SHORT).show()
                         passCode.value = ""
                         pass2 = ""
-                        rootView.message_text_view.text = "Enter new PIN"
+                        rootView.message_text_view.text = getString(R.string.enter_new_pin)
                     }
                 }
             } else {
@@ -152,7 +152,7 @@ class AppLockFragment : Fragment() {
                         if (oldPIN == code) {
                             pass2 = code
                             passCode.value = ""
-                            rootView.message_text_view.text = "Enter new PIN"
+                            rootView.message_text_view.text = getString(R.string.enter_new_pin)
                         } else {
                             Toast.makeText(activity, "Old PIN incorrect. Try again", LENGTH_SHORT).show()
                             passCode.value = ""

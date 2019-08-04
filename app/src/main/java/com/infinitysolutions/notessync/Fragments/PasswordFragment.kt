@@ -164,7 +164,7 @@ class PasswordFragment : Fragment() {
                     }
                     ENCRYPTED_YES -> {
                         if (passwordMode == MODE_CHANGE_PASSWORD) {
-                            rootView.info_text_view.text = "Change password"
+                            rootView.info_text_view.text = getString(R.string.change_password)
                             rootView.password_edit_text.hint = "Enter old password"
                             rootView.again_password_edit_text.visibility = VISIBLE
                             rootView.again_password_edit_text.hint = "Enter new password"

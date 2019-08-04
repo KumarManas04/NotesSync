@@ -52,7 +52,22 @@
     <string name="login_pref_summary">Login to your preferred cloud storage</string>
     <string name="last_modified_indicator">Last modified indicator</string>
     <string name="check_encryption_loading_text">Checking...</string>
-    <string name="enter_password_to_decrypt_message">Encryption found. Please enter your password to decrypt your data
-    </string>
+    <string name="enter_password_to_decrypt_message">Encryption found. Please enter your password to decrypt your data</string>
     <string name="will_user_encrypt_message">Would you like to encrypt your data?</string>
+    <string name="enter_new_pin">Enter new PIN</string>
+    <string name="enter_old_pin">Enter old PIN</string>
+    <string name="re_enter_pin">Re-enter PIN</string>
+    <string name="all_empty_message">Oops, nothing here</string>
+    <string name="notes_empty_message">Notes appear here</string>
+    <string name="todo_empty_message">To-do lists appear here</string>
+    <string name="archived_empty_message">Archived notes appear here</string>
+    <string name="trash_empty_message">Deleted notes appear here for 30 days</string>
+    <string name="edited_time_stamp">Edited %1$s</string>
+    <string name="archive_note">Archive note</string>
+    <string name="unarchive_note">Unarchive note</string>
+    <string name="reminder_set">Reminder set:\n%1$s</string>
+    <string name="change_password">Change password</string>
+    <string name="change_password_summary">Change the password used to encrypt your data in the cloud.</string>
+    <string name="enable_encrypted_sync">Enable encrypted sync</string>
+    <string name="encrypted_sync_summary">Set a sync password to encrypt your data in the cloud. This is to improve privacy.</string>
 </resources>

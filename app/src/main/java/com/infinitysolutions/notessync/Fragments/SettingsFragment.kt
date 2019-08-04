@@ -172,12 +172,12 @@ class SettingsFragment : Fragment() {
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         if (prefs != null){
             val passwordMode = if (prefs.contains(PREF_ENCRYPTED) && prefs.getBoolean(PREF_ENCRYPTED, false)){
-                rootView.change_pass_title.text = "Change Password"
-                rootView.change_pass_text.text = "Change the password used to encrypt your data in the cloud."
+                rootView.change_pass_title.text = getString(R.string.change_password)
+                rootView.change_pass_text.text = getString(R.string.change_password_summary)
                 MODE_CHANGE_PASSWORD
             }else{
-                rootView.change_pass_title.text = "Enable encrypted sync"
-                rootView.change_pass_text.text = "Set a sync password to encrypt your data in the cloud. This is to improve privacy."
+                rootView.change_pass_title.text = getString(R.string.enable_encrypted_sync)
+                rootView.change_pass_text.text = getString(R.string.encrypted_sync_summary)
                 MODE_NEW_PASSWORD
             }
 
@@ -222,8 +222,8 @@ class SettingsFragment : Fragment() {
             Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_cloudPickerFragment)
         }
 
-        rootView.change_pass_title.text = "Enable encrypted sync"
-        rootView.change_pass_text.text = "Set a sync password to encrypt your data in the cloud. This is to improve privacy."
+        rootView.change_pass_title.text = getString(R.string.enable_encrypted_sync)
+        rootView.change_pass_text.text = getString(R.string.encrypted_sync_summary)
         rootView.change_pass_button.setOnClickListener {
             Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
         }

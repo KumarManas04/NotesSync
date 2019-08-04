@@ -1,5 +1,5 @@
 # ![alt text](https://github.com/KumarManas04/NotesSync/blob/master/Images/icon.png)NotesSync
-Notes Sync is the answer to your everyday note taking requirements. It was designed with the primary goal of being convenient to the user. Take notes, create to-do lists, set reminders, and share with others everything is just one tap away. And it's all instantly searchable.
+Notes Sync is the answer to your everyday note taking requirements. It was designed with the primary goal of being convenient and privacy oriented. Take notes, create to-do lists, set reminders, and share with others everything is just one tap away. And it's all instantly searchable.
 
 With Notes Sync users can sync all of their notes, to-do lists and reminders to their <b>own Google Drive or Dropbox accounts respectively.</b>
 No server is required for syncing the data from the app. Everything goes directly from the app to user's account's storage all in just one tap.

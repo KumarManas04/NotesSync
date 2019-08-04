@@ -79,31 +79,31 @@ class MainFragment : Fragment() {
                         toolbar.title = "All"
                         databaseViewModel.setViewMode(1)
                         rootView.empty_image.setImageResource(R.drawable.all_empty)
-                        rootView.empty_text.text = "Oops, nothing here"
+                        rootView.empty_text.text = getString(R.string.all_empty_message)
                     }
                     2 -> {
                         toolbar.title = "Notes"
                         databaseViewModel.setViewMode(2)
                         rootView.empty_image.setImageResource(R.drawable.notes_empty)
-                        rootView.empty_text.text = "Notes appear here"
+                        rootView.empty_text.text = getString(R.string.notes_empty_message)
                     }
                     3 -> {
                         toolbar.title = "To-do lists"
                         databaseViewModel.setViewMode(3)
                         rootView.empty_image.setImageResource(R.drawable.todo_empty)
-                        rootView.empty_text.text = "To-do lists appear here"
+                        rootView.empty_text.text = getString(R.string.todo_empty_message)
                     }
                     4 -> {
                         toolbar.title = "Archive"
                         databaseViewModel.setViewMode(4)
                         rootView.empty_image.setImageResource(R.drawable.archive_empty)
-                        rootView.empty_text.text = "Archived notes appear here"
+                        rootView.empty_text.text = getString(R.string.archived_empty_message)
                     }
                     5 -> {
                         toolbar.title = "Trash"
                         databaseViewModel.setViewMode(5)
                         rootView.empty_image.setImageResource(R.drawable.trash_empty)
-                        rootView.empty_text.text = "Deleted notes appear here for 30 days"
+                        rootView.empty_text.text = getString(R.string.trash_empty_message)
                     }
                 }
             }
