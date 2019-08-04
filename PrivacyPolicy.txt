@@ -1,0 +1,5 @@
+All the data goes directly from the app to the user's own Google Drive and/or Dropbox accounts.
+No data goes through our servers or server databases.
+In fact, we do not own any servers or server databases.
+So it is literally impossible to collect any of the user's data.
+Hence, no user data is collected by us.
