@@ -22,7 +22,7 @@ class AboutFragment : Fragment() {
         return rootView
     }
 
-    private fun setupView(rootView: View){
+    private fun setupView(rootView: View) {
         val toolbar = rootView.toolbar
         toolbar.title = "About"
         toolbar.setNavigationOnClickListener {
@@ -54,13 +54,13 @@ class AboutFragment : Fragment() {
         rootView.changelog_button.setOnClickListener {
             AlertDialog.Builder(context)
                 .setTitle("Changelog")
-                .setMessage("VERSION 1.0  JULY 23,2019\n\n - Initial release\n\nVERSION 1.1 JULY 24,2019\n\n - Added widget\n\nVERSION 1.2 JULY 25,2019\n\n - Improved Performance\n\nVERSION 1.3 JULY 25, 2019\n\n - Reduced size")
+                .setMessage("VERSION 1.0  JULY 23,2019\n\n - Initial release\n\nVERSION 1.1 JULY 24,2019\n\n - Added widget\n\nVERSION 1.2 JULY 25,2019\n\n - Improved Performance\n\nVERSION 1.3 JULY 25, 2019\n\n - Reduced size\n\nVERSION 1.5 AUGUST 4, 2019\n\n - Added encrypted sync\n - Added app lock\n - More efficient auto sync")
                 .setPositiveButton("Close", null)
                 .show()
         }
     }
 
-    private fun openLink(link: String){
+    private fun openLink(link: String) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
         if (browserIntent.resolveActivity(activity!!.packageManager) != null)
             startActivity(browserIntent)

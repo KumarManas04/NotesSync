@@ -14,6 +14,8 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
@@ -22,6 +24,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.infinitysolutions.checklistview.ChecklistView
 import com.infinitysolutions.notessync.Adapters.ColorPickerAdapter
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
@@ -31,12 +34,11 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.Util.ChecklistConverter
 import com.infinitysolutions.notessync.Util.ColorsUtil
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
-import it.feio.android.checklistview.exceptions.ViewNotSupportedException
-import it.feio.android.checklistview.models.ChecklistManager
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_note_edit.view.*
 import kotlinx.coroutines.Dispatchers
@@ -53,9 +55,8 @@ class NoteEditFragment : Fragment() {
     private lateinit var mainViewModel: MainViewModel
     private lateinit var noteTitle: EditText
     private lateinit var noteContent: EditText
-    private lateinit var mChecklistManager: ChecklistManager
+    private lateinit var checklistView: ChecklistView
     private val colorsUtil = ColorsUtil()
-    private var switchView: View? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Log.d(TAG, "OnCreate")
@@ -77,6 +78,7 @@ class NoteEditFragment : Fragment() {
         Log.d(TAG, "InitDataBinding")
         noteTitle = rootView.note_title
         noteContent = rootView.note_content
+        checklistView = rootView.checklist_view
 
         mainViewModel.getSelectedColor().observe(this, androidx.lifecycle.Observer { selectedColor ->
             noteTitle.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
@@ -127,26 +129,23 @@ class NoteEditFragment : Fragment() {
             if (selectedNote.nId != -1L) {
                 noteTitle.setText(selectedNote.noteTitle)
                 mainViewModel.setSelectedColor(selectedNote.noteColor)
-                val formatter = SimpleDateFormat("MMM d, YYYY", Locale.ENGLISH)
+                val formatter = SimpleDateFormat("MMM d, yyyy", Locale.ENGLISH)
                 rootView.last_edited_text.text = getString(R.string.edited_time_stamp, formatter.format(Calendar.getInstance().timeInMillis))
             }
 
             mainViewModel.reminderTime = selectedNote.reminderTime
             if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
-                try {
-                    mChecklistManager = ChecklistManager(context)
-                    switchView = noteContent
-                    mChecklistManager.newEntryHint("Add new")
-                    mChecklistManager.moveCheckedOnBottom(0)
-                    mChecklistManager.showCheckMarks(true)
-                    mChecklistManager.keepChecked(true)
-                    mChecklistManager.dragEnabled(false)
-                    val newView = mChecklistManager.convert(switchView)
-                    mChecklistManager.replaceViews(switchView, newView)
-                    switchView = newView
-                } catch (e: ViewNotSupportedException) {
-                    e.printStackTrace()
+                checklistView.visibility = VISIBLE
+                noteContent.visibility = GONE
+                var content = selectedNote.noteContent
+                if(content != null){
+                    if(content.contains("[ ]") || content.contains("[x]"))
+                        content = ChecklistConverter.convertList(content)
+                    checklistView.setList(content)
                 }
+            }else{
+                checklistView.visibility = GONE
+                noteContent.visibility = VISIBLE
             }
         }
     }
@@ -281,17 +280,17 @@ class NoteEditFragment : Fragment() {
         }
     }
 
-    private fun saveNote() {
+    private fun saveNote(content: String) {
         val timeModified = Calendar.getInstance().timeInMillis
         val selectedNote = mainViewModel.getSelectedNote()
         if (selectedNote != null) {
             if (selectedNote.nId == -1L) {
-                if (noteContent.text.isNotEmpty() || noteTitle.text.isNotEmpty()) {
+                if (content.isNotEmpty() || noteTitle.text.isNotEmpty()) {
                     databaseViewModel.insert(
                         Note(
                             null,
                             noteTitle.text.toString(),
-                            noteContent.text.toString(),
+                            content,
                             timeModified,
                             timeModified,
                             "-1",
@@ -308,7 +307,7 @@ class NoteEditFragment : Fragment() {
                     Note(
                         selectedNote.nId,
                         noteTitle.text.toString(),
-                        noteContent.text.toString(),
+                        content,
                         selectedNote.dateCreated,
                         timeModified,
                         selectedNote.gDriveId,
@@ -376,16 +375,10 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun getNoteText(selectedNote: Note): String {
-        return if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED) {
-            try {
-                (mChecklistManager.convert(switchView) as EditText).text.toString()
-            } catch (e: ViewNotSupportedException) {
-                e.printStackTrace()
-                selectedNote.noteContent!!
-            }
-        } else {
+        return if (selectedNote.noteType == LIST_DEFAULT || selectedNote.noteType == LIST_ARCHIVED)
+            checklistView.toString()
+        else
             noteContent.text.toString()
-        }
     }
 
     override fun onDestroy() {
@@ -398,7 +391,7 @@ class NoteEditFragment : Fragment() {
                 || (selectedNote.noteColor != mainViewModel.getSelectedColor().value)
                 || (selectedNote.reminderTime != mainViewModel.reminderTime)
             )
-                saveNote()
+                saveNote(noteContentText)
         }
         super.onDestroy()
     }

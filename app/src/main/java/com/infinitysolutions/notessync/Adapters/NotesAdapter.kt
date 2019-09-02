@@ -23,7 +23,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.Util.ChecklistGenerator
+import com.infinitysolutions.notessync.Util.ChecklistConverter
 import com.infinitysolutions.notessync.Util.ColorsUtil
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
@@ -31,12 +31,7 @@ import kotlinx.android.synthetic.main.notes_list_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NotesAdapter(
-    private val mainViewModel: MainViewModel,
-    private val databaseViewModel: DatabaseViewModel,
-    private val items: List<Note>,
-    val context: Context
-) : RecyclerView.Adapter<NotesAdapter.ViewHolder>() {
+class NotesAdapter(private val mainViewModel: MainViewModel, private val databaseViewModel: DatabaseViewModel, private val items: List<Note>, val context: Context) : RecyclerView.Adapter<NotesAdapter.ViewHolder>() {
     private val formatter = SimpleDateFormat("E, MMM d", Locale.ENGLISH)
     private val colorsUtil = ColorsUtil()
     private val TAG = "NotesAdapter"
@@ -49,19 +44,17 @@ class NotesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.titleTextView.text = items[position].noteTitle
         holder.dateModifiedTextView.text = formatter.format(items[position].dateModified)
-        holder.parentView.backgroundTintList =
-            ColorStateList.valueOf(Color.parseColor(colorsUtil.getColor(items[position].noteColor)))
+        holder.parentView.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorsUtil.getColor(items[position].noteColor)))
 
+        var noteContent = items[position].noteContent
         if (items[position].noteType == LIST_DEFAULT || items[position].noteType == LIST_ARCHIVED || items[position].noteType == LIST_TRASH) {
             holder.indicatorView.setImageResource(R.drawable.todo_indicator)
-            val itemsList = ChecklistGenerator.generateList(items[position].noteContent)
-            holder.contentTextView.text = itemsList
-        } else {
-            holder.contentTextView.text = items[position].noteContent
-            if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == NOTE_ARCHIVED || items[position].noteType == NOTE_TRASH) {
+            if(noteContent!= null && (noteContent.contains("[ ]") || noteContent.contains("[x]")))
+                noteContent = ChecklistConverter.convertList(noteContent)
+        } else
+            if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == NOTE_ARCHIVED || items[position].noteType == NOTE_TRASH)
                 holder.indicatorView.setImageResource(R.drawable.note_indicator)
-            }
-        }
+        holder.contentTextView.text = noteContent
 
         if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH) {
             holder.itemContainer.setOnClickListener {

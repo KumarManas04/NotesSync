@@ -3,6 +3,7 @@ package com.infinitysolutions.notessync.Adapters
 import android.content.Context
 import android.content.Intent
 import android.os.Binder
+import android.view.View.GONE
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.infinitysolutions.notessync.Contracts.Contract
@@ -11,20 +12,26 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ID_EXTR
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Model.NotesRoomDatabase
 import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.Util.ChecklistGenerator
+import com.infinitysolutions.notessync.Util.ChecklistConverter
 
-class WidgetRemoteViewsFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
+class WidgetRemoteViewsFactory(private val context: Context) :
+    RemoteViewsService.RemoteViewsFactory {
     private lateinit var notesList: List<Note>
     private var selectedLayout = R.layout.widget_notes_item
 
     override fun getViewAt(position: Int): RemoteViews {
         val rv = RemoteViews(context.packageName, selectedLayout)
-        rv.setTextViewText(R.id.title_text, notesList[position].noteTitle)
-        if (notesList[position].noteType == LIST_DEFAULT){
-            val noteContent = ChecklistGenerator.generateList(notesList[position].noteContent)
+        val noteTitle = notesList[position].noteTitle
+        if (noteTitle != null && noteTitle.isNotEmpty())
+            rv.setTextViewText(R.id.title_text, notesList[position].noteTitle)
+        else
+            rv.setViewVisibility(R.id.title_text, GONE)
+
+        var noteContent = notesList[position].noteContent
+        if (noteContent != null) {
+            if (notesList[position].noteType == LIST_DEFAULT && (noteContent.contains("[ ]") || noteContent.contains("[x]")))
+                noteContent = ChecklistConverter.convertList(noteContent)
             rv.setTextViewText(R.id.content_preview_text, noteContent)
-        }else {
-            rv.setTextViewText(R.id.content_preview_text, notesList[position].noteContent)
         }
 
         val fillInIntent = Intent()
@@ -50,11 +57,11 @@ class WidgetRemoteViewsFactory(private val context: Context) : RemoteViewsServic
 
     override fun onDataSetChanged() {
         val prefs = context.getSharedPreferences(Contract.SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-        if (prefs.contains(Contract.PREF_THEME)){
+        if (prefs.contains(Contract.PREF_THEME)) {
             selectedLayout = if (prefs.getInt(Contract.PREF_THEME, 0) == 1)
-                    R.layout.widget_notes_item_dark
-                else
-                    R.layout.widget_notes_item
+                R.layout.widget_notes_item_dark
+            else
+                R.layout.widget_notes_item
         }
         val notesDao = NotesRoomDatabase.getDatabase(context).notesDao()
         val identityToken = Binder.clearCallingIdentity()

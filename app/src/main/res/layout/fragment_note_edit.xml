@@ -1,84 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
-              android:background="?attr/mainBackground"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/mainBackground"
+        android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
-            app:navigationIcon="?attr/homeAsUpIndicator"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/mainBackground"/>
+            android:background="?attr/mainBackground"
+            app:navigationIcon="?attr/homeAsUpIndicator" />
 
     <EditText
             android:id="@+id/note_title"
-            android:hint="@string/title"
-            android:padding="10dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp"
-            android:textSize="20sp"
-            android:fontFamily="sans-serif"
-            android:textStyle="bold"
-            android:background="?attr/mainBackground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapSentences"/>
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="?attr/mainBackground"
+            android:fontFamily="sans-serif"
+            android:hint="@string/title"
+            android:inputType="textCapSentences"
+            android:padding="10dp"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
     <ScrollView
             android:id="@+id/note_content_container"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:padding="10dp"
-            android:fillViewport="true"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:padding="10dp">
 
-        <EditText
-                android:id="@+id/note_content"
-                android:background="?attr/mainBackground"
-                android:textSize="18sp"
-                android:hint="@string/write_something"
-                android:gravity="top|start"
-                android:textColor="?attr/mainTextColor"
-                android:fontFamily="sans-serif-condensed"
-                android:inputType="textCapSentences|textMultiLine"
+        <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+            <EditText
+                    android:id="@+id/note_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?attr/mainBackground"
+                    android:fontFamily="sans-serif-condensed"
+                    android:gravity="top|start"
+                    android:hint="@string/write_something"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:textColor="?attr/mainTextColor"
+                    android:textSize="18sp" />
+
+            <com.infinitysolutions.checklistview.ChecklistView
+                    android:id="@+id/checklist_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:dragHandleColor="?attr/mainTextColor"
+                    app:removeButtonColor="?attr/mainTextColor"
+                    app:textColor="?attr/mainTextColor" />
+        </LinearLayout>
     </ScrollView>
 
     <LinearLayout
-            android:elevation="8dp"
-            android:background="?attr/overlayBackground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="?attr/overlayBackground"
+            android:elevation="8dp"
             android:orientation="horizontal">
 
         <TextView
                 android:id="@+id/last_edited_text"
-                android:textColor="#424242"
-                android:padding="10dp"
-                android:layout_gravity="center_vertical"
                 android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:layout_height="match_parent"/>
+                android:padding="10dp"
+                android:textColor="#424242" />
 
         <ImageView
                 android:id="@+id/open_bottom_menu"
-                android:src="@drawable/more_options"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:tint="?attr/iconsTint"
-                android:background="@drawable/overlay_simple_ripple"
                 android:layout_gravity="center_vertical"
-                android:contentDescription="@string/more_options"/>
+                android:background="@drawable/overlay_simple_ripple"
+                android:clickable="true"
+                android:contentDescription="@string/more_options"
+                android:focusable="true"
+                android:padding="10dp"
+                android:src="@drawable/more_options"
+                android:tint="?attr/iconsTint" />
     </LinearLayout>
 
 </LinearLayout>
