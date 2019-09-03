@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupMenu
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
@@ -70,22 +69,21 @@ class SettingsFragment : Fragment() {
         }
 
         rootView.night_mode_button.setOnClickListener {
-            val popup = PopupMenu(activity, it)
-            val inflater = popup.menuInflater
-            inflater.inflate(R.menu.theme_select_menu, popup.menu)
-            popup.setOnMenuItemClickListener {
+            val content = arrayOf("Light", "Dark", "Amoled")
+            val optionsDialog = AlertDialog.Builder(activity)
+            optionsDialog.setTitle("Pick a theme")
+            optionsDialog.setItems(content) { dialog, which ->
                 val editor = prefs.edit()
-                when(it.itemId){
-                    R.id.light_menu_item-> editor.putInt(PREF_THEME, THEME_DEFAULT)
-                    R.id.dark_menu_item-> editor.putInt(PREF_THEME, THEME_DARK)
-                    R.id.amoled_menu_item-> editor.putInt(PREF_THEME, THEME_AMOLED)
+                when(which){
+                    0 -> editor.putInt(PREF_THEME, THEME_DEFAULT)
+                    1 -> editor.putInt(PREF_THEME, THEME_DARK)
+                    2 -> editor.putInt(PREF_THEME, THEME_AMOLED)
                 }
                 editor.commit()
                 updateWidgets()
                 activity?.recreate()
-                return@setOnMenuItemClickListener true
             }
-            popup.show()
+            optionsDialog.show()
         }
 
         configureAppLockButtons(rootView, prefs)

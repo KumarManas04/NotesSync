@@ -76,6 +76,7 @@
                 android:textColor="?attr/mainTextColor"
                 android:textAlignment="viewStart"
                 android:fontFamily="sans-serif-condensed"
+                android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"/>
@@ -88,10 +89,8 @@
                 android:background="@drawable/overlay_simple_ripple"
                 android:layout_gravity="center_vertical"
                 android:padding="12dp"
-                android:layout_width="wrap_content"
-                android:scaleType="fitXY"
-                android:adjustViewBounds="true"
-                android:layout_height="match_parent"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:focusable="true"
                 android:contentDescription="@string/new_list"/>
 
@@ -103,10 +102,8 @@
                 android:background="@drawable/overlay_simple_ripple"
                 android:layout_gravity="center_vertical"
                 android:padding="12dp"
-                android:layout_width="wrap_content"
-                android:scaleType="fitXY"
-                android:adjustViewBounds="true"
-                android:layout_height="match_parent"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:focusable="true"
                 android:contentDescription="@string/search_button"/>
 

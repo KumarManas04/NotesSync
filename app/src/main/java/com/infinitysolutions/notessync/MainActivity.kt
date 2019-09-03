@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
         if(prefs.contains(PREF_THEME)){
             when(prefs.getInt(PREF_THEME, THEME_DEFAULT)){
-                THEME_DEFAULT-> setTheme(R.style.AppThemeDark)
+                THEME_DEFAULT-> setTheme(R.style.AppTheme)
                 THEME_DARK -> setTheme(R.style.AppThemeDark)
                 THEME_AMOLED -> setTheme(R.style.AppThemeAmoled)
             }

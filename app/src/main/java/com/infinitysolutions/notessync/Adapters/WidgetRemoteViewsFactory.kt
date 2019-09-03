@@ -2,29 +2,26 @@ package com.infinitysolutions.notessync.Adapters
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Binder
 import android.view.View.GONE
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ID_EXTRA
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Model.NotesRoomDatabase
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.ChecklistConverter
+import com.infinitysolutions.notessync.Util.ColorsUtil
 
 class WidgetRemoteViewsFactory(private val context: Context) :
     RemoteViewsService.RemoteViewsFactory {
     private lateinit var notesList: List<Note>
-    private var selectedLayout = R.layout.widget_notes_item
+    private val colorsUtil = ColorsUtil()
 
     override fun getViewAt(position: Int): RemoteViews {
-        val rv = RemoteViews(context.packageName, selectedLayout)
+        val rv = RemoteViews(context.packageName, R.layout.widget_notes_item)
         val noteTitle = notesList[position].noteTitle
         if (noteTitle != null && noteTitle.isNotEmpty())
             rv.setTextViewText(R.id.title_text, notesList[position].noteTitle)
@@ -38,6 +35,7 @@ class WidgetRemoteViewsFactory(private val context: Context) :
             rv.setTextViewText(R.id.content_preview_text, noteContent)
         }
 
+        rv.setInt(R.id.list_item_container, "setBackgroundColor", Color.parseColor(colorsUtil.getColor(notesList[position].noteColor)))
         val fillInIntent = Intent()
         fillInIntent.putExtra(NOTE_ID_EXTRA, notesList[position].nId)
         rv.setOnClickFillInIntent(R.id.list_item_container, fillInIntent)
@@ -60,15 +58,6 @@ class WidgetRemoteViewsFactory(private val context: Context) :
     }
 
     override fun onDataSetChanged() {
-        val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-        if (prefs.contains(PREF_THEME))
-            selectedLayout = when(prefs.getInt(PREF_THEME, THEME_DEFAULT)){
-                THEME_DEFAULT -> R.layout.widget_notes_item
-                THEME_DARK -> R.layout.widget_notes_item_dark
-                THEME_AMOLED -> R.layout.widget_notes_item_amoled
-                else -> R.layout.widget_notes_item
-            }
-
         val notesDao = NotesRoomDatabase.getDatabase(context).notesDao()
         val identityToken = Binder.clearCallingIdentity()
         notesList = notesDao.getAllPresent()
