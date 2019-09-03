@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
@@ -36,6 +37,9 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.STATE_CHANGE_PIN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.STATE_NEW_PIN
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import kotlinx.android.synthetic.main.fragment_settings.view.*
@@ -56,25 +60,32 @@ class SettingsFragment : Fragment() {
             activity?.onBackPressed()
         }
 
-        val nightModeToggle = rootView.night_mode_toggle
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (prefs!!.contains(PREF_THEME))
-            nightModeToggle.isChecked = prefs.getInt(PREF_THEME, 0) == 1
-
-        nightModeToggle.setOnCheckedChangeListener { _, isChecked ->
-            val editor = prefs.edit()
-            if (isChecked)
-                editor.putInt(PREF_THEME, 1)
-            else
-                editor.putInt(PREF_THEME, 0)
-
-            editor.commit()
-            updateWidgets()
-            activity?.recreate()
+        if (prefs!!.contains(PREF_THEME)) {
+            when(prefs.getInt(PREF_THEME, THEME_DEFAULT)){
+                THEME_DEFAULT-> rootView.pref_theme_text.text = "Light"
+                THEME_DARK -> rootView.pref_theme_text.text = "Dark"
+                THEME_AMOLED -> rootView.pref_theme_text.text = "Amoled"
+            }
         }
 
         rootView.night_mode_button.setOnClickListener {
-            nightModeToggle.toggle()
+            val popup = PopupMenu(activity, it)
+            val inflater = popup.menuInflater
+            inflater.inflate(R.menu.theme_select_menu, popup.menu)
+            popup.setOnMenuItemClickListener {
+                val editor = prefs.edit()
+                when(it.itemId){
+                    R.id.light_menu_item-> editor.putInt(PREF_THEME, THEME_DEFAULT)
+                    R.id.dark_menu_item-> editor.putInt(PREF_THEME, THEME_DARK)
+                    R.id.amoled_menu_item-> editor.putInt(PREF_THEME, THEME_AMOLED)
+                }
+                editor.commit()
+                updateWidgets()
+                activity?.recreate()
+                return@setOnMenuItemClickListener true
+            }
+            popup.show()
         }
 
         configureAppLockButtons(rootView, prefs)

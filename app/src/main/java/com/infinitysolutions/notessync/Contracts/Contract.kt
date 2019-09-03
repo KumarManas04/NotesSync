@@ -18,6 +18,9 @@ class Contract{
         const val CLOUD_DROPBOX = 1
         const val SHARED_PREFS_NAME = "com.infinitySolutions.notesSync.sharedPrefs"
         const val PREF_THEME = "sharedPrefs.currentTheme"
+        const val THEME_DEFAULT = 0
+        const val THEME_DARK = 1
+        const val THEME_AMOLED = 2
         const val PREF_CLOUD_TYPE = "sharedPrefs.cloudType"
         const val PREF_ACCESS_TOKEN = "sharedPrefs.accessToken"
         const val PREF_ID = "sharedPrefs.userId"

@@ -6,9 +6,13 @@ import android.os.Binder
 import android.view.View.GONE
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ID_EXTRA
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Model.NotesRoomDatabase
 import com.infinitysolutions.notessync.R
@@ -56,13 +60,15 @@ class WidgetRemoteViewsFactory(private val context: Context) :
     }
 
     override fun onDataSetChanged() {
-        val prefs = context.getSharedPreferences(Contract.SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-        if (prefs.contains(Contract.PREF_THEME)) {
-            selectedLayout = if (prefs.getInt(Contract.PREF_THEME, 0) == 1)
-                R.layout.widget_notes_item_dark
-            else
-                R.layout.widget_notes_item
-        }
+        val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+        if (prefs.contains(PREF_THEME))
+            selectedLayout = when(prefs.getInt(PREF_THEME, THEME_DEFAULT)){
+                THEME_DEFAULT -> R.layout.widget_notes_item
+                THEME_DARK -> R.layout.widget_notes_item_dark
+                THEME_AMOLED -> R.layout.widget_notes_item_amoled
+                else -> R.layout.widget_notes_item
+            }
+
         val notesDao = NotesRoomDatabase.getDatabase(context).notesDao()
         val identityToken = Binder.clearCallingIdentity()
         notesList = notesDao.getAllPresent()
@@ -77,6 +83,5 @@ class WidgetRemoteViewsFactory(private val context: Context) :
         return 2
     }
 
-    override fun onDestroy() {
-    }
+    override fun onDestroy() {}
 }

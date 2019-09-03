@@ -18,6 +18,9 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.DRIVE_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_INDICATOR_EXTRA
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.Services.NotesSyncService
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
@@ -31,10 +34,11 @@ class MainActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
         if(prefs.contains(PREF_THEME)){
-            if (prefs.getInt(PREF_THEME, 0) == 1)
-                setTheme(R.style.AppThemeDark)
-            else
-                setTheme(R.style.AppTheme)
+            when(prefs.getInt(PREF_THEME, THEME_DEFAULT)){
+                THEME_DEFAULT-> setTheme(R.style.AppThemeDark)
+                THEME_DARK -> setTheme(R.style.AppThemeDark)
+                THEME_AMOLED -> setTheme(R.style.AppThemeAmoled)
+            }
         }
 
         WorkSchedulerHelper().setAutoDelete()
@@ -126,7 +130,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun syncFiles(driveType: Int){
-        if (!isServiceRunning("com.infinitysolutions.notessync.Services.NotesSyncService")){
+        if (!isServiceRunning()){
             Log.d(TAG, "Service not running. Starting it...")
             Toast.makeText(this, "Syncing...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, NotesSyncService::class.java)
@@ -138,10 +142,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun isServiceRunning(serviceName: String): Boolean {
+    private fun isServiceRunning(): Boolean {
         val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceName == service.service.className)
+            if ("com.infinitysolutions.notessync.Services.NotesSyncService" == service.service.className)
                 return true
         }
         return false

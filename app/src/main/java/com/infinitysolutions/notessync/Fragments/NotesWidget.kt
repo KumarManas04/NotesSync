@@ -8,6 +8,7 @@ import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.widget.RemoteViews
 import androidx.core.app.TaskStackBuilder
+import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_BUTTON_EXTRA
@@ -48,12 +49,11 @@ class NotesWidget : AppWidgetProvider() {
 
         internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-            var layout = R.layout.notes_widget
-            if (prefs.contains(PREF_THEME)){
-                layout = if (prefs.getInt(PREF_THEME, 0) == 1)
-                    R.layout.notes_widget_dark
-                else
-                    R.layout.notes_widget
+            val layout = when(prefs.getInt(PREF_THEME, Contract.THEME_DEFAULT)){
+                Contract.THEME_DEFAULT -> R.layout.notes_widget
+                Contract.THEME_DARK -> R.layout.notes_widget_dark
+                Contract.THEME_AMOLED -> R.layout.notes_widget_amoled
+                else -> R.layout.notes_widget
             }
             val remoteViews = RemoteViews(context.packageName, layout)
 
