@@ -1,12 +1,17 @@
 package com.infinitysolutions.notessync.Adapters
 
 import android.app.AlertDialog
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -21,6 +26,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
+import com.infinitysolutions.notessync.Fragments.NotesWidget
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.ChecklistConverter
@@ -42,6 +48,11 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.titleTextView.visibility = if(items[position].noteTitle!!.isEmpty())
+            GONE
+        else
+            VISIBLE
+
         holder.titleTextView.text = items[position].noteTitle
         holder.dateModifiedTextView.text = formatter.format(items[position].dateModified)
         holder.parentView.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorsUtil.getColor(items[position].noteColor)))
@@ -134,6 +145,16 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                 items[position].reminderTime
             )
         )
+        updateWidgets()
+    }
+
+    private fun updateWidgets() {
+        val intent = Intent(context, NotesWidget::class.java)
+        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        val ids =
+            AppWidgetManager.getInstance(context).getAppWidgetIds(ComponentName(context, NotesWidget::class.java))
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        context.sendBroadcast(intent)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

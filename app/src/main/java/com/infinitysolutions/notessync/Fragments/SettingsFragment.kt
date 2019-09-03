@@ -69,7 +69,7 @@ class SettingsFragment : Fragment() {
         }
 
         rootView.night_mode_button.setOnClickListener {
-            val content = arrayOf("Light", "Dark", "Amoled")
+            val content = arrayOf("Light", "Dark", "AMOLED")
             val optionsDialog = AlertDialog.Builder(activity)
             optionsDialog.setTitle("Pick a theme")
             optionsDialog.setItems(content) { dialog, which ->

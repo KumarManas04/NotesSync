@@ -52,5 +52,6 @@ class Contract{
         const val APP_LOCK_STATE = "appLockState"
         const val STATE_NEW_PIN = 0
         const val STATE_CHANGE_PIN = 1
+        const val IS_ROTATED = "isRotated"
     }
 }

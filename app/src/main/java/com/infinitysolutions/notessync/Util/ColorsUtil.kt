@@ -2,14 +2,14 @@ package com.infinitysolutions.notessync.Util
 
 class ColorsUtil {
     private val colorsList = arrayOf(
-        "#3d81f4",// 0
-        "#940044",// 1
-        "#ff5b3a",// 2
-        "#ac00ae",// 3
-        "#5e7c8a",// 4
-        "#009d88",// 5
-        "#ff0071",// 6
-        "#7b5448" // 7
+        "#2196f3",// 0
+        "#AD1457",// 1
+        "#FF5722",// 2
+        "#9C27B0",// 3
+        "#607D8B",// 4
+        "#009688",// 5
+        "#E91E63",// 6
+        "#795548" // 7
     )
 
     fun getColor(position: Int?): String {

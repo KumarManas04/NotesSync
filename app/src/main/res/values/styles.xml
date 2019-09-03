@@ -29,6 +29,20 @@
         <item name="deleteMenuIcon">@drawable/delete_menu_icon_dark</item>
     </style>
 
+    <style name="AppThemeAmoled" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@android:color/transparent</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="mainBackground">#000000</item>
+        <item name="toolbarTextColor">#ffffff</item>
+        <item name="iconsTint">#ffffff</item>
+        <item name="mainTextColor">#ffffff</item>
+        <item name="syncIcon">@drawable/sync_notes_dark</item>
+        <item name="overlayBackground">#2a2a2a</item>
+        <item name="navDrawerItemTint">#ffffff</item>
+        <item name="deleteMenuIcon">@drawable/delete_menu_icon_dark</item>
+    </style>
+
     <style name="TitleTextAppearance" >
         <item name="android:textSize">30sp</item>
         <item name="android:textStyle">bold</item>
