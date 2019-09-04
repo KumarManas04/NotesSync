@@ -18,7 +18,7 @@
                 android:background="#000000"
                 android:contentDescription="@string/new_note"
                 android:padding="8dp"
-                android:src="@drawable/new_note_icon"
+                android:src="@drawable/widget_new_note"
                 android:tint="#ffffff"/>
 
         <ImageView

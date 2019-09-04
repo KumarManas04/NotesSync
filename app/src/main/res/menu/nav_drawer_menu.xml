@@ -39,6 +39,11 @@
             android:title="Share app"/>
 
         <item
+            android:id="@+id/rate"
+            android:icon="@drawable/rate_icon"
+            android:title="Rate app"/>
+
+        <item
             android:id="@+id/about"
             android:icon="@drawable/about_drawer_item"
             android:title="About"/>

@@ -3,6 +3,7 @@ package com.infinitysolutions.notessync
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -118,6 +119,13 @@ class MainActivity : AppCompatActivity() {
                     shareIntent.type = "text/plain"
                     shareIntent.putExtra(Intent.EXTRA_TEXT, message)
                     startActivity(Intent.createChooser(shareIntent, "Share..."))
+                }
+                R.id.rate->{
+                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.infinitysolutions.notessync"))
+                    if (browserIntent.resolveActivity(packageManager) != null)
+                        startActivity(browserIntent)
+                    else
+                        Toast.makeText(this, "No browser found!", Toast.LENGTH_SHORT).show()
                 }
                 R.id.about->{
                     Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.action_mainFragment_to_aboutFragment)

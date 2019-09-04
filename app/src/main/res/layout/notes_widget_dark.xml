@@ -14,7 +14,7 @@
                 android:id="@+id/new_note_button"
                 android:padding="8dp"
                 android:background="#252629"
-                android:src="@drawable/new_note_icon"
+                android:src="@drawable/widget_new_note"
                 android:tint="#ffffff"
                 android:layout_width="0dp"
                 android:layout_weight="1"
