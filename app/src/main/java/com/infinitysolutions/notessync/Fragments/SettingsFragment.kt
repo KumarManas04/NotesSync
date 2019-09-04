@@ -64,8 +64,10 @@ class SettingsFragment : Fragment() {
             when(prefs.getInt(PREF_THEME, THEME_DEFAULT)){
                 THEME_DEFAULT-> rootView.pref_theme_text.text = "Light"
                 THEME_DARK -> rootView.pref_theme_text.text = "Dark"
-                THEME_AMOLED -> rootView.pref_theme_text.text = "Amoled"
+                THEME_AMOLED -> rootView.pref_theme_text.text = "AMOLED"
             }
+        }else{
+            rootView.pref_theme_text.text = "Light"
         }
 
         rootView.night_mode_button.setOnClickListener {

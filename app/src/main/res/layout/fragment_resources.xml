@@ -84,7 +84,7 @@
 
             <TextView
                     android:id="@+id/checklist"
-                    android:text="Checklist View"
+                    android:text="ChecklistView"
                     style="@style/openLinks"/>
 
             <TextView

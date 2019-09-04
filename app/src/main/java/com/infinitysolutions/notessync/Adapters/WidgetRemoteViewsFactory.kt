@@ -69,7 +69,7 @@ class WidgetRemoteViewsFactory(private val context: Context) :
     }
 
     override fun getViewTypeCount(): Int {
-        return 2
+        return 1
     }
 
     override fun onDestroy() {}

@@ -4,7 +4,6 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -131,7 +130,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun syncFiles(driveType: Int){
         if (!isServiceRunning()){
-            Log.d(TAG, "Service not running. Starting it...")
             Toast.makeText(this, "Syncing...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, NotesSyncService::class.java)
             intent.putExtra(DRIVE_EXTRA, driveType)

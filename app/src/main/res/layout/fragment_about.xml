@@ -38,7 +38,7 @@
                             style="@style/prefsMain"/>
 
                     <TextView
-                            android:text="1.5"
+                            android:text="1.6"
                             style="@style/prefsSummary"/>
 
                 </LinearLayout>

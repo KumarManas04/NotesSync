@@ -68,7 +68,7 @@ class ResourcesFragment : Fragment() {
         }
 
         rootView.checklist.setOnClickListener {
-            openLink("https://github.com/federicoiosue/checklistview")
+            openLink("https://github.com/KumarManas04/ChecklistView")
         }
 
         rootView.icons.setOnClickListener {
