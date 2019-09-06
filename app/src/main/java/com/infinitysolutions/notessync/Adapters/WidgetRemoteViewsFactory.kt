@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Binder
 import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
@@ -23,9 +24,10 @@ class WidgetRemoteViewsFactory(private val context: Context) :
     override fun getViewAt(position: Int): RemoteViews {
         val rv = RemoteViews(context.packageName, R.layout.widget_notes_item)
         val noteTitle = notesList[position].noteTitle
-        if (noteTitle != null && noteTitle.isNotEmpty())
+        if (noteTitle != null && noteTitle.isNotEmpty()){
+            rv.setViewVisibility(R.id.title_text, VISIBLE)
             rv.setTextViewText(R.id.title_text, notesList[position].noteTitle)
-        else
+        }else
             rv.setViewVisibility(R.id.title_text, GONE)
 
         var noteContent = notesList[position].noteContent
