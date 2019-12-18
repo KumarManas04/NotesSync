@@ -67,7 +67,8 @@ class AboutFragment : Fragment() {
                         "VERSION 1.2 JULY 25,2019\n\n - Improved Performance\n\n" +
                         "VERSION 1.3 JULY 25, 2019\n\n - Reduced size\n\n" +
                         "VERSION 1.5 AUGUST 4, 2019\n\n - Added encrypted sync\n - Added app lock\n - More efficient auto sync\n\n" +
-                        "VERSION 1.6 SEPTEMBER 4, 2019\n\n - Added AMOLED Theme\n - Fixed bugs\n - Added colored notes to widget\n - Improved widget performance\n - Added drag and drop in Todo list\n - Checked items move to the bottom"
+                        "VERSION 1.6 SEPTEMBER 4, 2019\n\n - Added AMOLED Theme\n - Fixed bugs\n - Added colored notes to widget\n - Improved widget performance\n - Added drag and drop in Todo list\n - Checked items move to the bottom\n\n" +
+                        "VERSION 1.7 SEPTEMBER 6, 2019\n\n - Fixed issue with title not shown in some notes in widget"
                 )
                 .setPositiveButton("Close", null)
                 .show()

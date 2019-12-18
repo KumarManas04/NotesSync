@@ -33,7 +33,7 @@ interface NotesDao {
     @Query("SELECT * FROM notes_table WHERE note_id = :nId LIMIT 1")
     fun getNoteById(nId: Long): Note
 
-    @Query("SELECT * FROM notes_table WHERE type != 0 AND (title LIKE:query OR content LIKE:query)")
+    @Query("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND (title LIKE:query OR content LIKE:query)")
     fun getSearchResult(query: String): LiveData<List<Note>>
 
     @Query("SELECT * FROM notes_table ORDER BY note_id ASC")

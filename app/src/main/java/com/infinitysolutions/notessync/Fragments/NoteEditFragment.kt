@@ -9,6 +9,7 @@ import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -190,7 +191,7 @@ class NoteEditFragment : Fragment() {
                 }
                 dialogView.cancel_reminder_button.setColorFilter(Color.parseColor(colorsUtil.getColor(mainViewModel.getSelectedColor().value)))
             } else {
-                dialogView.cancel_reminder_button.visibility = View.GONE
+                dialogView.cancel_reminder_button.visibility = GONE
                 dialogView.reminder_text.text = getString(R.string.set_reminder)
                 val typedValue = TypedValue()
                 context?.theme?.resolveAttribute(R.attr.mainTextColor, typedValue, true)

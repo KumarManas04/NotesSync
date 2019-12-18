@@ -106,7 +106,6 @@
         <ImageView
                 android:id="@+id/cancel_reminder_button"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/overlay_simple_ripple"
                 android:src="@drawable/cancel_reminder"
                 android:visibility="gone"
                 android:layout_width="26dp"
