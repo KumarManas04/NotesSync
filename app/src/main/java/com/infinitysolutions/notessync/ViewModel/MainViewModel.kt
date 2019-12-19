@@ -15,11 +15,29 @@ class MainViewModel: ViewModel(){
     private val syncNotes = MutableLiveData<Event<Int>>()
     private val mToolbar = MutableLiveData<Toolbar>()
     private val viewMode = MutableLiveData<Int>()
+    private var currentImage: String? = null
+    private var currentPhotoPath: String? = null
     var intent: Intent? = null
     var reminderTime = -1L
 
     init{
         viewMode.value = 1
+    }
+
+    fun getCurrentImage(): String?{
+        return currentImage
+    }
+
+    fun setCurrentImage(image: String){
+        currentImage = image
+    }
+
+    fun getCurrentPhotoPath(): String?{
+        return currentPhotoPath
+    }
+
+    fun setCurrentPhotoPath(photoPath: String){
+        currentPhotoPath = photoPath
     }
 
     fun setViewMode(mode: Int){

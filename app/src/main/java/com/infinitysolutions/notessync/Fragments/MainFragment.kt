@@ -3,6 +3,8 @@ package com.infinitysolutions.notessync.Fragments
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -18,11 +20,13 @@ import com.infinitysolutions.notessync.Adapters.NotesAdapter
 import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_CAPTURE_REQUEST_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.MainActivity
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
@@ -65,6 +69,12 @@ class MainFragment : Fragment() {
         rootView.new_note_button.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
             mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
+        }
+
+        rootView.new_image_note_btn.setOnClickListener {
+            val i = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(i, IMAGE_CAPTURE_REQUEST_CODE)
+            //TODO: Open image selection dialog and then after image is received new image note is created
         }
 
         rootView.new_list_button.setOnClickListener{
@@ -127,8 +137,7 @@ class MainFragment : Fragment() {
                     // find navController. This is an issue in the Navigation components in Jetpack
                     try {
                         Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_noteEditFragment)
-                    } catch (e: Exception) {
-                    }
+                    } catch (e: Exception) { }
                 }
             }
         })

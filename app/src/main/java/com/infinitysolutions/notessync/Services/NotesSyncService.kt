@@ -259,6 +259,8 @@ class NotesSyncService : Service() {
                     else
                         workScheduler.cancelReminderByNoteId(localNotesList[localCounter].nId)
                     isLocalDbChanged = true
+
+                    //TODO: Add the localNote to the newFilesList
                     continue
                 }
 

@@ -9,7 +9,6 @@ import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -20,7 +19,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,7 +26,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.infinitysolutions.checklistview.ChecklistView
 import com.infinitysolutions.notessync.Adapters.ColorPickerAdapter
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.IS_ROTATED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
@@ -63,7 +60,7 @@ class NoteEditFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_note_edit, container, false)
-        initDataBinding(rootView, savedInstanceState)
+        initDataBinding(rootView)
 
         //Setting up bottom menu
         val menuButton = rootView.open_bottom_menu
@@ -73,7 +70,7 @@ class NoteEditFragment : Fragment() {
         return rootView
     }
 
-    private fun initDataBinding(rootView: View, savedInstanceState: Bundle?) {
+    private fun initDataBinding(rootView: View) {
         databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
         mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
@@ -118,13 +115,6 @@ class NoteEditFragment : Fragment() {
                 if (mainViewModel.getShouldOpenEditor().value!!) {
                     mainViewModel.setShouldOpenEditor(false)
                     prepareNoteView(rootView)
-                }else{
-                    if(savedInstanceState != null)
-                        if(savedInstanceState.getBoolean(IS_ROTATED)) {
-                            if(mainViewModel.getSelectedNote()?.nId == -1L)
-                                Toast.makeText(activity, "Note saved. This is a new note", LENGTH_SHORT).show()
-                            prepareNoteView(rootView)
-                        }
                 }
             }
         }
@@ -392,18 +382,15 @@ class NoteEditFragment : Fragment() {
         if (selectedNote != null) {
             val noteContentText = getNoteText(selectedNote)
 
-            if ((selectedNote.noteContent != noteContentText)
+            if (((selectedNote.noteContent != noteContentText)
                 || (selectedNote.noteTitle != noteTitle.text.toString())
                 || (selectedNote.noteColor != mainViewModel.getSelectedColor().value)
                 || (selectedNote.reminderTime != mainViewModel.reminderTime)
-            )
+            ) && !(activity!!.isChangingConfigurations)) {
                 saveNote(noteContentText)
+                //TODO: Call the sync work for this note here
+            }
         }
         super.onDestroy()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(IS_ROTATED, true)
     }
 }

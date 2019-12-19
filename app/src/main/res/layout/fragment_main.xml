@@ -74,12 +74,24 @@
                 android:padding="12dp"
                 android:textSize="18sp"
                 android:textColor="?attr/mainTextColor"
-                android:textAlignment="viewStart"
                 android:fontFamily="sans-serif-condensed"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:id="@+id/new_image_note_btn"
+            android:src="@drawable/new_image_note"
+            android:tint="?attr/iconsTint"
+            android:clickable="true"
+            android:background="@drawable/overlay_simple_ripple"
+            android:layout_gravity="center_vertical"
+            android:padding="12dp"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:focusable="true"
+            android:contentDescription="New image note"/>
 
         <ImageView
                 android:id="@+id/new_list_button"

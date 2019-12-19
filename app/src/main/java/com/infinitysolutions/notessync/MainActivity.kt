@@ -1,10 +1,15 @@
 package com.infinitysolutions.notessync
 
+import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -15,6 +20,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.DRIVE_EXTRA
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_CAPTURE_REQUEST_CODE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_PICKER_REQUEST_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_INDICATOR_EXTRA
@@ -25,6 +32,7 @@ import com.infinitysolutions.notessync.Services.NotesSyncService
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.ByteArrayOutputStream
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
@@ -155,6 +163,37 @@ class MainActivity : AppCompatActivity() {
                 return true
         }
         return false
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(resultCode == Activity.RESULT_OK){
+            val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+            val bitmap = if(requestCode == IMAGE_PICKER_REQUEST_CODE){
+                val uri: Uri? = data?.data
+                if (uri != null) {
+                    val imageStream = contentResolver.openInputStream(uri)
+                    BitmapFactory.decodeStream(imageStream)
+                }else{
+                    null
+                }
+            }else if(requestCode == IMAGE_CAPTURE_REQUEST_CODE){
+                BitmapFactory.decodeFile(mainViewModel.getCurrentPhotoPath())
+            }else{
+                null
+            }
+            if(bitmap != null){
+                val baos = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+                val b = baos.toByteArray()
+                mainViewModel.setCurrentImage(Base64.encodeToString(b, Base64.DEFAULT))
+                // case 1: when new image note is being created
+                // case 2: when a new image is being added
+                // For case 2: 2 sub cases are present
+                // case 2.1: When new image is added to a new image note
+                // case 2.2: When new image is added to an old image note
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onDestroy() {

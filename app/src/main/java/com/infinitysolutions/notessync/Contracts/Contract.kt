@@ -56,5 +56,7 @@ class Contract{
         const val STATE_NEW_PIN = 0
         const val STATE_CHANGE_PIN = 1
         const val IS_ROTATED = "isRotated"
+        const val IMAGE_CAPTURE_REQUEST_CODE = 1010
+        const val IMAGE_PICKER_REQUEST_CODE = 1020
     }
 }
