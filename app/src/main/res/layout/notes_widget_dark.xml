@@ -33,6 +33,17 @@
                 android:layout_height="40dp"
                 android:contentDescription="@string/new_list"/>
 
+        <ImageView
+            android:id="@+id/new_image_button"
+            android:padding="8dp"
+            android:foregroundGravity="center"
+            android:src="@drawable/new_image_note"
+            android:background="#252629"
+            android:tint="#ffffff"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:contentDescription="New Image"/>
     </LinearLayout>
 
     <ListView

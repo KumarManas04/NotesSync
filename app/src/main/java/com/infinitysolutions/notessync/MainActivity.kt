@@ -19,6 +19,8 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
+import com.google.gson.Gson
+import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.DRIVE_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_CAPTURE_REQUEST_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_PICKER_REQUEST_CODE
@@ -28,11 +30,20 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_INDICAT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
+import com.infinitysolutions.notessync.Model.ImageData
+import com.infinitysolutions.notessync.Model.ImageNoteContent
+import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Services.NotesSyncService
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
+import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
@@ -41,9 +52,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val prefs = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-        if(prefs.contains(PREF_THEME)){
-            when(prefs.getInt(PREF_THEME, THEME_DEFAULT)){
-                THEME_DEFAULT-> setTheme(R.style.AppTheme)
+        if (prefs.contains(PREF_THEME)) {
+            when (prefs.getInt(PREF_THEME, THEME_DEFAULT)) {
+                THEME_DEFAULT -> setTheme(R.style.AppTheme)
                 THEME_DARK -> setTheme(R.style.AppThemeDark)
                 THEME_AMOLED -> setTheme(R.style.AppThemeAmoled)
             }
@@ -54,16 +65,22 @@ class MainActivity : AppCompatActivity() {
         initDataBinding()
     }
 
-    private fun initDataBinding(){
+    private fun initDataBinding() {
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
         mainViewModel.getSyncNotes().observe(this, Observer {
-            it.getContentIfNotHandled()?.let {noteType-> syncFiles(noteType) }
+            it.getContentIfNotHandled()?.let { noteType -> syncFiles(noteType) }
         })
 
-        mainViewModel.getToolbar().observe(this, Observer {toolbar->
+        mainViewModel.getToolbar().observe(this, Observer { toolbar ->
             if (toolbar != null) {
-                val toggle = ActionBarDrawerToggle(this, drawer_layout, toolbar, R.string.app_name, R.string.app_name)
+                val toggle = ActionBarDrawerToggle(
+                    this,
+                    drawer_layout,
+                    toolbar,
+                    R.string.app_name,
+                    R.string.app_name
+                )
                 drawer_layout.addDrawerListener(toggle)
                 toggle.isDrawerIndicatorEnabled = true
                 toggle.syncState()
@@ -73,70 +90,77 @@ class MainActivity : AppCompatActivity() {
 
         Navigation.findNavController(this, R.id.nav_host_fragment)
             .addOnDestinationChangedListener { _, destination, _ ->
-                when(destination.id){
-                    R.id.mainFragment-> {
+                when (destination.id) {
+                    R.id.mainFragment -> {
                         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                         //Hide keyboard
                         val view = this.currentFocus
                         view?.let { v ->
-                            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                            val imm =
+                                getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
                             imm?.hideSoftInputFromWindow(v.windowToken, 0)
                         }
                     }
-                    else-> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                    else -> drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                 }
             }
     }
 
-    private fun prepareNavDrawer(){
+    private fun prepareNavDrawer() {
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         val index = mainViewModel.getViewMode().value
         if (index != null)
-            navigation_view.menu[index -1].isChecked = true
+            navigation_view.menu[index - 1].isChecked = true
         else
             navigation_view.menu[0].isChecked = true
         navigation_view.setNavigationItemSelectedListener {
-            when(it.itemId){
-                R.id.all->{
+            when (it.itemId) {
+                R.id.all -> {
                     mainViewModel.setViewMode(1)
                     drawer_layout.closeDrawers()
                 }
-                R.id.notes->{
+                R.id.notes -> {
                     mainViewModel.setViewMode(2)
                     drawer_layout.closeDrawers()
                 }
-                R.id.lists->{
+                R.id.lists -> {
                     mainViewModel.setViewMode(3)
                     drawer_layout.closeDrawers()
                 }
-                R.id.archive->{
+                R.id.archive -> {
                     mainViewModel.setViewMode(4)
                     drawer_layout.closeDrawers()
                 }
-                R.id.trash->{
+                R.id.trash -> {
                     mainViewModel.setViewMode(5)
                     drawer_layout.closeDrawers()
                 }
-                R.id.settings->{
-                    Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.action_mainFragment_to_settingsFragment)
+                R.id.settings -> {
+                    Navigation.findNavController(this, R.id.nav_host_fragment)
+                        .navigate(R.id.action_mainFragment_to_settingsFragment)
                     drawer_layout.closeDrawers()
                 }
-                R.id.share->{
-                    val message = "Hey there!\nTry Notes Sync.\nIt is really fast, easy to use and privacy focused with lots of cool features. https://play.google.com/store/apps/details?id=com.infinitysolutions.notessync"
+                R.id.share -> {
+                    val message =
+                        "Hey there!\nTry Notes Sync.\nIt is really fast, easy to use and privacy focused with lots of cool features. https://play.google.com/store/apps/details?id=com.infinitysolutions.notessync"
                     val shareIntent = Intent(Intent.ACTION_SEND)
                     shareIntent.type = "text/plain"
                     shareIntent.putExtra(Intent.EXTRA_TEXT, message)
                     startActivity(Intent.createChooser(shareIntent, "Share..."))
                 }
-                R.id.rate->{
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.infinitysolutions.notessync"))
+                R.id.rate -> {
+                    val browserIntent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://play.google.com/store/apps/details?id=com.infinitysolutions.notessync")
+                    )
                     if (browserIntent.resolveActivity(packageManager) != null)
                         startActivity(browserIntent)
                     else
                         Toast.makeText(this, "No browser found!", Toast.LENGTH_SHORT).show()
                 }
-                R.id.about->{
-                    Navigation.findNavController(this, R.id.nav_host_fragment).navigate(R.id.action_mainFragment_to_aboutFragment)
+                R.id.about -> {
+                    Navigation.findNavController(this, R.id.nav_host_fragment)
+                        .navigate(R.id.action_mainFragment_to_aboutFragment)
                     drawer_layout.closeDrawers()
                 }
             }
@@ -144,14 +168,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun syncFiles(driveType: Int){
-        if (!isServiceRunning()){
+    private fun syncFiles(driveType: Int) {
+        if (!isServiceRunning()) {
             Toast.makeText(this, "Syncing...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, NotesSyncService::class.java)
             intent.putExtra(DRIVE_EXTRA, driveType)
             intent.putExtra(SYNC_INDICATOR_EXTRA, true)
             startService(intent)
-        }else{
+        } else {
             Toast.makeText(this, "Already syncing. Please wait...", Toast.LENGTH_SHORT).show()
         }
     }
@@ -166,33 +190,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if(resultCode == Activity.RESULT_OK){
-            val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-            val bitmap = if(requestCode == IMAGE_PICKER_REQUEST_CODE){
-                val uri: Uri? = data?.data
-                if (uri != null) {
-                    val imageStream = contentResolver.openInputStream(uri)
-                    BitmapFactory.decodeStream(imageStream)
-                }else{
-                    null
-                }
-            }else if(requestCode == IMAGE_CAPTURE_REQUEST_CODE){
-                BitmapFactory.decodeFile(mainViewModel.getCurrentPhotoPath())
-            }else{
-                null
-            }
-            if(bitmap != null){
-                val baos = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-                val b = baos.toByteArray()
-                mainViewModel.setCurrentImage(Base64.encodeToString(b, Base64.DEFAULT))
-                // case 1: when new image note is being created
-                // case 2: when a new image is being added
-                // For case 2: 2 sub cases are present
-                // case 2.1: When new image is added to a new image note
-                // case 2.2: When new image is added to an old image note
-            }
-        }
+        Log.d(TAG, "onActivityResult")
         super.onActivityResult(requestCode, resultCode, data)
     }
 

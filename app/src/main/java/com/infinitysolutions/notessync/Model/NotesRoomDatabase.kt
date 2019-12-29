@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+//TODO: Update database version
 @Database(entities = [Note::class, ImageData::class], version = 1)
 abstract class NotesRoomDatabase : RoomDatabase() {
     abstract fun notesDao(): NotesDao

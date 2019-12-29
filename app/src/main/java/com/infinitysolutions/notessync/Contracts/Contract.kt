@@ -12,6 +12,7 @@ class Contract{
         const val IMAGE_DEFAULT = 7
         const val IMAGE_ARCHIVED = 8
         const val IMAGE_TRASH = 9
+        const val IMAGE_DELETED = 10
         const val FILE_TYPE_FOLDER = "application/vnd.google-apps.folder"
         const val FILE_TYPE_TEXT = "text/plain"
         const val DRIVE_EXTRA = "DriveExtra"
@@ -39,6 +40,7 @@ class Contract{
         const val WIDGET_BUTTON_EXTRA = "widgetButtonPressed"
         const val WIDGET_NEW_NOTE = "newNoteButtonPressed"
         const val WIDGET_NEW_LIST = "newListButtonPressed"
+        const val WIDGET_NEW_IMAGE = "newImageButtonPressed"
         const val PASSWORD_MODE = "changePasswordMode"
         const val MODE_CHANGE_PASSWORD = 0
         const val MODE_NEW_PASSWORD = 1

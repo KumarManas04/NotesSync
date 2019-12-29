@@ -12,6 +12,7 @@ import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_BUTTON_EXTRA
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_IMAGE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_LIST
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_NOTE
 import com.infinitysolutions.notessync.MainActivity
@@ -66,6 +67,11 @@ class NotesWidget : AppWidgetProvider() {
             newListIntent.putExtra(WIDGET_BUTTON_EXTRA, WIDGET_NEW_LIST)
             val newListPendingIntent = PendingIntent.getActivity(context, 2, newListIntent, PendingIntent.FLAG_UPDATE_CURRENT)
             remoteViews.setOnClickPendingIntent(R.id.new_list_button, newListPendingIntent)
+
+            val newImageIntent = Intent(context, MainActivity::class.java)
+            newImageIntent.putExtra(WIDGET_BUTTON_EXTRA, WIDGET_NEW_IMAGE)
+            val newImagePendingIntent = PendingIntent.getActivity(context, 50, newImageIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            remoteViews.setOnClickPendingIntent(R.id.new_image_button, newImagePendingIntent)
 
             val adapterIntent = Intent(context, WidgetRemoteViewsService::class.java)
             remoteViews.setRemoteAdapter(R.id.notes_list_view, adapterIntent)

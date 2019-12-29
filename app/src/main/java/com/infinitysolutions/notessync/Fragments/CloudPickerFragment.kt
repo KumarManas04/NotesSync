@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.dropbox.core.android.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -32,11 +32,10 @@ import kotlinx.android.synthetic.main.fragment_cloud_picker.view.*
 class CloudPickerFragment : Fragment() {
     private val TAG = "CloudPickerFragment"
     private lateinit var mainViewModel: MainViewModel
-    private lateinit var rootView: View
     private val REQUEST_SIGN_IN = 133
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        rootView = inflater.inflate(R.layout.fragment_cloud_picker, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_cloud_picker, container, false)
 
         mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
@@ -116,6 +115,6 @@ class CloudPickerFragment : Fragment() {
         bundle.putString(PREF_ID, id)
         bundle.putInt(PREF_CLOUD_TYPE, cloudType)
         bundle.putInt(PASSWORD_MODE, MODE_LOGIN_TIME_PASSWORD)
-        Navigation.findNavController(rootView).navigate(R.id.action_cloudPickerFragment_to_passwordFragment, bundle)
+        findNavController(this).navigate(R.id.action_cloudPickerFragment_to_passwordFragment, bundle)
     }
 }

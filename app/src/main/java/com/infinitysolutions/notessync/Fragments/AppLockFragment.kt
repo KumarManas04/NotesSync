@@ -11,7 +11,7 @@ import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_APP_LOCK_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
@@ -76,7 +76,7 @@ class AppLockFragment : Fragment() {
             if (prefs.contains(PREF_APP_LOCK_CODE)) {
                 prepareButtons(rootView)
             } else {
-                Navigation.findNavController(activity!!, R.id.nav_host_fragment).navigate(R.id.action_appLockFragment_to_mainFragment)
+                findNavController(this).navigate(R.id.action_appLockFragment_to_mainFragment)
             }
         }
     }
@@ -167,7 +167,7 @@ class AppLockFragment : Fragment() {
             if (prefs != null) {
                 val pin = prefs.getString(PREF_APP_LOCK_CODE, null)
                 if (pin != null && pin == code) {
-                    Navigation.findNavController(activity!!, R.id.nav_host_fragment).navigate(R.id.action_appLockFragment_to_mainFragment)
+                    findNavController(this).navigate(R.id.action_appLockFragment_to_mainFragment)
                 }else{
                     Toast.makeText(activity, "PIN Incorrect. Try again", LENGTH_SHORT).show()
                     passCode.value = ""

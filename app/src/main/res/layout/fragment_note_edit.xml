@@ -13,40 +13,46 @@
         android:background="?attr/mainBackground"
         app:navigationIcon="?attr/homeAsUpIndicator" />
 
-    <EditText
-        android:id="@+id/note_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:background="?attr/mainBackground"
-        android:fontFamily="sans-serif"
-        android:hint="@string/title"
-        android:inputType="textCapSentences"
-        android:padding="10dp"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/note_content_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
         android:layout_weight="1"
-        android:fillViewport="true"
-        android:padding="10dp">
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/images_recycler_view"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"/>
+
+            <EditText
+                android:id="@+id/note_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="16dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:background="?attr/mainBackground"
+                android:fontFamily="sans-serif"
+                android:hint="@string/title"
+                android:inputType="textCapSentences"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
             <EditText
                 android:id="@+id/note_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="10dp"
                 android:background="?attr/mainBackground"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="top|start"
@@ -59,11 +65,14 @@
                 android:id="@+id/checklist_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="10dp"
                 app:dragHandleColor="?attr/mainTextColor"
                 app:removeButtonColor="?attr/mainTextColor"
                 app:textColor="?attr/mainTextColor" />
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"

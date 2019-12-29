@@ -17,6 +17,7 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.infinitysolutions.notessync.Contracts.Contract
@@ -91,11 +92,11 @@ class SettingsFragment : Fragment() {
         configureAppLockButtons(rootView, prefs)
 
         rootView.about_button.setOnClickListener {
-            Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_aboutFragment)
+            findNavController(this).navigate(R.id.action_settingsFragment_to_aboutFragment)
         }
 
         rootView.resources_button.setOnClickListener {
-            Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_resourcesFragment)
+            findNavController(this).navigate(R.id.action_settingsFragment_to_resourcesFragment)
         }
 
         rootView.open_source_button.setOnClickListener {
@@ -150,7 +151,7 @@ class SettingsFragment : Fragment() {
             rootView.change_pin_button.setOnClickListener {
                 val bundle = Bundle()
                 bundle.putInt(APP_LOCK_STATE, STATE_CHANGE_PIN)
-                Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_appLockFragment, bundle)
+                findNavController(this).navigate(R.id.action_settingsFragment_to_appLockFragment, bundle)
             }
         }else{
             rootView.app_lock_toggle.isChecked = false
@@ -164,7 +165,7 @@ class SettingsFragment : Fragment() {
                 val bundle = Bundle()
                 bundle.putInt(APP_LOCK_STATE, STATE_NEW_PIN)
                 try {
-                    Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_appLockFragment, bundle)
+                    findNavController(this).navigate(R.id.action_settingsFragment_to_appLockFragment, bundle)
                 }catch (e: Exception){
                     rootView.app_lock_toggle.isChecked = false
                 }
@@ -197,7 +198,7 @@ class SettingsFragment : Fragment() {
                 bundle.putInt(PREF_CLOUD_TYPE, prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE))
                 bundle.putString(Contract.PREF_ID, prefs.getString(Contract.PREF_ID, null))
                 bundle.putInt(PASSWORD_MODE, passwordMode)
-                Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_passwordFragment, bundle)
+                findNavController(this).navigate(R.id.action_settingsFragment_to_passwordFragment, bundle)
             }
         }
     }
@@ -230,7 +231,7 @@ class SettingsFragment : Fragment() {
         prefs?.edit()?.putBoolean(PREF_IS_AUTO_SYNC_ENABLED, false)?.commit()
         rootView.auto_sync_toggle.isChecked = false
         rootView.logout_button.setOnClickListener {
-            Navigation.findNavController(rootView).navigate(R.id.action_settingsFragment_to_cloudPickerFragment)
+            findNavController(this).navigate(R.id.action_settingsFragment_to_cloudPickerFragment)
         }
 
         rootView.change_pass_title.text = getString(R.string.enable_encrypted_sync)

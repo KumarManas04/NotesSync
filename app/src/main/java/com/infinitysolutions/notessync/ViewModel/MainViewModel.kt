@@ -1,10 +1,12 @@
 package com.infinitysolutions.notessync.ViewModel
 
 import android.content.Intent
+import android.util.Log
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.infinitysolutions.notessync.Model.ImageData
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Util.Event
 
@@ -13,23 +15,16 @@ class MainViewModel: ViewModel(){
     private val selectedColor = MutableLiveData<Int>()
     private val shouldOpenEditor = MutableLiveData<Boolean>()
     private val syncNotes = MutableLiveData<Event<Int>>()
+    private val imagesList = ArrayList<ImageData>()
+    private val openImageView = MutableLiveData<Event<Int>>()
     private val mToolbar = MutableLiveData<Toolbar>()
     private val viewMode = MutableLiveData<Int>()
-    private var currentImage: String? = null
     private var currentPhotoPath: String? = null
     var intent: Intent? = null
     var reminderTime = -1L
 
     init{
         viewMode.value = 1
-    }
-
-    fun getCurrentImage(): String?{
-        return currentImage
-    }
-
-    fun setCurrentImage(image: String){
-        currentImage = image
     }
 
     fun getCurrentPhotoPath(): String?{
@@ -91,5 +86,28 @@ class MainViewModel: ViewModel(){
 
     fun getSyncNotes(): LiveData<Event<Int>>{
         return syncNotes
+    }
+
+    fun setImagesList(list: ArrayList<ImageData>?){
+        imagesList.clear()
+        if(list != null)
+            for(item in list)
+                imagesList.add(item)
+    }
+
+    fun addImageToImageList(image: ImageData){
+        imagesList.add(image)
+    }
+
+    fun getImagesList(): ArrayList<ImageData>{
+        return imagesList
+    }
+
+    fun setOpenImageView(imageId: Int){
+        openImageView.value = Event(imageId)
+    }
+
+    fun getOpenImageView(): LiveData<Event<Int>>{
+        return openImageView
     }
 }

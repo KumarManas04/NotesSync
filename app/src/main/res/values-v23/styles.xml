@@ -13,6 +13,7 @@
         <item name="overlayBackground">#ffffff</item>
         <item name="navDrawerItemTint">#3c4043</item>
         <item name="deleteMenuIcon">@drawable/delete_menu_icon</item>
+        <item name="addImageMenuIcon">@drawable/add_image_menu_icon</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
@@ -28,6 +29,7 @@
         <item name="overlayBackground">#2a2a2a</item>
         <item name="navDrawerItemTint">#ffffff</item>
         <item name="deleteMenuIcon">@drawable/delete_menu_icon_dark</item>
+        <item name="addImageMenuIcon">@drawable/add_image_menu_icon_dark</item>
     </style>
 
     <style name="AppThemeAmoled" parent="Theme.AppCompat.NoActionBar">
@@ -43,6 +45,7 @@
         <item name="overlayBackground">#2a2a2a</item>
         <item name="navDrawerItemTint">#ffffff</item>
         <item name="deleteMenuIcon">@drawable/delete_menu_icon_dark</item>
+        <item name="addImageMenuIcon">@drawable/add_image_menu_icon_dark</item>
     </style>
 
     <style name="NavigationDrawerStyle">

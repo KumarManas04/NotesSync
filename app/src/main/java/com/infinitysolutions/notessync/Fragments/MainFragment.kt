@@ -1,37 +1,60 @@
 package com.infinitysolutions.notessync.Fragments
 
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.gson.Gson
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
 import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_CAPTURE_REQUEST_CODE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_PICKER_REQUEST_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ID_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
-import com.infinitysolutions.notessync.MainActivity
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_BUTTON_EXTRA
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_IMAGE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_LIST
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_NOTE
+import com.infinitysolutions.notessync.Model.ImageNoteContent
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_main.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainFragment : Fragment() {
     private val TAG = "MainFragment"
@@ -42,7 +65,7 @@ class MainFragment : Fragment() {
         initDataBinding(rootView)
 
         rootView.search_button.setOnClickListener{
-            Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_searchFragment)
+            findNavController(this).navigate(R.id.action_mainFragment_to_searchFragment)
         }
         return rootView
     }
@@ -72,9 +95,10 @@ class MainFragment : Fragment() {
         }
 
         rootView.new_image_note_btn.setOnClickListener {
-            val i = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            startActivityForResult(i, IMAGE_CAPTURE_REQUEST_CODE)
-            //TODO: Open image selection dialog and then after image is received new image note is created
+            rootView.new_image_note_btn.setOnCreateContextMenuListener { menu, _, _ ->
+                openNewImageMenu(menu)
+            }
+            rootView.new_image_note_btn.showContextMenu()
         }
 
         rootView.new_list_button.setOnClickListener{
@@ -136,7 +160,7 @@ class MainFragment : Fragment() {
                     // If we don't put the navigation statement in try-catch block then app crashes due to unable to
                     // find navController. This is an issue in the Navigation components in Jetpack
                     try {
-                        Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_noteEditFragment)
+                        findNavController(this).navigate(R.id.action_mainFragment_to_noteEditFragment)
                     } catch (e: Exception) { }
                 }
             }
@@ -144,8 +168,7 @@ class MainFragment : Fragment() {
 
         if (mainViewModel.intent == null) {
             val intent = activity?.intent
-            if (intent != null && (intent.hasExtra(Intent.EXTRA_TEXT) || intent.hasExtra(Contract.WIDGET_BUTTON_EXTRA)
-                        || intent.hasExtra(Contract.NOTE_ID_EXTRA))) {
+            if (intent != null && (intent.hasExtra(Intent.EXTRA_TEXT) || intent.hasExtra(WIDGET_BUTTON_EXTRA) || intent.hasExtra(NOTE_ID_EXTRA))) {
                 if (intent.flags != Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) {
                     mainViewModel.intent = intent
                     var text = intent.getStringExtra(Intent.EXTRA_TEXT)
@@ -154,27 +177,78 @@ class MainFragment : Fragment() {
                         mainViewModel.setShouldOpenEditor(true)
                     }
 
-                    text = intent.getStringExtra(Contract.WIDGET_BUTTON_EXTRA)
+                    text = intent.getStringExtra(WIDGET_BUTTON_EXTRA)
                     if (text != null) {
-                        if (text == Contract.WIDGET_NEW_NOTE) {
-                            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
-                            mainViewModel.setShouldOpenEditor(true)
-                        } else if (text == Contract.WIDGET_NEW_LIST) {
-                            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", LIST_DEFAULT, false, null, -1L))
-                            mainViewModel.setShouldOpenEditor(true)
+                        Log.d(TAG, "Reached here")
+                        when (text) {
+                            WIDGET_NEW_NOTE -> {
+                                mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
+                                mainViewModel.setShouldOpenEditor(true)
+                            }
+                            WIDGET_NEW_LIST -> {
+                                mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", LIST_DEFAULT, false, null, -1L))
+                                mainViewModel.setShouldOpenEditor(true)
+                            }
+                            WIDGET_NEW_IMAGE -> {
+                                Log.d(TAG, "Triggered WIDGET_NEW_IMAGE")
+                                rootView.new_image_note_btn.post {
+                                    Log.d(TAG, "Triggered onPost")
+                                    rootView.new_image_note_btn.setOnCreateContextMenuListener { menu, _, _ ->
+                                        openNewImageMenu(menu)
+                                    }
+                                    rootView.new_image_note_btn.showContextMenu()
+                                }
+                            }
                         }
                     }
 
-                    val noteId = intent.getLongExtra(Contract.NOTE_ID_EXTRA, -1L)
+                    val noteId = intent.getLongExtra(NOTE_ID_EXTRA, -1L)
                     if (noteId != -1L) {
                         val bundle = Bundle()
                         bundle.putLong("NOTE_ID", noteId)
-                        Navigation.findNavController(activity!!, R.id.nav_host_fragment)
-                            .navigate(R.id.noteEditFragment, bundle)
+                        findNavController(this).navigate(R.id.noteEditFragment, bundle)
                     }
                 }
             }
         }
+    }
+
+    private fun openNewImageMenu(menu: Menu){
+        menu.add("Take a photo").setOnMenuItemClickListener {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            if (intent.resolveActivity(activity!!.packageManager) != null) {
+                val photoFile: File? = try{
+                    createImageFile()
+                }catch(e: IOException){
+                    e.printStackTrace()
+                    null
+                }
+                if(photoFile != null) {
+                    mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
+                    val photoUri = FileProvider.getUriForFile(context!!, "com.infinitysolutions.notessync.fileprovider", photoFile)
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                    startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
+                }else
+                    Toast.makeText(context, "Couldn't access file system", Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(context, "No camera app found!", Toast.LENGTH_SHORT).show()
+            }
+            true
+        }
+        menu.add("Pick an image").setOnMenuItemClickListener {
+            val i = Intent(Intent.ACTION_PICK)
+            i.type = "image/*"
+            startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)
+            true
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir: File? = activity?.filesDir
+        Log.d("MainActivity", "extDir: $storageDir")
+        return File.createTempFile("JPEG_${timeStamp}_",".jpg", storageDir)
     }
 
     private fun syncFiles(rootView: View){
@@ -185,15 +259,59 @@ class MainFragment : Fragment() {
                     if (prefs.getString(PREF_ACCESS_TOKEN, null) != null)
                         mainViewModel.setSyncNotes(CLOUD_DROPBOX)
                     else
-                        Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
+                        findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
                 } else {
                     if (GoogleSignIn.getLastSignedInAccount(activity) != null)
                         mainViewModel.setSyncNotes(CLOUD_GOOGLE_DRIVE)
                     else
-                        Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
+                        findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
                 }
             }else{
-                Navigation.findNavController(rootView).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
+                findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK) {
+            val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
+            var bitmap: Bitmap? = null
+            if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
+                val uri: Uri? = data?.data
+                if (uri != null) {
+                    val imageStream = activity!!.contentResolver.openInputStream(uri)
+                    bitmap = BitmapFactory.decodeStream(imageStream)
+                }
+            } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
+                bitmap = BitmapFactory.decodeFile(mainViewModel.getCurrentPhotoPath())
+                if(mainViewModel.getCurrentPhotoPath() != null) {
+                    val file = File(mainViewModel.getCurrentPhotoPath())
+                    if(file.exists())
+                        file.delete()
+                }
+            }
+            if (bitmap != null) {
+                val builder = AlertDialog.Builder(context)
+                builder.setCancelable(false)
+                builder.setView(R.layout.loading_dialog_layout)
+                val dialog = builder.create()
+                dialog.show()
+                GlobalScope.launch(Dispatchers.IO) {
+                    val imageData = databaseViewModel.insertImage(activity!!.filesDir.toString(), bitmap)
+                    val id: Long = imageData.imageId!!
+                    bitmap.recycle()
+
+                    withContext(Dispatchers.Main){
+                        dialog.dismiss()
+                        mainViewModel.setImagesList(arrayListOf(imageData))
+                        mainViewModel.setShouldOpenEditor(true)
+                        val imageContent = ImageNoteContent("", arrayListOf(id))
+                        val content = Gson().toJson(imageContent)
+                        mainViewModel.setSelectedNote(Note(-1L, "", content, 0, 0,
+                            "-1", Contract.IMAGE_DEFAULT, false, null, -1L)
+                        )
+                    }
+                }
             }
         }
     }

@@ -8,5 +8,4 @@ class WidgetRemoteViewsService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent?): RemoteViewsFactory {
         return WidgetRemoteViewsFactory(this.applicationContext)
     }
-
 }

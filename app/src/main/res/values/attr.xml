@@ -9,5 +9,6 @@
         <attr name="navDrawerItemTint" format="color"/>
         <attr name="syncIcon" format="integer"/>
         <attr name="deleteMenuIcon" format="integer"/>
+        <attr name="addImageMenuIcon" format="integer"/>
     </declare-styleable>
 </resources>
