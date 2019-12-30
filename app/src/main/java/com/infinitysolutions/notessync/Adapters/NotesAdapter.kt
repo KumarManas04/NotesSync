@@ -1,15 +1,11 @@
 package com.infinitysolutions.notessync.Adapters
 
 import android.app.AlertDialog
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
@@ -30,16 +26,13 @@ import com.bumptech.glide.request.target.Target
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_DEFAULT
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_DELETED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
-import com.infinitysolutions.notessync.Fragments.NotesWidget
 import com.infinitysolutions.notessync.Model.ImageNoteContent
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
@@ -52,11 +45,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 class NotesAdapter(private val mainViewModel: MainViewModel, private val databaseViewModel: DatabaseViewModel, private val items: List<Note>, val context: Context) : RecyclerView.Adapter<NotesAdapter.ViewHolder>() {
     private val colorsUtil = ColorsUtil()
@@ -164,13 +154,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                             .setTitle("Delete forever")
                             .setMessage("Are you sure you want to delete this note forever?")
                             .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
-                                if(items[position].noteType == IMAGE_TRASH){
-                                    val imageNoteContent = Gson().fromJson(items[position].noteContent, ImageNoteContent::class.java)
-                                    databaseViewModel.deleteImagesByIds(imageNoteContent.idList)
-                                    changeNoteType(position, IMAGE_DELETED)
-                                }else {
-                                    changeNoteType(position, NOTE_DELETED)
-                                }
+                                databaseViewModel.deleteNote(items[position])
                             }
                             .setNegativeButton("No", null)
                             .setCancelable(false)
@@ -214,17 +198,14 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                 items[position].reminderTime
             )
         )
-        updateWidgets()
     }
 
-    private fun updateWidgets() {
-        val intent = Intent(context, NotesWidget::class.java)
-        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-        val ids =
-            AppWidgetManager.getInstance(context)
-                .getAppWidgetIds(ComponentName(context, NotesWidget::class.java))
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-        context.sendBroadcast(intent)
+    fun getList(): List<Note>{
+        return items
+    }
+
+    fun isNotEmpty(): Boolean{
+        return items.isNotEmpty()
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

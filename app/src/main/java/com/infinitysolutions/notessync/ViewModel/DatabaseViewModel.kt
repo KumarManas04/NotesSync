@@ -1,15 +1,28 @@
 package com.infinitysolutions.notessync.ViewModel
 
 import android.app.Application
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.*
+import com.google.gson.Gson
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_DELETED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
+import com.infinitysolutions.notessync.Fragments.NotesWidget
 import com.infinitysolutions.notessync.Model.*
 import com.infinitysolutions.notessync.Repository.NotesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
@@ -53,6 +66,9 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
     fun insert(note: Note){
         viewModelScope.launch(Dispatchers.IO){
             repository.insert(note)
+            withContext(Dispatchers.Main){
+                updateWidgets(getApplication<Application>().applicationContext)
+            }
         }
     }
 
@@ -93,11 +109,46 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun deleteImagesByIds(idList: ArrayList<Long>){
+    private fun deleteImagesByIds(idList: ArrayList<Long>){
         viewModelScope.launch(Dispatchers.IO) {
             val images = getImagesByIds(idList)
             for(image in images)
                 deleteImage(image.imageId!!, image.imagePath)
         }
+    }
+
+    fun deleteNote(note: Note){
+        if(note.noteType == IMAGE_TRASH){
+            val imageNoteContent = Gson().fromJson(note.noteContent, ImageNoteContent::class.java)
+            deleteImagesByIds(imageNoteContent.idList)
+            changeNoteType(note, IMAGE_DELETED)
+        }else if(note.noteType == NOTE_TRASH || note.noteType == LIST_TRASH){
+            changeNoteType(note, NOTE_DELETED)
+        }
+    }
+
+    private fun changeNoteType(note: Note, noteType: Int) {
+        insert(
+            Note(
+                note.nId,
+                note.noteTitle,
+                note.noteContent,
+                note.dateCreated,
+                Calendar.getInstance().timeInMillis,
+                note.gDriveId,
+                noteType,
+                note.synced,
+                note.noteColor,
+                note.reminderTime
+            )
+        )
+    }
+
+    private fun updateWidgets(context: Context) {
+        val intent = Intent(context, NotesWidget::class.java)
+        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        val ids = AppWidgetManager.getInstance(context).getAppWidgetIds(ComponentName(context, NotesWidget::class.java))
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        context.sendBroadcast(intent)
     }
 }
