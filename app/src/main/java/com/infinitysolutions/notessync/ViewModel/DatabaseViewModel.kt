@@ -32,6 +32,7 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
             3 -> repository.getTodoList()
             4 -> repository.getArchiveList()
             5 -> repository.getTrashList()
+            6 -> repository.getImageNotesList()
             else -> null
         }
     }

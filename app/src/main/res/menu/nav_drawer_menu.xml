@@ -16,6 +16,11 @@
             android:title="To-do Lists"/>
 
         <item
+            android:id="@+id/image_notes"
+            android:icon="@drawable/new_image_note"
+            android:title="Image Notes"/>
+
+        <item
             android:id="@+id/archive"
             android:icon="@drawable/archive_drawer_item"
             android:title="Archive"/>

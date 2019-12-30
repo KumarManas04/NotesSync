@@ -10,6 +10,8 @@
         <item name="iconsTint">#000000</item>
         <item name="mainTextColor">#000000</item>
         <item name="syncIcon">@drawable/sync_notes</item>
+        <item name="compactViewIcon">@drawable/compact_view</item>
+        <item name="simpleViewIcon">@drawable/simple_view</item>
         <item name="overlayBackground">#ffffff</item>
         <item name="navDrawerItemTint">#3c4043</item>
         <item name="deleteMenuIcon">@drawable/delete_menu_icon</item>
@@ -26,6 +28,8 @@
         <item name="iconsTint">#ffffff</item>
         <item name="mainTextColor">#ffffff</item>
         <item name="syncIcon">@drawable/sync_notes_dark</item>
+        <item name="compactViewIcon">@drawable/compact_view_dark</item>
+        <item name="simpleViewIcon">@drawable/simple_view_dark</item>
         <item name="overlayBackground">#2a2a2a</item>
         <item name="navDrawerItemTint">#ffffff</item>
         <item name="deleteMenuIcon">@drawable/delete_menu_icon_dark</item>
@@ -42,6 +46,8 @@
         <item name="iconsTint">#ffffff</item>
         <item name="mainTextColor">#ffffff</item>
         <item name="syncIcon">@drawable/sync_notes_dark</item>
+        <item name="compactViewIcon">@drawable/compact_view_dark</item>
+        <item name="simpleViewIcon">@drawable/simple_view_dark</item>
         <item name="overlayBackground">#2a2a2a</item>
         <item name="navDrawerItemTint">#ffffff</item>
         <item name="deleteMenuIcon">@drawable/delete_menu_icon_dark</item>

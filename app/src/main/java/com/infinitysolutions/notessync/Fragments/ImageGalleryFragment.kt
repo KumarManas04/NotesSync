@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.infinitysolutions.notessync.Adapters.GalleryAdapter
 
@@ -26,6 +27,9 @@ class ImageGalleryFragment : Fragment() {
         val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
         val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
 
+        rootView.toolbar.setNavigationOnClickListener {
+            findNavController(this).navigateUp()
+        }
         viewPager = rootView.view_pager
         viewPager.adapter = GalleryAdapter(
             context!!,

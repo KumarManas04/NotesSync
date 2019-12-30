@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
@@ -79,17 +80,10 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
 
         var noteContent = items[position].noteContent
         if (items[position].noteType == LIST_DEFAULT || items[position].noteType == LIST_ARCHIVED || items[position].noteType == LIST_TRASH) {
-            holder.indicatorView.setImageResource(R.drawable.todo_indicator)
-            holder.indicatorView.visibility = VISIBLE
             holder.imageView.visibility = GONE
             if (noteContent != null && (noteContent.contains("[ ]") || noteContent.contains("[x]")))
                 noteContent = ChecklistConverter.convertList(noteContent)
-        } else if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == NOTE_ARCHIVED || items[position].noteType == NOTE_TRASH) {
-            holder.indicatorView.setImageResource(R.drawable.note_indicator)
-            holder.indicatorView.visibility = VISIBLE
-            holder.imageView.visibility = GONE
-        } else {
-            holder.indicatorView.visibility = GONE
+        } else if (items[position].noteType == IMAGE_DEFAULT || items[position].noteType == IMAGE_ARCHIVED || items[position].noteType == IMAGE_TRASH) {
             holder.imageView.visibility = VISIBLE
             val imageContent = Gson().fromJson(noteContent, ImageNoteContent::class.java)
             var path = pathsMap.get(position)
@@ -105,6 +99,8 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                 }
             }
             noteContent = imageContent.noteContent
+        } else {
+            holder.imageView.visibility = GONE
         }
 
         holder.contentTextView.visibility = if (noteContent == null || noteContent.isEmpty()) {
@@ -125,42 +121,41 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
             holder.itemContainer.setOnCreateContextMenuListener { menu, _, _ ->
                 if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH && items[position].noteType != IMAGE_TRASH) {
                     menu.add("Delete").setOnMenuItemClickListener {
-                        if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == NOTE_ARCHIVED)
-                            changeNoteType(position, NOTE_TRASH)
+                        if (items[position].noteType == IMAGE_DEFAULT || items[position].noteType == IMAGE_ARCHIVED)
+                            changeNoteType(position, IMAGE_TRASH)
                         else if (items[position].noteType == LIST_DEFAULT || items[position].noteType == LIST_ARCHIVED)
                             changeNoteType(position, LIST_TRASH)
                         else
-                            changeNoteType(position, IMAGE_TRASH)
+                            changeNoteType(position, NOTE_TRASH)
                         Toast.makeText(context, "Moved to trash", LENGTH_SHORT).show()
                         true
                     }
                     if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == LIST_DEFAULT || items[position].noteType == IMAGE_DEFAULT) {
                         menu.add("Archive").setOnMenuItemClickListener {
-                            if (items[position].noteType == NOTE_DEFAULT)
-                                changeNoteType(position, NOTE_ARCHIVED)
-                            else if (items[position].noteType == LIST_DEFAULT)
-                                changeNoteType(position, LIST_ARCHIVED)
-                            else
-                                changeNoteType(position, IMAGE_ARCHIVED)
+                            when (items[position].noteType) {
+                                IMAGE_DEFAULT -> changeNoteType(position, IMAGE_ARCHIVED)
+                                LIST_DEFAULT -> changeNoteType(position, LIST_ARCHIVED)
+                                else -> changeNoteType(position, NOTE_ARCHIVED)
+                            }
                             true
                         }
                     } else {
                         menu.add("Unarchive").setOnMenuItemClickListener {
-                            if (items[position].noteType == NOTE_ARCHIVED)
-                                changeNoteType(position, NOTE_DEFAULT)
+                            if (items[position].noteType == IMAGE_ARCHIVED)
+                                changeNoteType(position, IMAGE_DEFAULT)
                             else if (items[position].noteType == LIST_ARCHIVED)
                                 changeNoteType(position, LIST_DEFAULT)
                             else
-                                changeNoteType(position, IMAGE_DEFAULT)
+                                changeNoteType(position, NOTE_DEFAULT)
                             true
                         }
                     }
                 } else {
                     menu.add("Restore").setOnMenuItemClickListener {
                         when (items[position].noteType) {
-                            NOTE_TRASH -> changeNoteType(position, NOTE_DEFAULT)
+                            IMAGE_TRASH -> changeNoteType(position, IMAGE_DEFAULT)
                             LIST_TRASH -> changeNoteType(position, LIST_DEFAULT)
-                            else -> changeNoteType(position, IMAGE_DEFAULT)
+                            else -> changeNoteType(position, NOTE_DEFAULT)
                         }
                         true
                     }
@@ -236,7 +231,6 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         val titleTextView: TextView = itemView.title_text
         val contentTextView: TextView = itemView.content_preview_text
         val parentView: ConstraintLayout = itemView.parent_view
-        val indicatorView: ImageView = itemView.indicator_view
         val imageView: ImageView = itemView.image_view
         val itemContainer = itemView
     }

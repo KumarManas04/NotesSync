@@ -8,6 +8,8 @@
         <attr name="overlayBackground" format="color"/>
         <attr name="navDrawerItemTint" format="color"/>
         <attr name="syncIcon" format="integer"/>
+        <attr name="compactViewIcon" format="integer"/>
+        <attr name="simpleViewIcon" format="integer"/>
         <attr name="deleteMenuIcon" format="integer"/>
         <attr name="addImageMenuIcon" format="integer"/>
     </declare-styleable>

@@ -27,6 +27,10 @@ class NotesRepository(private val notesDao: NotesDao){
         return notesDao.getTrash()
     }
 
+    fun getImageNotesList(): LiveData<List<Note>>{
+        return notesDao.getImageNotesOnly()
+    }
+
     @WorkerThread
     suspend fun insert(note: Note){
         notesDao.insert(note)

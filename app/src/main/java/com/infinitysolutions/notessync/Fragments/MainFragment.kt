@@ -3,6 +3,7 @@ package com.infinitysolutions.notessync.Fragments
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -10,19 +11,19 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.View
+import android.view.*
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.app.ActivityCompat.invalidateOptionsMenu
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
@@ -36,6 +37,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ID_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_COMPACT_VIEW_MODE_ENABLED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_BUTTON_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_IMAGE
@@ -74,15 +76,44 @@ class MainFragment : Fragment() {
         val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
         mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
-        val notesRecyclerView = rootView.notes_recycler_view
-        notesRecyclerView.layoutManager = LinearLayoutManager(activity!!)
         val toolbar = rootView.toolbar
         toolbar.title = "All"
         toolbar.inflateMenu(R.menu.main_fragment_menu)
+
+        val notesRecyclerView = rootView.notes_recycler_view
+        val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && prefs.getBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)){
+            notesRecyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+            toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
+            toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = false
+        }else {
+            notesRecyclerView.layoutManager = LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
+            toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
+            toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
+        }
+
         toolbar.setOnMenuItemClickListener { item ->
             when(item.itemId){
                 R.id.sync_menu_item ->{
-                    syncFiles(rootView)
+                    syncFiles()
+                }
+                R.id.compact_view_menu_item->{
+                    val editor = prefs.edit()
+                    notesRecyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    editor.putBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)
+                    notesRecyclerView.adapter?.notifyDataSetChanged()
+                    toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
+                    toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = false
+                    editor.apply()
+                }
+                R.id.simple_view_menu_item->{
+                    val editor = prefs.edit()
+                    notesRecyclerView.layoutManager = LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
+                    editor.putBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, false)
+                    notesRecyclerView.adapter?.notifyDataSetChanged()
+                    toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
+                    toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
+                    editor.apply()
                 }
             }
             true
@@ -138,6 +169,12 @@ class MainFragment : Fragment() {
                         databaseViewModel.setViewMode(5)
                         rootView.empty_image.setImageResource(R.drawable.trash_empty)
                         rootView.empty_text.text = getString(R.string.trash_empty_message)
+                    }
+                    6 -> {
+                        toolbar.title = "Image notes"
+                        databaseViewModel.setViewMode(6)
+                        rootView.empty_image.setImageResource(R.drawable.image_notes_empty)
+                        rootView.empty_text.text = "Image notes appear here"
                     }
                 }
             }
@@ -251,7 +288,7 @@ class MainFragment : Fragment() {
         return File.createTempFile("JPEG_${timeStamp}_",".jpg", storageDir)
     }
 
-    private fun syncFiles(rootView: View){
+    private fun syncFiles() {
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
         if (prefs != null){
             if(prefs.contains(PREF_CLOUD_TYPE)) {

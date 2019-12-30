@@ -32,7 +32,7 @@ class SearchFragment : Fragment() {
         searchRecyclerView = rootView.result_recycler_view
         searchRecyclerView.layoutManager = LinearLayoutManager(context)
         rootView.back_button.setOnClickListener{
-            activity?.onBackPressed()
+            findNavController(this).navigateUp()
         }
         initDataBinding(rootView)
         return rootView

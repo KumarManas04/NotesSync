@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-            android:id="@+id/sync_menu_item"
-            android:icon="?attr/syncIcon"
-            android:orderInCategory="1"
-            android:title="@string/sync"
-            app:showAsAction="always"/>
+        android:id="@+id/sync_menu_item"
+        android:icon="?attr/syncIcon"
+        android:orderInCategory="3"
+        android:title="@string/sync"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/compact_view_menu_item"
+        android:icon="?attr/compactViewIcon"
+        android:orderInCategory="2"
+        android:title="Compact view"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/simple_view_menu_item"
+        android:icon="?attr/simpleViewIcon"
+        android:orderInCategory="1"
+        android:title="Simple view"
+        app:showAsAction="always" />
 </menu>

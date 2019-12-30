@@ -7,6 +7,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
@@ -23,6 +24,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.content.FileProvider
@@ -118,7 +120,7 @@ class NoteEditFragment : Fragment() {
         else
             toolbar.inflateMenu(R.menu.note_editor_menu)
         toolbar.setNavigationOnClickListener {
-            activity?.onBackPressed()
+            findNavController(this).navigateUp()
         }
 
         toolbar.setOnMenuItemClickListener { item ->
@@ -222,6 +224,12 @@ class NoteEditFragment : Fragment() {
                 checklistView.visibility = GONE
                 noteContent.visibility = VISIBLE
             }
+            noteContent.postDelayed({
+                noteContent.requestFocus()
+                noteContent.setSelection(noteContent.text.length)
+                val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(noteContent, 0)
+            }, 50)
         }
     }
 

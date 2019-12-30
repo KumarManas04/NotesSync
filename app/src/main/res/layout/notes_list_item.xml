@@ -5,26 +5,14 @@
     android:id="@+id/parent_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="20dp"
+    android:layout_marginStart="10dp"
     android:layout_marginTop="10dp"
-    android:layout_marginEnd="20dp"
+    android:layout_marginEnd="10dp"
     android:layout_marginBottom="5dp"
     android:background="@drawable/notes_item_round"
     android:clickable="true"
     android:elevation="2dp"
     android:focusable="true">
-
-    <ImageView
-        android:id="@+id/indicator_view"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp"
-        android:visibility="gone"
-        android:tint="#ffffff"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/new_image_note"/>
 
     <ImageView
         android:id="@+id/image_view"
@@ -38,30 +26,29 @@
 
     <TextView
         android:id="@+id/title_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="16dp"
-        android:paddingBottom="10dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="4dp"
         android:textColor="#fff"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@id/indicator_view"
         app:layout_constraintTop_toBottomOf="@id/image_view"
         tools:text="Hey"/>
 
     <TextView
         android:id="@+id/content_preview_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp"
         android:fontFamily="sans-serif-condensed"
         android:textColor="#fff"
         android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@id/indicator_view"
         app:layout_constraintTop_toBottomOf="@id/title_text"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:text="This is a testing ground."/>

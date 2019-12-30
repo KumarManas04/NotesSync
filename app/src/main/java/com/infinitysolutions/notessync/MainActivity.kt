@@ -96,8 +96,16 @@ class MainActivity : AppCompatActivity() {
                         //Hide keyboard
                         val view = this.currentFocus
                         view?.let { v ->
-                            val imm =
-                                getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                            imm?.hideSoftInputFromWindow(v.windowToken, 0)
+                        }
+                    }
+                    R.id.imageGalleryFragment->{
+                        drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                        //Hide keyboard
+                        val view = this.currentFocus
+                        view?.let { v ->
+                            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
                             imm?.hideSoftInputFromWindow(v.windowToken, 0)
                         }
                     }
@@ -127,12 +135,17 @@ class MainActivity : AppCompatActivity() {
                     mainViewModel.setViewMode(3)
                     drawer_layout.closeDrawers()
                 }
+
                 R.id.archive -> {
                     mainViewModel.setViewMode(4)
                     drawer_layout.closeDrawers()
                 }
                 R.id.trash -> {
                     mainViewModel.setViewMode(5)
+                    drawer_layout.closeDrawers()
+                }
+                R.id.image_notes-> {
+                    mainViewModel.setViewMode(6)
                     drawer_layout.closeDrawers()
                 }
                 R.id.settings -> {
