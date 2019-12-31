@@ -26,6 +26,9 @@ import com.bumptech.glide.request.target.Target
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_ARCHIVED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
@@ -69,28 +72,32 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
             ColorStateList.valueOf(Color.parseColor(colorsUtil.getColor(items[position].noteColor)))
 
         var noteContent = items[position].noteContent
-        if (items[position].noteType == LIST_DEFAULT || items[position].noteType == LIST_ARCHIVED || items[position].noteType == LIST_TRASH) {
-            holder.imageView.visibility = GONE
-            if (noteContent != null && (noteContent.contains("[ ]") || noteContent.contains("[x]")))
-                noteContent = ChecklistConverter.convertList(noteContent)
-        } else if (items[position].noteType == IMAGE_DEFAULT || items[position].noteType == IMAGE_ARCHIVED || items[position].noteType == IMAGE_TRASH) {
-            holder.imageView.visibility = VISIBLE
-            val imageContent = Gson().fromJson(noteContent, ImageNoteContent::class.java)
-            var path = pathsMap.get(position)
-            if (path != null) {
-                setImage(path, holder.imageView)
-            } else {
-                GlobalScope.launch(Dispatchers.IO) {
-                    path = databaseViewModel.getImagePathById(imageContent.idList[0])
-                    withContext(Dispatchers.Main) {
-                        pathsMap.put(position, path)
-                        setImage(path, holder.imageView)
+        when(items[position].noteType) {
+            LIST_DEFAULT, LIST_ARCHIVED, LIST_TRASH ->{
+                holder.imageView.visibility = GONE
+                if (noteContent != null && (noteContent.contains("[ ]") || noteContent.contains("[x]")))
+                    noteContent = ChecklistConverter.convertList(noteContent)
+            }
+            IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_TRASH, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED, IMAGE_LIST_TRASH ->{
+                holder.imageView.visibility = VISIBLE
+                val imageContent = Gson().fromJson(noteContent, ImageNoteContent::class.java)
+                var path = pathsMap.get(position)
+                if (path != null) {
+                    setImage(path, holder.imageView)
+                } else {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        path = databaseViewModel.getImagePathById(imageContent.idList[0])
+                        withContext(Dispatchers.Main) {
+                            pathsMap.put(position, path)
+                            setImage(path, holder.imageView)
+                        }
                     }
                 }
+                noteContent = imageContent.noteContent
             }
-            noteContent = imageContent.noteContent
-        } else {
-            holder.imageView.visibility = GONE
+            else ->{
+                holder.imageView.visibility = GONE
+            }
         }
 
         holder.contentTextView.visibility = if (noteContent == null || noteContent.isEmpty()) {
@@ -100,7 +107,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
             VISIBLE
         }
 
-        if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH) {
+        if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH && items[position].noteType != IMAGE_TRASH && items[position].noteType != IMAGE_LIST_TRASH) {
             holder.itemContainer.setOnClickListener {
                 mainViewModel.setSelectedNote(items[position])
                 mainViewModel.setShouldOpenEditor(true)
@@ -109,34 +116,43 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
 
         holder.itemContainer.setOnLongClickListener {
             holder.itemContainer.setOnCreateContextMenuListener { menu, _, _ ->
-                if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH && items[position].noteType != IMAGE_TRASH) {
+                if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH && items[position].noteType != IMAGE_TRASH && items[position].noteType != IMAGE_LIST_TRASH) {
                     menu.add("Delete").setOnMenuItemClickListener {
-                        if (items[position].noteType == IMAGE_DEFAULT || items[position].noteType == IMAGE_ARCHIVED)
-                            changeNoteType(position, IMAGE_TRASH)
-                        else if (items[position].noteType == LIST_DEFAULT || items[position].noteType == LIST_ARCHIVED)
-                            changeNoteType(position, LIST_TRASH)
-                        else
-                            changeNoteType(position, NOTE_TRASH)
+                        when(items[position].noteType){
+                            IMAGE_DEFAULT, IMAGE_ARCHIVED ->{
+                                changeNoteType(position, IMAGE_TRASH)
+                            }
+                            LIST_DEFAULT, LIST_ARCHIVED ->{
+                                changeNoteType(position, LIST_TRASH)
+                            }
+                            IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED ->{
+                                changeNoteType(position, IMAGE_LIST_TRASH)
+                            }
+                            else ->{
+                                changeNoteType(position, NOTE_TRASH)
+                            }
+                        }
                         Toast.makeText(context, "Moved to trash", LENGTH_SHORT).show()
                         true
                     }
-                    if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == LIST_DEFAULT || items[position].noteType == IMAGE_DEFAULT) {
+                    if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == LIST_DEFAULT || items[position].noteType == IMAGE_DEFAULT || items[position].noteType == IMAGE_LIST_DEFAULT) {
                         menu.add("Archive").setOnMenuItemClickListener {
                             when (items[position].noteType) {
                                 IMAGE_DEFAULT -> changeNoteType(position, IMAGE_ARCHIVED)
                                 LIST_DEFAULT -> changeNoteType(position, LIST_ARCHIVED)
+                                IMAGE_LIST_DEFAULT -> changeNoteType(position, IMAGE_LIST_ARCHIVED)
                                 else -> changeNoteType(position, NOTE_ARCHIVED)
                             }
                             true
                         }
                     } else {
                         menu.add("Unarchive").setOnMenuItemClickListener {
-                            if (items[position].noteType == IMAGE_ARCHIVED)
-                                changeNoteType(position, IMAGE_DEFAULT)
-                            else if (items[position].noteType == LIST_ARCHIVED)
-                                changeNoteType(position, LIST_DEFAULT)
-                            else
-                                changeNoteType(position, NOTE_DEFAULT)
+                            when (items[position].noteType) {
+                                IMAGE_ARCHIVED -> changeNoteType(position, IMAGE_DEFAULT)
+                                LIST_ARCHIVED -> changeNoteType(position, LIST_DEFAULT)
+                                IMAGE_LIST_ARCHIVED -> changeNoteType(position, IMAGE_LIST_DEFAULT)
+                                else -> changeNoteType(position, NOTE_DEFAULT)
+                            }
                             true
                         }
                     }
@@ -145,6 +161,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                         when (items[position].noteType) {
                             IMAGE_TRASH -> changeNoteType(position, IMAGE_DEFAULT)
                             LIST_TRASH -> changeNoteType(position, LIST_DEFAULT)
+                            IMAGE_LIST_TRASH -> changeNoteType(position, IMAGE_LIST_DEFAULT)
                             else -> changeNoteType(position, NOTE_DEFAULT)
                         }
                         true

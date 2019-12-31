@@ -13,6 +13,9 @@ class Contract{
         const val IMAGE_ARCHIVED = 8
         const val IMAGE_TRASH = 9
         const val IMAGE_DELETED = 10
+        const val IMAGE_LIST_DEFAULT = 11
+        const val IMAGE_LIST_ARCHIVED = 12
+        const val IMAGE_LIST_TRASH = 13
         const val FILE_TYPE_FOLDER = "application/vnd.google-apps.folder"
         const val FILE_TYPE_TEXT = "text/plain"
         const val DRIVE_EXTRA = "DriveExtra"

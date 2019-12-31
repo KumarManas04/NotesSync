@@ -19,6 +19,7 @@ class MainViewModel: ViewModel(){
     private val openImageView = MutableLiveData<Event<Int>>()
     private val mToolbar = MutableLiveData<Toolbar>()
     private val viewMode = MutableLiveData<Int>()
+    var noteType: Int? = null
     private var currentPhotoPath: String? = null
     var intent: Intent? = null
     var reminderTime = -1L

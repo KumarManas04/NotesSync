@@ -73,7 +73,16 @@ class ImageGalleryFragment : Fragment() {
                             .setCancelable(true)
                             .show()
                     }else{
-                        Toast.makeText(context, "At least one image is required", Toast.LENGTH_SHORT).show()
+                        AlertDialog.Builder(context)
+                            .setTitle("Delete")
+                            .setMessage("Are you sure you want to delete this image?")
+                            .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                                galleryAdapter.deleteImage(viewPager.currentItem)
+                                findNavController(this).navigateUp()
+                            }
+                            .setNegativeButton("No", null)
+                            .setCancelable(true)
+                            .show()
                     }
                 }
                 R.id.share_image_menu_item->{
@@ -98,7 +107,6 @@ class ImageGalleryFragment : Fragment() {
     }
 
     private fun sendBitmap(bitmap: Bitmap){
-        Log.d("ImageGalleryFragment", "Bitmap acquired.")
         GlobalScope.launch(Dispatchers.IO){
             val folder = File(activity!!.cacheDir, "images")
             try{
@@ -111,7 +119,6 @@ class ImageGalleryFragment : Fragment() {
                 outputStream.flush()
                 outputStream.close()
                 val uri = FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, file)
-                Log.d("ImageGalleryFragment", "Uri acquired")
                 withContext(Dispatchers.Main){
                     if(uri != null){
                         val intent = Intent(Intent.ACTION_SEND)

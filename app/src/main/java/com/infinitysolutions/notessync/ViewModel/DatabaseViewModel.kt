@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_DELETED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
@@ -118,7 +119,7 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun deleteNote(note: Note){
-        if(note.noteType == IMAGE_TRASH){
+        if(note.noteType == IMAGE_TRASH || note.noteType == IMAGE_LIST_TRASH){
             val imageNoteContent = Gson().fromJson(note.noteContent, ImageNoteContent::class.java)
             deleteImagesByIds(imageNoteContent.idList)
             changeNoteType(note, IMAGE_DELETED)

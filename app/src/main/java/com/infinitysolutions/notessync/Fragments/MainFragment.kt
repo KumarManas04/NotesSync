@@ -65,11 +65,7 @@ class MainFragment : Fragment() {
     private val TAG = "MainFragment"
     private lateinit var mainViewModel: MainViewModel
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_main, container, false)
         initDataBinding(rootView)
 

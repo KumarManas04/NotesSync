@@ -184,11 +184,6 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d(TAG, "onActivityResult")
-        super.onActivityResult(requestCode, resultCode, data)
-    }
-
     override fun onDestroy() {
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         mainViewModel.intent = null

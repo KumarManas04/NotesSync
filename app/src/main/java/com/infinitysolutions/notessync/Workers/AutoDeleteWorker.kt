@@ -28,6 +28,7 @@ class AutoDeleteWorker(context: Context, params: WorkerParameters) : Worker(cont
         val trashList = notesDao.getTrashPresent()
         for (item in trashList){
             if (item.dateModified + differTime <= presentTime){
+                //TODO: Handle image based notes
                 notesDao.simpleInsert(
                     Note(
                         item.nId,
