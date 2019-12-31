@@ -204,10 +204,6 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         return items
     }
 
-    fun isNotEmpty(): Boolean{
-        return items.isNotEmpty()
-    }
-
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.title_text
         val contentTextView: TextView = itemView.content_preview_text

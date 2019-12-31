@@ -62,6 +62,10 @@ class GalleryAdapter(private val context: Context, private val list: ArrayList<I
         notifyItemRemoved(position)
     }
 
+    fun getItemAtPosition(pos: Int): ImageData{
+        return list[pos]
+    }
+
     class ViewHolder(view: TouchImageView): RecyclerView.ViewHolder(view){
         val imageView = view
     }

@@ -1,14 +1,10 @@
 package com.infinitysolutions.notessync
 
-import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -19,31 +15,17 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
-import com.google.gson.Gson
-import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.DRIVE_EXTRA
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_CAPTURE_REQUEST_CODE
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_PICKER_REQUEST_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_INDICATOR_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
-import com.infinitysolutions.notessync.Model.ImageData
-import com.infinitysolutions.notessync.Model.ImageNoteContent
-import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.Services.NotesSyncService
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
-import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"

@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/delete_menu_item"
-        android:icon="?attr/deleteMenuIcon"
+        android:id="@+id/delete_image_menu_item"
+        android:icon="@drawable/delete_menu_icon_tinted"
         android:orderInCategory="2"
         android:title="Delete note"
         app:showAsAction="always"/>
 
     <item
-        android:id="@+id/add_image_menu_item"
-        android:icon="?attr/addImageMenuIcon"
-        android:title="Add Image"
+        android:id="@+id/share_image_menu_item"
+        android:icon="@drawable/share_icon_tinted"
+        android:title="Share image"
         android:orderInCategory="1"
         app:showAsAction="always"/>
 </menu>

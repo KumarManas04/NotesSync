@@ -3,21 +3,40 @@ package com.infinitysolutions.notessync.Fragments
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.BitmapImageViewTarget
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.infinitysolutions.notessync.Adapters.GalleryAdapter
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_PROVIDER_AUTHORITY
 
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_image_gallery.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.Dispatcher
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.lang.Exception
 
 class ImageGalleryFragment : Fragment() {
     private lateinit var viewPager: ViewPager2
@@ -27,36 +46,84 @@ class ImageGalleryFragment : Fragment() {
         val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
         val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
 
-        rootView.toolbar.setNavigationOnClickListener {
-            findNavController(this).navigateUp()
-        }
         viewPager = rootView.view_pager
-        viewPager.adapter = GalleryAdapter(
+        val galleryAdapter = GalleryAdapter(
             context!!,
             mainViewModel.getImagesList(),
             databaseViewModel
         )
+        viewPager.adapter = galleryAdapter
+
+        val toolbar = rootView.toolbar
+        toolbar.setNavigationOnClickListener {
+            findNavController(this).navigateUp()
+        }
+        toolbar.inflateMenu(R.menu.gallery_view_menu)
+        toolbar.setOnMenuItemClickListener {item->
+            when(item.itemId){
+                R.id.delete_image_menu_item->{
+                    if(galleryAdapter.itemCount > 1) {
+                        AlertDialog.Builder(context)
+                            .setTitle("Delete")
+                            .setMessage("Are you sure you want to delete this image?")
+                            .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                                galleryAdapter.deleteImage(viewPager.currentItem)
+                            }
+                            .setNegativeButton("No", null)
+                            .setCancelable(true)
+                            .show()
+                    }else{
+                        Toast.makeText(context, "At least one image is required", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                R.id.share_image_menu_item->{
+                    val imageData = galleryAdapter.getItemAtPosition(viewPager.currentItem)
+                    Glide.with(context!!).asBitmap().load(imageData.imagePath).into(object: CustomTarget<Bitmap>(){
+                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                            sendBitmap(resource)
+                        }
+                        override fun onLoadCleared(placeholder: Drawable?) {}
+                    })
+                }
+            }
+            true
+        }
+
         val position: Int? = arguments?.getInt("currentPosition")
         if (position != null) {
             viewPager.setCurrentItem(position, false)
         }
 
-        rootView.delete_btn.setOnClickListener {
-            val adapter = (viewPager.adapter as GalleryAdapter)
-            if(adapter.itemCount > 1) {
-                AlertDialog.Builder(context)
-                    .setTitle("Delete")
-                    .setMessage("Are you sure you want to delete this image?")
-                    .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
-                        adapter.deleteImage(viewPager.currentItem)
+        return rootView
+    }
+
+    private fun sendBitmap(bitmap: Bitmap){
+        Log.d("ImageGalleryFragment", "Bitmap acquired.")
+        GlobalScope.launch(Dispatchers.IO){
+            val folder = File(activity!!.cacheDir, "images")
+            try{
+                folder.mkdirs()
+                val file = File(folder, "shared_image.png")
+                if(file.exists())
+                    file.delete()
+                val outputStream = FileOutputStream(file)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                outputStream.flush()
+                outputStream.close()
+                val uri = FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, file)
+                Log.d("ImageGalleryFragment", "Uri acquired")
+                withContext(Dispatchers.Main){
+                    if(uri != null){
+                        val intent = Intent(Intent.ACTION_SEND)
+                        intent.putExtra(Intent.EXTRA_STREAM, uri)
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        intent.type = "image/png"
+                        startActivity(Intent.createChooser(intent, "Share"))
                     }
-                    .setNegativeButton("No", null)
-                    .setCancelable(true)
-                    .show()
-            }else{
-                Toast.makeText(context, "At least one image is required", Toast.LENGTH_SHORT).show()
+                }
+            }catch(e: IOException){
+                e.printStackTrace()
             }
         }
-        return rootView
     }
 }

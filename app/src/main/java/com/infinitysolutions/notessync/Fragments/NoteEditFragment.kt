@@ -114,11 +114,9 @@ class NoteEditFragment : Fragment() {
 
         val toolbar = rootView.toolbar
         toolbar.title = ""
+        toolbar.inflateMenu(R.menu.note_editor_menu)
         val selectedNote: Note? = mainViewModel.getSelectedNote()
-        if (selectedNote != null && (selectedNote.noteType == IMAGE_DEFAULT || selectedNote.noteType == IMAGE_ARCHIVED))
-            toolbar.inflateMenu(R.menu.image_note_editor_menu)
-        else
-            toolbar.inflateMenu(R.menu.note_editor_menu)
+        toolbar.menu.findItem(R.id.add_image_menu_item).isVisible = selectedNote != null && (selectedNote.noteType == IMAGE_DEFAULT || selectedNote.noteType == IMAGE_ARCHIVED)
         toolbar.setNavigationOnClickListener {
             findNavController(this).navigateUp()
         }
@@ -378,7 +376,6 @@ class NoteEditFragment : Fragment() {
                     )
                 )
             }
-            updateWidgets()
             activity?.onBackPressed()
         }
     }
@@ -421,17 +418,7 @@ class NoteEditFragment : Fragment() {
                     )
                 )
             }
-            updateWidgets()
         }
-    }
-
-    private fun updateWidgets() {
-        val intent = Intent(activity, NotesWidget::class.java)
-        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-        val ids = AppWidgetManager.getInstance(activity)
-            .getAppWidgetIds(ComponentName(activity!!, NotesWidget::class.java))
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-        activity?.sendBroadcast(intent)
     }
 
     private fun deleteNote() {
@@ -468,7 +455,6 @@ class NoteEditFragment : Fragment() {
                         if (selectedNote.reminderTime != -1L) {
                             WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
                         }
-                        updateWidgets()
                     }
                 }
                 activity?.onBackPressed()

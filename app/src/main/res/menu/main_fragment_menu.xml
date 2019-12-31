@@ -4,28 +4,28 @@
 
     <item
         android:id="@+id/sync_menu_item"
-        android:icon="?attr/syncIcon"
+        android:icon="@drawable/sync_notes_tinted"
         android:orderInCategory="4"
         android:title="@string/sync"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/compact_view_menu_item"
-        android:icon="?attr/compactViewIcon"
+        android:icon="@drawable/compact_view_tinted"
         android:orderInCategory="3"
         android:title="Compact view"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/simple_view_menu_item"
-        android:icon="?attr/simpleViewIcon"
+        android:icon="@drawable/simple_view_tinted"
         android:orderInCategory="2"
         android:title="Simple view"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/empty_trash_menu_item"
-        android:icon="?attr/deleteMenuIcon"
+        android:icon="@drawable/empty_trash_icon_tinted"
         android:orderInCategory="1"
         android:title="Empty Trash"
         app:showAsAction="ifRoom" />

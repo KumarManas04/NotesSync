@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
 import android.view.*
@@ -31,6 +32,7 @@ import com.infinitysolutions.notessync.Adapters.NotesAdapter
 import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_PROVIDER_AUTHORITY
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_CAPTURE_REQUEST_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_PICKER_REQUEST_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
@@ -63,11 +65,15 @@ class MainFragment : Fragment() {
     private val TAG = "MainFragment"
     private lateinit var mainViewModel: MainViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val rootView = inflater.inflate(R.layout.fragment_main, container, false)
         initDataBinding(rootView)
 
-        rootView.search_button.setOnClickListener{
+        rootView.search_button.setOnClickListener {
             findNavController(this).navigate(R.id.action_mainFragment_to_searchFragment)
         }
         return rootView
@@ -83,42 +89,50 @@ class MainFragment : Fragment() {
 
         val notesRecyclerView = rootView.notes_recycler_view
         val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && prefs.getBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)){
-            notesRecyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && prefs.getBoolean(
+                PREF_COMPACT_VIEW_MODE_ENABLED,
+                true
+            )
+        ) {
+            notesRecyclerView.layoutManager =
+                StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
             toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
             toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = false
-        }else {
-            notesRecyclerView.layoutManager = LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
+        } else {
+            notesRecyclerView.layoutManager =
+                LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
             toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
             toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
         }
 
         toolbar.setOnMenuItemClickListener { item ->
-            when(item.itemId){
-                R.id.sync_menu_item ->{
+            when (item.itemId) {
+                R.id.sync_menu_item -> {
                     syncFiles()
                 }
-                R.id.compact_view_menu_item->{
+                R.id.compact_view_menu_item -> {
                     val editor = prefs.edit()
-                    notesRecyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    notesRecyclerView.layoutManager =
+                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
                     editor.putBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)
                     notesRecyclerView.adapter?.notifyDataSetChanged()
                     toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
                     toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = false
                     editor.apply()
                 }
-                R.id.simple_view_menu_item->{
+                R.id.simple_view_menu_item -> {
                     val editor = prefs.edit()
-                    notesRecyclerView.layoutManager = LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
+                    notesRecyclerView.layoutManager =
+                        LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
                     editor.putBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, false)
                     notesRecyclerView.adapter?.notifyDataSetChanged()
                     toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
                     toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
                     editor.apply()
                 }
-                R.id.empty_trash_menu_item->{
+                R.id.empty_trash_menu_item -> {
                     val adapter = notesRecyclerView.adapter as NotesAdapter
-                    if(adapter.isNotEmpty()) {
+                    if (adapter.itemCount > 0) {
                         AlertDialog.Builder(context)
                             .setTitle("Empty trash")
                             .setMessage("Are you sure you want to permanently delete all notes in trash?")
@@ -141,7 +155,20 @@ class MainFragment : Fragment() {
 
         rootView.new_note_button.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
-            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
+            mainViewModel.setSelectedNote(
+                Note(
+                    -1L,
+                    "",
+                    "",
+                    0,
+                    0,
+                    "-1",
+                    NOTE_DEFAULT,
+                    false,
+                    null,
+                    -1L
+                )
+            )
         }
 
         rootView.new_image_note_btn.setOnClickListener {
@@ -151,13 +178,26 @@ class MainFragment : Fragment() {
             rootView.new_image_note_btn.showContextMenu()
         }
 
-        rootView.new_list_button.setOnClickListener{
+        rootView.new_list_button.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
-            mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", LIST_DEFAULT, false, null, -1L))
+            mainViewModel.setSelectedNote(
+                Note(
+                    -1L,
+                    "",
+                    "",
+                    0,
+                    0,
+                    "-1",
+                    LIST_DEFAULT,
+                    false,
+                    null,
+                    -1L
+                )
+            )
         }
 
-        mainViewModel.getViewMode().observe(this, Observer { mode->
-            if (mode != null){
+        mainViewModel.getViewMode().observe(this, Observer { mode ->
+            if (mode != null) {
                 when (mode) {
                     1 -> {
                         toolbar.title = "All"
@@ -209,37 +249,45 @@ class MainFragment : Fragment() {
             if (viewList != null && viewList.isNotEmpty()) {
                 notesRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE
-                notesRecyclerView.adapter = NotesAdapter(mainViewModel, databaseViewModel, viewList, context!!)
-            }else{
+                notesRecyclerView.adapter =
+                    NotesAdapter(mainViewModel, databaseViewModel, viewList, context!!)
+            } else {
                 notesRecyclerView.visibility = GONE
                 rootView.empty_items.visibility = VISIBLE
             }
         })
 
-        mainViewModel.getShouldOpenEditor().observe(this, Observer {should ->
+        mainViewModel.getShouldOpenEditor().observe(this, Observer { should ->
             if (should != null) {
                 if (should) {
                     // If we don't put the navigation statement in try-catch block then app crashes due to unable to
                     // find navController. This is an issue in the Navigation components in Jetpack
                     try {
                         findNavController(this).navigate(R.id.action_mainFragment_to_noteEditFragment)
-                    } catch (e: Exception) { }
+                    } catch (e: Exception) {
+                    }
                 }
             }
         })
 
         if (mainViewModel.intent == null) {
             val intent = activity?.intent
-            if (intent != null && (intent.hasExtra(Intent.EXTRA_TEXT) || intent.hasExtra(WIDGET_BUTTON_EXTRA) || intent.hasExtra(NOTE_ID_EXTRA))) {
-                if (intent.flags != Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) {
-                    mainViewModel.intent = intent
-                    var text = intent.getStringExtra(Intent.EXTRA_TEXT)
+            if (intent != null && intent.flags != Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) {
+                mainViewModel.intent = intent
+
+                if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
+                    val text = intent.getStringExtra(Intent.EXTRA_TEXT)
                     if (text != null) {
                         mainViewModel.setSelectedNote(Note(-1L, "", text, 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
                         mainViewModel.setShouldOpenEditor(true)
                     }
-
-                    text = intent.getStringExtra(WIDGET_BUTTON_EXTRA)
+                }else if(intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true){
+                    (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {uri->
+                        val bitmap = getBitmapFromUri(uri)
+                        createNewNoteWithBitmap(bitmap)
+                    }
+                }else if (intent.hasExtra(WIDGET_BUTTON_EXTRA)) {
+                    val text = intent.getStringExtra(WIDGET_BUTTON_EXTRA)
                     if (text != null) {
                         Log.d(TAG, "Reached here")
                         when (text) {
@@ -263,7 +311,7 @@ class MainFragment : Fragment() {
                             }
                         }
                     }
-
+                }else if (intent.hasExtra(NOTE_ID_EXTRA)) {
                     val noteId = intent.getLongExtra(NOTE_ID_EXTRA, -1L)
                     if (noteId != -1L) {
                         val bundle = Bundle()
@@ -275,28 +323,34 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun openNewImageMenu(menu: Menu){
+    private fun openNewImageMenu(menu: Menu) {
         menu.add("Take a photo").setOnMenuItemClickListener {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             if (intent.resolveActivity(activity!!.packageManager) != null) {
-                val photoFile: File? = try{
+                val photoFile: File? = try {
                     createImageFile()
-                }catch(e: IOException){
+                } catch (e: IOException) {
                     e.printStackTrace()
                     null
                 }
-                if(photoFile != null) {
+                if (photoFile != null) {
                     mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
-                    val photoUri = FileProvider.getUriForFile(context!!, "com.infinitysolutions.notessync.fileprovider", photoFile)
+                    val photoUri =
+                        FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, photoFile)
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
                     startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
-                }else
-                    Toast.makeText(context, "Couldn't access file system", Toast.LENGTH_SHORT).show()
-            }else{
+                } else
+                    Toast.makeText(
+                        context,
+                        "Couldn't access file system",
+                        Toast.LENGTH_SHORT
+                    ).show()
+            } else {
                 Toast.makeText(context, "No camera app found!", Toast.LENGTH_SHORT).show()
             }
             true
         }
+
         menu.add("Pick an image").setOnMenuItemClickListener {
             val i = Intent(Intent.ACTION_PICK)
             i.type = "image/*"
@@ -307,16 +361,17 @@ class MainFragment : Fragment() {
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val timeStamp: String =
+            SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val storageDir: File? = activity?.filesDir
         Log.d("MainActivity", "extDir: $storageDir")
-        return File.createTempFile("JPEG_${timeStamp}_",".jpg", storageDir)
+        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 
     private fun syncFiles() {
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-        if (prefs != null){
-            if(prefs.contains(PREF_CLOUD_TYPE)) {
+        if (prefs != null) {
+            if (prefs.contains(PREF_CLOUD_TYPE)) {
                 if (prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE) == CLOUD_DROPBOX) {
                     if (prefs.getString(PREF_ACCESS_TOKEN, null) != null)
                         mainViewModel.setSyncNotes(CLOUD_DROPBOX)
@@ -328,7 +383,7 @@ class MainFragment : Fragment() {
                     else
                         findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
                 }
-            }else{
+            } else {
                 findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
             }
         }
@@ -336,45 +391,59 @@ class MainFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
-            val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
             var bitmap: Bitmap? = null
             if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
                 val uri: Uri? = data?.data
-                if (uri != null) {
-                    val imageStream = activity!!.contentResolver.openInputStream(uri)
-                    bitmap = BitmapFactory.decodeStream(imageStream)
-                }
+                bitmap = getBitmapFromUri(uri)
             } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
                 bitmap = BitmapFactory.decodeFile(mainViewModel.getCurrentPhotoPath())
-                if(mainViewModel.getCurrentPhotoPath() != null) {
+                if (mainViewModel.getCurrentPhotoPath() != null) {
                     val file = File(mainViewModel.getCurrentPhotoPath())
-                    if(file.exists())
+                    if (file.exists())
                         file.delete()
                 }
             }
-            if (bitmap != null) {
-                val builder = AlertDialog.Builder(context)
-                builder.setCancelable(false)
-                builder.setView(R.layout.loading_dialog_layout)
-                val dialog = builder.create()
-                dialog.show()
-                GlobalScope.launch(Dispatchers.IO) {
-                    val imageData = databaseViewModel.insertImage(activity!!.filesDir.toString(), bitmap)
-                    val id: Long = imageData.imageId!!
-                    bitmap.recycle()
+            createNewNoteWithBitmap(bitmap)
+        }
+    }
 
-                    withContext(Dispatchers.Main){
-                        dialog.dismiss()
-                        mainViewModel.setImagesList(arrayListOf(imageData))
-                        mainViewModel.setShouldOpenEditor(true)
-                        val imageContent = ImageNoteContent("", arrayListOf(id))
-                        val content = Gson().toJson(imageContent)
-                        mainViewModel.setSelectedNote(Note(-1L, "", content, 0, 0,
-                            "-1", Contract.IMAGE_DEFAULT, false, null, -1L)
+    private fun createNewNoteWithBitmap(bitmap: Bitmap?) {
+        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
+        if (bitmap != null) {
+            val builder = AlertDialog.Builder(context)
+            builder.setCancelable(false)
+            builder.setView(R.layout.loading_dialog_layout)
+            val dialog = builder.create()
+            dialog.show()
+            GlobalScope.launch(Dispatchers.IO) {
+                val imageData =
+                    databaseViewModel.insertImage(activity!!.filesDir.toString(), bitmap)
+                val id: Long = imageData.imageId!!
+                bitmap.recycle()
+
+                withContext(Dispatchers.Main) {
+                    dialog.dismiss()
+                    mainViewModel.setImagesList(arrayListOf(imageData))
+                    mainViewModel.setShouldOpenEditor(true)
+                    val imageContent = ImageNoteContent("", arrayListOf(id))
+                    val content = Gson().toJson(imageContent)
+                    mainViewModel.setSelectedNote(
+                        Note(
+                            -1L, "", content, 0, 0,
+                            "-1", Contract.IMAGE_DEFAULT, false, null, -1L
                         )
-                    }
+                    )
                 }
             }
+        }
+    }
+
+    private fun getBitmapFromUri(uri: Uri?): Bitmap? {
+        return if (uri != null) {
+            val imageStream = activity!!.contentResolver.openInputStream(uri)
+            BitmapFactory.decodeStream(imageStream)
+        } else {
+            null
         }
     }
 }

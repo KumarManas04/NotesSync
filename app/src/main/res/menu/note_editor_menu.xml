@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-            android:id="@+id/delete_menu_item"
-            android:icon="?attr/deleteMenuIcon"
-            android:orderInCategory="1"
-            android:title="Delete note"
-            app:showAsAction="always"/>
+        android:id="@+id/delete_menu_item"
+        android:icon="@drawable/delete_menu_icon_tinted"
+        android:orderInCategory="2"
+        android:title="Delete note"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/add_image_menu_item"
+        android:icon="@drawable/add_image_menu_icon_tinted"
+        android:title="Add Image"
+        android:orderInCategory="1"
+        app:showAsAction="always"/>
 </menu>

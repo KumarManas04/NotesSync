@@ -3,19 +3,19 @@
 
     <item
             android:id="@+id/light_menu_item"
-            android:icon="?attr/deleteMenuIcon"
+            android:icon="@drawable/delete_menu_icon_tinted"
             android:orderInCategory="1"
             android:title="Light" />
 
     <item
             android:id="@+id/dark_menu_item"
-            android:icon="?attr/deleteMenuIcon"
+            android:icon="@drawable/delete_menu_icon_tinted"
             android:orderInCategory="2"
             android:title="Dark" />
 
     <item
             android:id="@+id/amoled_menu_item"
-            android:icon="?attr/deleteMenuIcon"
+            android:icon="@drawable/delete_menu_icon_tinted"
             android:orderInCategory="3"
             android:title="Amoled" />
 </menu>
