@@ -25,6 +25,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -69,6 +70,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -353,14 +355,7 @@ class NoteEditFragment : Fragment() {
             }
 
             dialogView.share_button.setOnClickListener {
-                val shareIntent = Intent(Intent.ACTION_SEND)
-                shareIntent.type = "text/plain"
-                shareIntent.putExtra(
-                    Intent.EXTRA_TEXT,
-                    "${noteTitle.text}\n${getNoteText()}"
-                )
-                shareIntent.putExtra(Intent.EXTRA_SUBJECT, noteTitle.text.toString())
-                startActivity(Intent.createChooser(shareIntent, "Share..."))
+                shareNote()
             }
         }
 
@@ -369,11 +364,75 @@ class NoteEditFragment : Fragment() {
             dialog.hide()
         }
 
+        dialogView.make_copy_button.setOnClickListener {
+            databaseViewModel.makeCopy(mainViewModel.getSelectedNote(), mainViewModel.noteType, noteTitle.text.toString(), getNoteText())
+            dialog.hide()
+            Toast.makeText(context, "Done", LENGTH_SHORT).show()
+        }
+
         val layoutManager = LinearLayoutManager(this@NoteEditFragment.context!!, RecyclerView.HORIZONTAL, false)
         dialogView.color_picker.layoutManager = layoutManager
         dialogView.color_picker.adapter = ColorPickerAdapter(this@NoteEditFragment.context!!, mainViewModel)
         dialog.setContentView(dialogView)
         dialog.show()
+    }
+
+    private fun shareNote(){
+        val shareIntent: Intent
+        val shareText = when(mainViewModel.noteType){
+            LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED ->{
+                checklistView.toString()
+            }
+            else ->{
+                noteContent.text.toString()
+            }
+        }
+
+        if(mainViewModel.noteType == IMAGE_DEFAULT || mainViewModel.noteType == IMAGE_LIST_DEFAULT || mainViewModel.noteType == IMAGE_ARCHIVED || mainViewModel.noteType == IMAGE_LIST_ARCHIVED){
+            shareIntent = Intent(Intent.ACTION_SEND_MULTIPLE)
+            shareIntent.type = "*/*"
+            GlobalScope.launch(Dispatchers.IO) {
+                val list = getUriList()
+                shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, list)
+                shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, noteTitle.text.toString())
+                withContext(Dispatchers.Main){
+                    startActivity(Intent.createChooser(shareIntent, "Share..."))
+                }
+            }
+        }else{
+            shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.type = "text/plain"
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, noteTitle.text.toString())
+            startActivity(Intent.createChooser(shareIntent, "Share..."))
+        }
+    }
+
+    private fun getUriList(): ArrayList<Uri>{
+        val list = (imageRecyclerView.adapter as ImageListAdapter).list
+        var bitmap: Bitmap
+        val folder = File(activity!!.cacheDir, "images")
+        folder.mkdirs()
+        val uriList = ArrayList<Uri>()
+        for(imageData in list.withIndex()){
+            val file = File(imageData.value.imagePath)
+            bitmap = BitmapFactory.decodeFile(file.absolutePath)
+            uriList.add(getUriForBitmap(folder, bitmap, imageData.index))
+            bitmap?.recycle()
+        }
+        return uriList
+    }
+
+    private fun getUriForBitmap(folder: File, bitmap: Bitmap, index: Int): Uri{
+        val file = File(folder, "$index.png")
+        if(file.exists())
+            file.delete()
+        val outputStream = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        outputStream.flush()
+        outputStream.close()
+        return FileProvider.getUriForFile(context!!, Contract.FILE_PROVIDER_AUTHORITY, file)
     }
 
     private fun pickReminderTime(noteId: Long?) {
@@ -651,7 +710,7 @@ class NoteEditFragment : Fragment() {
                 val dialog = builder.create()
                 dialog.show()
                 GlobalScope.launch(Dispatchers.IO) {
-                    val imageData = databaseViewModel.insertImage(activity!!.filesDir.toString(), bitmap)
+                    val imageData = databaseViewModel.insertImage(bitmap)
                     bitmap.recycle()
 
                     withContext(Dispatchers.Main) {

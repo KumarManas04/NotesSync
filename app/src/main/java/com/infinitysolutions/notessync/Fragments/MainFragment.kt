@@ -412,8 +412,7 @@ class MainFragment : Fragment() {
             val dialog = builder.create()
             dialog.show()
             GlobalScope.launch(Dispatchers.IO) {
-                val imageData =
-                    databaseViewModel.insertImage(activity!!.filesDir.toString(), bitmap)
+                val imageData = databaseViewModel.insertImage(bitmap)
                 val id: Long = imageData.imageId!!
                 bitmap.recycle()
 

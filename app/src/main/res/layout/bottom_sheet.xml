@@ -1,124 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:background="?attr/mainBackground"
-              android:paddingTop="10dp"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/mainBackground"
+    android:orientation="vertical"
+    android:paddingTop="10dp">
 
     <LinearLayout
-            android:id="@+id/archive_button"
-            android:clickable="true"
-            android:background="?android:attr/selectableItemBackground"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:focusable="true">
+        android:id="@+id/archive_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="8dp">
 
         <ImageView
-                android:id="@+id/archive_button_icon"
-                android:src="@drawable/archive_drawer_item"
-                android:tint="?attr/iconsTint"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:contentDescription="@string/archive"/>
+            android:id="@+id/archive_button_icon"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:contentDescription="@string/archive"
+            android:src="@drawable/archive_drawer_item"
+            android:tint="?attr/iconsTint" />
 
         <TextView
-                android:id="@+id/archive_button_text"
-                android:text="@string/archive"
-                android:textSize="16sp"
-                android:textColor="?attr/mainTextColor"
-                android:layout_marginStart="30dp"
-                android:layout_gravity="center_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+            android:id="@+id/archive_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="30dp"
+            android:text="@string/archive"
+            android:textColor="?attr/mainTextColor"
+            android:textSize="16sp" />
 
     </LinearLayout>
 
     <LinearLayout
-            android:id="@+id/share_button"
-            android:clickable="true"
-            android:background="?android:attr/selectableItemBackground"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:focusable="true">
+        android:id="@+id/make_copy_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="8dp">
 
         <ImageView
-                android:src="@drawable/share_menu_item"
-                android:tint="?attr/iconsTint"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:contentDescription="@string/share"/>
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:contentDescription="@string/share"
+            android:src="@drawable/make_copy_icon"
+            android:tint="?attr/iconsTint" />
 
         <TextView
-                android:text="@string/share"
-                android:textSize="16sp"
-                android:textColor="?attr/mainTextColor"
-                android:layout_marginStart="30dp"
-                android:layout_gravity="center_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="30dp"
+            android:text="Make a copy"
+            android:textColor="?attr/mainTextColor"
+            android:textSize="16sp" />
 
     </LinearLayout>
 
     <LinearLayout
-            android:id="@+id/reminder_button"
-            android:clickable="true"
-            android:background="?android:attr/selectableItemBackground"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:focusable="true">
+        android:id="@+id/share_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="8dp">
 
         <ImageView
-                android:src="@drawable/reminder_icon"
-                android:layout_gravity="center_vertical"
-                android:tint="?attr/iconsTint"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:contentDescription="@string/set_reminder"/>
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:contentDescription="@string/share"
+            android:src="@drawable/share_menu_item"
+            android:tint="?attr/iconsTint" />
 
         <TextView
-                android:id="@+id/reminder_text"
-                android:text="@string/set_reminder"
-                android:textSize="16sp"
-                android:textColor="?attr/mainTextColor"
-                android:layout_marginStart="30dp"
-                android:layout_gravity="center_vertical"
-                android:maxLines="2"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="30dp"
+            android:text="@string/share"
+            android:textColor="?attr/mainTextColor"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/reminder_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="8dp">
 
         <ImageView
-                android:id="@+id/cancel_reminder_button"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/cancel_reminder"
-                android:visibility="gone"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:contentDescription="@string/cancel_reminder"/>
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/set_reminder"
+            android:src="@drawable/reminder_icon"
+            android:tint="?attr/iconsTint" />
+
+        <TextView
+            android:id="@+id/reminder_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="30dp"
+            android:layout_weight="1"
+            android:maxLines="2"
+            android:text="@string/set_reminder"
+            android:textColor="?attr/mainTextColor"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/cancel_reminder_button"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/cancel_reminder"
+            android:src="@drawable/cancel_reminder"
+            android:visibility="gone" />
 
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/color_picker"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+        android:id="@+id/color_picker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp" />
 
 </LinearLayout>

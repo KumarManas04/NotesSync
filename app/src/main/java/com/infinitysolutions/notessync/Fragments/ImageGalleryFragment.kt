@@ -111,7 +111,7 @@ class ImageGalleryFragment : Fragment() {
             val folder = File(activity!!.cacheDir, "images")
             try{
                 folder.mkdirs()
-                val file = File(folder, "shared_image.png")
+                val file = File(folder, "1.png")
                 if(file.exists())
                     file.delete()
                 val outputStream = FileOutputStream(file)

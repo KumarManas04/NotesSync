@@ -15,6 +15,7 @@ import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ID_EXTRA
 import com.infinitysolutions.notessync.Model.ImageNoteContent
@@ -41,7 +42,7 @@ class WidgetRemoteViewsFactory(private val context: Context) :
         }else
             rv.setViewVisibility(R.id.title_text, GONE)
 
-        if(notesList[position].noteType == IMAGE_DEFAULT){
+        if(notesList[position].noteType == IMAGE_DEFAULT || notesList[position].noteType == IMAGE_LIST_DEFAULT){
             rv.setViewVisibility(R.id.image_view, VISIBLE)
             val bitmap = Glide.with(context)
                 .asBitmap()
@@ -56,7 +57,7 @@ class WidgetRemoteViewsFactory(private val context: Context) :
         if (noteContent != null) {
             if (notesList[position].noteType == LIST_DEFAULT && (noteContent.contains("[ ]") || noteContent.contains("[x]")))
                 noteContent = ChecklistConverter.convertList(noteContent)
-            if (notesList[position].noteType == IMAGE_DEFAULT){
+            if (notesList[position].noteType == IMAGE_DEFAULT || notesList[position].noteType == IMAGE_LIST_DEFAULT){
                 val imageContent = Gson().fromJson(noteContent, ImageNoteContent::class.java)
                 noteContent = imageContent.noteContent
             }
@@ -98,7 +99,7 @@ class WidgetRemoteViewsFactory(private val context: Context) :
         var imageContent: ImageNoteContent
         var path: String
         for(i in notesList.indices){
-            if(notesList[i].noteType == IMAGE_DEFAULT){
+            if(notesList[i].noteType == IMAGE_DEFAULT || notesList[i].noteType == IMAGE_LIST_DEFAULT){
                 imageContent = Gson().fromJson(notesList[i].noteContent, ImageNoteContent::class.java)
                 path = imagesDao.getImagePathById(imageContent.idList[0])
                 pathsMap.put(i, path)
