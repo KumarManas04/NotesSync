@@ -64,5 +64,6 @@ class Contract{
         const val IMAGE_CAPTURE_REQUEST_CODE = 1010
         const val IMAGE_PICKER_REQUEST_CODE = 1020
         const val FILE_PROVIDER_AUTHORITY = "com.infinitysolutions.notessync.fileprovider"
+        const val TYPE_IMAGE = 0
     }
 }

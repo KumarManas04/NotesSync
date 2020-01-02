@@ -13,18 +13,19 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.app.ActivityCompat.invalidateOptionsMenu
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.gson.Gson
@@ -90,8 +91,8 @@ class MainFragment : Fragment() {
                 true
             )
         ) {
-            notesRecyclerView.layoutManager =
-                StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+            val columnCount = resources.getInteger(R.integer.columns_count)
+            notesRecyclerView.layoutManager = StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
             toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
             toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = false
         } else {
@@ -108,8 +109,8 @@ class MainFragment : Fragment() {
                 }
                 R.id.compact_view_menu_item -> {
                     val editor = prefs.edit()
-                    notesRecyclerView.layoutManager =
-                        StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    val columnCount = resources.getInteger(R.integer.columns_count)
+                    notesRecyclerView.layoutManager = StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
                     editor.putBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)
                     notesRecyclerView.adapter?.notifyDataSetChanged()
                     toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
