@@ -5,7 +5,6 @@ import android.app.AlertDialog
 import android.app.Service
 import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -48,14 +47,11 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_T
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_IS_AUTO_SYNC_ENABLED
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_LAST_SYNCED_TIME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Model.NoteFile
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.DropboxHelper
 import com.infinitysolutions.notessync.Util.GoogleDriveHelper
-import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.LoginViewModel
 import kotlinx.android.synthetic.main.fragment_password.view.*
 import kotlinx.coroutines.Dispatchers
@@ -84,7 +80,6 @@ class PasswordFragment : Fragment() {
             editor?.putBoolean(PREF_ENCRYPTED, false)
             editor?.putString(PREF_ID, userId)
             editor?.putInt(PREF_CLOUD_TYPE, cloudType)
-            setAutoSync(editor)
             editor?.commit()
             Toast.makeText(activity, "Login successful", LENGTH_SHORT).show()
             loginViewModel.isLoginSuccess = true
@@ -274,7 +269,6 @@ class PasswordFragment : Fragment() {
         editor?.putBoolean(PREF_ENCRYPTED, true)
         editor?.putString(PREF_ID, userId)
         editor?.putInt(PREF_CLOUD_TYPE, cloudType)
-        setAutoSync(editor)
         editor?.commit()
         Toast.makeText(activity, "Login successful", LENGTH_SHORT).show()
         loginViewModel.isLoginSuccess = true
@@ -352,14 +346,5 @@ class PasswordFragment : Fragment() {
         }
         loginViewModel.resetViewModel()
         super.onDestroy()
-    }
-
-    private fun setAutoSync(editor: SharedPreferences.Editor?) {
-        WorkSchedulerHelper().setAutoSync()
-        if (editor != null) {
-            editor.putBoolean(PREF_IS_AUTO_SYNC_ENABLED, true)
-            editor.putLong(PREF_LAST_SYNCED_TIME, 0)
-            editor.commit()
-        }
     }
 }

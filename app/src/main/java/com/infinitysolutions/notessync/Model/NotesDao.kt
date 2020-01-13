@@ -53,4 +53,7 @@ interface NotesDao {
 
     @Query("UPDATE notes_table SET content = :noteContent WHERE note_id = :noteId")
     fun updateNoteContent(noteId: Long, noteContent: String)
+
+    @Query("SELECT note_id FROM notes_table")
+    fun getAllIds(): List<Long>
 }

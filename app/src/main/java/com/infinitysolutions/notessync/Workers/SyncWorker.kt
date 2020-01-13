@@ -24,6 +24,7 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CREDENTIALS_FILENAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_SYSTEM_FILENAME
@@ -38,6 +39,8 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_D
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SYNC_QUEUE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Fragments.NotesWidget
@@ -68,7 +71,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     override fun doWork(): Result {
         val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         if (prefs.contains(PREF_SYNC_QUEUE)) {
-            val set = prefs.getStringSet(PREF_SYNC_QUEUE, null)
+            var set = prefs.getStringSet(PREF_SYNC_QUEUE, null)
             if (set != null && set.isNotEmpty()) {
                 when(val loginStatus = getLoginStatus(prefs)){
                     -1 ->{
@@ -96,18 +99,29 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     }
                 }
 
-                val database = NotesRoomDatabase.getDatabase(applicationContext)
-                notesDao = database.notesDao()
-                imagesDao = database.imagesDao()
-
-                val idsList = mutableListOf<Long>()
-                for(str in set)
-                    idsList.add(str.toLong())
-
-                val availableNotesList = notesDao.getNotesByIds(idsList)
                 try {
                     checkAndPrepareEncryption()
                     var fileSystem = getFileSystem()
+
+                    val database = NotesRoomDatabase.getDatabase(applicationContext)
+                    notesDao = database.notesDao()
+                    imagesDao = database.imagesDao()
+
+                    if(inputData.getBoolean("syncAll", true)){
+                        val cloudIds = mutableListOf<String>()
+                        for(noteFile in fileSystem)
+                            cloudIds.add(noteFile.nId.toString())
+                        val localIds = mutableListOf<String>()
+                        val localIdList = notesDao.getAllIds()
+                        for(id in localIdList)
+                            localIds.add(id.toString())
+                        set = cloudIds.union(localIds)
+                    }
+                    val idsList = mutableListOf<Long>()
+                    for(str in set)
+                        idsList.add(str.toLong())
+
+                    val availableNotesList = notesDao.getNotesByIds(idsList)
 
                     if (availableNotesList.isNotEmpty()) {
                         for (note in availableNotesList) {
@@ -659,7 +673,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
 
     private fun getDropboxClient(): DbxClientV2? {
         val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, Service.MODE_PRIVATE)
-        val accessToken = prefs.getString(Contract.PREF_ACCESS_TOKEN, null)
+        val accessToken = prefs.getString(PREF_ACCESS_TOKEN, null)
         return if (accessToken != null) {
             val requestConfig = DbxRequestConfig.newBuilder("Notes-Sync")
                 .withHttpRequestor(OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
@@ -856,10 +870,10 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun getLoginStatus(prefs: SharedPreferences?): Int {
-        if (prefs != null && prefs.contains(Contract.PREF_CLOUD_TYPE)) {
-            if (prefs.getInt(Contract.PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE) == Contract.CLOUD_DROPBOX) {
-                if (prefs.contains(Contract.PREF_ACCESS_TOKEN) && prefs.getString(Contract.PREF_ACCESS_TOKEN, null) != null)
-                    return Contract.CLOUD_DROPBOX
+        if (prefs != null && prefs.contains(PREF_CLOUD_TYPE)) {
+            if (prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE) == CLOUD_DROPBOX) {
+                if (prefs.contains(PREF_ACCESS_TOKEN) && prefs.getString(PREF_ACCESS_TOKEN, null) != null)
+                    return CLOUD_DROPBOX
             } else {
                 if (GoogleSignIn.getLastSignedInAccount(context) != null)
                     return CLOUD_GOOGLE_DRIVE

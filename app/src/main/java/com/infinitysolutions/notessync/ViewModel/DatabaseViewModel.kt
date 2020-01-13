@@ -4,11 +4,10 @@ import android.app.Application
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.Environment
-import android.util.Log
 import androidx.lifecycle.*
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_ARCHIVED
@@ -18,13 +17,15 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_A
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SYNC_QUEUE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Fragments.NotesWidget
 import com.infinitysolutions.notessync.Model.*
 import com.infinitysolutions.notessync.Repository.NotesRepository
+import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -69,7 +70,19 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch(Dispatchers.IO) {
             repository.insert(note)
             withContext(Dispatchers.Main) {
-                updateWidgets(getApplication<Application>().applicationContext)
+                val context = getApplication<Application>().applicationContext
+                updateWidgets(context)
+                val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+                var set = prefs.getStringSet(PREF_SYNC_QUEUE, null)
+                if(set == null)
+                   set = hashSetOf(note.nId.toString())
+                else
+                    set.add(note.nId.toString())
+
+                val editor = prefs.edit()
+                editor.putStringSet(PREF_SYNC_QUEUE, set)
+                editor.commit()
+                WorkSchedulerHelper().syncNotes(false)
             }
         }
     }
@@ -132,12 +145,24 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
 
     fun insertImage(image: Bitmap): ImageData {
         val path = getApplication<Application>().applicationContext.filesDir.toString()
-        //TODO: Apply any image compression while storing image here, if desired
+
+        var imageBitmap: Bitmap? = null
+        if(image.width > 1000 || image.height > 1000){
+            val ratio = (maxOf(image.width, image.height)).toFloat() / 1000.0f
+            val newWidth = (image.width * ratio).toInt()
+            val newHeight = (image.height * ratio).toInt()
+            imageBitmap = Bitmap.createScaledBitmap(image, newWidth, newHeight, false)
+            image.recycle()
+        }
+
         val time = Calendar.getInstance().timeInMillis
         val file = File(path, "$time.png")
         try {
             val fos = FileOutputStream(file)
-            image.compress(Bitmap.CompressFormat.PNG, 100, fos)
+            if(imageBitmap == null)
+                image.compress(Bitmap.CompressFormat.PNG, 100, fos)
+            else
+                imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
             fos.flush()
             fos.close()
         } catch (e: Exception) {

@@ -101,35 +101,6 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                    android:id="@+id/auto_sync_button"
-                    style="@style/prefsContainer">
-
-                <ImageView
-                        android:src="@drawable/sync_notes"
-                        style="@style/prefsIcon"/>
-
-                <LinearLayout style="@style/prefsTextContainer">
-
-                    <TextView
-                            android:text="@string/auto_sync"
-                            style="@style/prefsMain"/>
-
-                    <TextView
-                            android:text="@string/auto_sync_pref_summary"
-                            style="@style/prefsSummary"/>
-
-                </LinearLayout>
-
-                <Switch
-                        android:id="@+id/auto_sync_toggle"
-                        android:layout_margin="10dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-            </LinearLayout>
-
             <TextView
                     android:text="App lock"
                     style="@style/prefsCategoryTitle"/>

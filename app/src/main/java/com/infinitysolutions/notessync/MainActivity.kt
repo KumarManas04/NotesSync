@@ -1,6 +1,5 @@
 package com.infinitysolutions.notessync
 
-import android.app.ActivityManager
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -17,18 +16,15 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.DRIVE_EXTRA
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SYNC_QUEUE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_INDICATOR_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
-import com.infinitysolutions.notessync.Services.NotesSyncService
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.support_development_dialog.*
 import kotlinx.android.synthetic.main.support_development_dialog.view.*
 
 class MainActivity : AppCompatActivity() {
@@ -55,7 +51,13 @@ class MainActivity : AppCompatActivity() {
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
         mainViewModel.getSyncNotes().observe(this, Observer {
-            it.getContentIfNotHandled()?.let { noteType -> syncFiles(noteType) }
+            it.getContentIfNotHandled()?.let {
+                val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+                val editor = prefs.edit()
+                editor.putStringSet(PREF_SYNC_QUEUE, hashSetOf("1"))
+                editor.commit()
+                WorkSchedulerHelper().syncNotes(true)
+            }
         })
 
         mainViewModel.getToolbar().observe(this, Observer { toolbar ->
@@ -175,27 +177,6 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-    }
-
-    private fun syncFiles(driveType: Int) {
-        if (!isServiceRunning()) {
-            Toast.makeText(this, "Syncing...", LENGTH_SHORT).show()
-            val intent = Intent(this, NotesSyncService::class.java)
-            intent.putExtra(DRIVE_EXTRA, driveType)
-            intent.putExtra(SYNC_INDICATOR_EXTRA, true)
-            startService(intent)
-        } else {
-            Toast.makeText(this, "Already syncing. Please wait...", LENGTH_SHORT).show()
-        }
-    }
-
-    private fun isServiceRunning(): Boolean {
-        val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
-            if ("com.infinitysolutions.notessync.Services.NotesSyncService" == service.service.className)
-                return true
-        }
-        return false
     }
 
     private fun openLink(link: String) {

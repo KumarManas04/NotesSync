@@ -22,7 +22,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.APP_LOCK_STATE
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_CHANGE_PASSWORD
@@ -32,7 +31,6 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_APP_LOCK_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_IS_AUTO_SYNC_ENABLED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.STATE_CHANGE_PIN
@@ -137,8 +135,6 @@ class SettingsFragment : Fragment() {
                         .show()
                 }
             }
-
-            configureAutoSync(rootView, prefs)
             configureChangePassButton(rootView)
         } else {
             resetLoginButton(rootView)
@@ -203,33 +199,10 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun configureAutoSync(rootView: View, prefs: SharedPreferences){
-        if (prefs.contains(PREF_IS_AUTO_SYNC_ENABLED))
-            rootView.auto_sync_toggle.isChecked = prefs.getBoolean(PREF_IS_AUTO_SYNC_ENABLED, false)
-
-        rootView.auto_sync_toggle.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                WorkSchedulerHelper().setAutoSync()
-                prefs.edit().putBoolean(PREF_IS_AUTO_SYNC_ENABLED, true).commit()
-            } else {
-                WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
-                prefs.edit().putBoolean(PREF_IS_AUTO_SYNC_ENABLED, false).commit()
-            }
-        }
-
-        rootView.auto_sync_button.setOnClickListener {
-            rootView.auto_sync_toggle.toggle()
-        }
-    }
-
     private fun resetLoginButton(rootView: View) {
         rootView.logout_title.text = getString(R.string.login)
         rootView.logout_text.text = getString(R.string.login_pref_summary)
         rootView.logout_icon.setImageResource(R.drawable.pref_login_icon)
-        WorkSchedulerHelper().cancelUniqueWork(AUTO_SYNC_WORK_ID)
-        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        prefs?.edit()?.putBoolean(PREF_IS_AUTO_SYNC_ENABLED, false)?.commit()
-        rootView.auto_sync_toggle.isChecked = false
         rootView.logout_button.setOnClickListener {
             findNavController(this).navigate(R.id.action_settingsFragment_to_cloudPickerFragment)
         }
@@ -238,18 +211,6 @@ class SettingsFragment : Fragment() {
         rootView.change_pass_text.text = getString(R.string.encrypted_sync_summary)
         rootView.change_pass_button.setOnClickListener {
             Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
-        }
-
-        rootView.auto_sync_button.setOnClickListener {
-            Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
-        }
-        rootView.auto_sync_toggle.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                rootView.auto_sync_toggle.isChecked = false
-                Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
-            }else{
-                Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
-            }
         }
     }
 

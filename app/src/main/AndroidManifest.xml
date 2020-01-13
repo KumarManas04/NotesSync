@@ -23,11 +23,6 @@
                     android:resource="@xml/notes_widget_info"/>
         </receiver>
 
-        <service
-                android:name=".Services.NotesSyncService"
-                android:enabled="true"
-                android:exported="false">
-        </service>
         <service android:name=".Services.WidgetRemoteViewsService" android:permission="android.permission.BIND_REMOTEVIEWS"/>
 
         <activity android:name=".MainActivity">

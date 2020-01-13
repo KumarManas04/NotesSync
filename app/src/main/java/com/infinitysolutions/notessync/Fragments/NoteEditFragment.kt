@@ -675,7 +675,6 @@ class NoteEditFragment : Fragment() {
                         || (selectedNote.reminderTime != mainViewModel.reminderTime)
                     ) {
                         saveNote(noteContentText)
-                        //TODO: Call the sync work for this note here
                     }
                     mainViewModel.setImagesList(null)
                     mainViewModel.noteType = null

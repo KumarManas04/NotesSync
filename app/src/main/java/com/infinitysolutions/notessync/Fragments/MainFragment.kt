@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -345,23 +346,11 @@ class MainFragment : Fragment() {
     }
 
     private fun syncFiles() {
-        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-        if (prefs != null) {
-            if (prefs.contains(PREF_CLOUD_TYPE)) {
-                if (prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE) == CLOUD_DROPBOX) {
-                    if (prefs.getString(PREF_ACCESS_TOKEN, null) != null)
-                        mainViewModel.setSyncNotes(CLOUD_DROPBOX)
-                    else
-                        findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
-                } else {
-                    if (GoogleSignIn.getLastSignedInAccount(activity) != null)
-                        mainViewModel.setSyncNotes(CLOUD_GOOGLE_DRIVE)
-                    else
-                        findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
-                }
-            } else {
-                findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
-            }
+        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        when(getLoginStatus(prefs)){
+            CLOUD_GOOGLE_DRIVE -> mainViewModel.setSyncNotes(CLOUD_GOOGLE_DRIVE)
+            CLOUD_DROPBOX -> mainViewModel.setSyncNotes(CLOUD_DROPBOX)
+            else -> findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
         }
     }
 
@@ -420,5 +409,18 @@ class MainFragment : Fragment() {
         } else {
             null
         }
+    }
+
+    private fun getLoginStatus(prefs: SharedPreferences?): Int {
+        if (prefs != null && prefs.contains(PREF_CLOUD_TYPE)) {
+            if (prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE) == CLOUD_DROPBOX) {
+                if (prefs.contains(PREF_ACCESS_TOKEN) && prefs.getString(PREF_ACCESS_TOKEN, null) != null)
+                    return CLOUD_DROPBOX
+            } else {
+                if (GoogleSignIn.getLastSignedInAccount(context) != null)
+                    return CLOUD_GOOGLE_DRIVE
+            }
+        }
+        return -1
     }
 }

@@ -2,10 +2,10 @@ package com.infinitysolutions.notessync.Util
 
 import androidx.work.*
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_DELETE_WORK_ID
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_SYNC_WORK_ID
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_WORK_ID
 import com.infinitysolutions.notessync.Workers.AutoDeleteWorker
-import com.infinitysolutions.notessync.Workers.AutoSyncWorker
 import com.infinitysolutions.notessync.Workers.ReminderWorker
+import com.infinitysolutions.notessync.Workers.SyncWorker
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -27,12 +27,17 @@ class WorkSchedulerHelper {
         }
     }
 
-    fun setAutoSync(){
+    fun syncNotes(syncAll: Boolean){
         val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-        val syncRequest = PeriodicWorkRequestBuilder<AutoSyncWorker>(1, TimeUnit.HOURS)
-            .setConstraints(constraints)
+        val data = Data.Builder()
+            .putBoolean("syncAll", syncAll)
             .build()
-        WorkManager.getInstance().enqueueUniquePeriodicWork(AUTO_SYNC_WORK_ID, ExistingPeriodicWorkPolicy.REPLACE, syncRequest)
+        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+            .setConstraints(constraints)
+            .setInputData(data)
+            .build()
+
+        WorkManager.getInstance().enqueueUniqueWork(SYNC_WORK_ID, ExistingWorkPolicy.REPLACE, syncRequest)
     }
 
     fun setAutoDelete(){
@@ -43,9 +48,5 @@ class WorkSchedulerHelper {
     fun cancelReminderByNoteId(noteId: Long?) {
         if (noteId != null)
             WorkManager.getInstance().cancelUniqueWork(noteId.toString())
-    }
-
-    fun cancelUniqueWork(workId: String) {
-        WorkManager.getInstance().cancelUniqueWork(workId)
     }
 }
