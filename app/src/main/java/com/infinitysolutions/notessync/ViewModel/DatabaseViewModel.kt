@@ -46,11 +46,8 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
     val viewList: LiveData<List<Note>> = Transformations.switchMap(viewMode) { mode ->
         when (mode) {
             1 -> repository.getAllList()
-            2 -> repository.getNotesList()
-            3 -> repository.getTodoList()
-            4 -> repository.getArchiveList()
-            5 -> repository.getTrashList()
-            6 -> repository.getImageNotesList()
+            2 -> repository.getArchiveList()
+            3 -> repository.getTrashList()
             else -> null
         }
     }
@@ -87,8 +84,7 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
                 val currentTime = Calendar.getInstance().timeInMillis
                 when (noteType) {
                     IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
-                        val imageNoteContent =
-                            Gson().fromJson(noteContent, ImageNoteContent::class.java)
+                        val imageNoteContent = Gson().fromJson(noteContent, ImageNoteContent::class.java)
                         val idsList = imageNoteContent.idList
                         val imageDataList = getImagesByIds(idsList)
                         var bitmap: Bitmap
@@ -99,8 +95,7 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
                             bitmap = BitmapFactory.decodeFile(file.absolutePath)
                             newIdList.add(insertImage(bitmap).imageId!!)
                         }
-                        val newNoteContent =
-                            Gson().toJson(ImageNoteContent(imageNoteContent.noteContent, newIdList))
+                        val newNoteContent = Gson().toJson(ImageNoteContent(imageNoteContent.noteContent, newIdList))
                         val newNote = Note(
                             null,
                             noteTitle,

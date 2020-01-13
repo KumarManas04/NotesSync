@@ -197,46 +197,25 @@ class MainFragment : Fragment() {
             if (mode != null) {
                 when (mode) {
                     1 -> {
-                        toolbar.title = "All"
+                        toolbar.title = "Notes"
                         toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = false
                         databaseViewModel.setViewMode(1)
                         rootView.empty_image.setImageResource(R.drawable.all_empty)
                         rootView.empty_text.text = getString(R.string.all_empty_message)
                     }
                     2 -> {
-                        toolbar.title = "Notes"
-                        toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = false
-                        databaseViewModel.setViewMode(2)
-                        rootView.empty_image.setImageResource(R.drawable.notes_empty)
-                        rootView.empty_text.text = getString(R.string.notes_empty_message)
-                    }
-                    3 -> {
-                        toolbar.title = "To-do lists"
-                        toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = false
-                        databaseViewModel.setViewMode(3)
-                        rootView.empty_image.setImageResource(R.drawable.todo_empty)
-                        rootView.empty_text.text = getString(R.string.todo_empty_message)
-                    }
-                    4 -> {
                         toolbar.title = "Archive"
                         toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = false
-                        databaseViewModel.setViewMode(4)
+                        databaseViewModel.setViewMode(2)
                         rootView.empty_image.setImageResource(R.drawable.archive_empty)
                         rootView.empty_text.text = getString(R.string.archived_empty_message)
                     }
-                    5 -> {
+                    3 -> {
                         toolbar.title = "Trash"
                         toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = true
-                        databaseViewModel.setViewMode(5)
+                        databaseViewModel.setViewMode(3)
                         rootView.empty_image.setImageResource(R.drawable.trash_empty)
                         rootView.empty_text.text = getString(R.string.trash_empty_message)
-                    }
-                    6 -> {
-                        toolbar.title = "Image notes"
-                        toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = false
-                        databaseViewModel.setViewMode(6)
-                        rootView.empty_image.setImageResource(R.drawable.image_notes_empty)
-                        rootView.empty_text.text = "Image notes appear here"
                     }
                 }
             }

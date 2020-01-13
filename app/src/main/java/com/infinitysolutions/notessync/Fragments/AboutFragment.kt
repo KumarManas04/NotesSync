@@ -62,13 +62,14 @@ class AboutFragment : Fragment() {
         rootView.changelog_button.setOnClickListener {
             AlertDialog.Builder(context)
                 .setTitle("Changelog")
-                .setMessage("VERSION 1.0  JULY 23,2019\n\n - Initial release\n\n" +
-                        "VERSION 1.1 JULY 24,2019\n\n - Added widget\n\n" +
-                        "VERSION 1.2 JULY 25,2019\n\n - Improved Performance\n\n" +
-                        "VERSION 1.3 JULY 25, 2019\n\n - Reduced size\n\n" +
-                        "VERSION 1.5 AUGUST 4, 2019\n\n - Added encrypted sync\n - Added app lock\n - More efficient auto sync\n\n" +
-                        "VERSION 1.6 SEPTEMBER 4, 2019\n\n - Added AMOLED Theme\n - Fixed bugs\n - Added colored notes to widget\n - Improved widget performance\n - Added drag and drop in Todo list\n - Checked items move to the bottom\n\n" +
-                        "VERSION 1.7 SEPTEMBER 6, 2019\n\n - Fixed issue with title not shown in some notes in widget"
+                .setMessage("VERSION 2.0 JANUARY 20, 2019\n\n - Add images to any note\n - Added compact view mode\n - Added make a copy option\n - Share images to and from Notes Sync\n - Added option to empty trash\n - Changed app icon\n - Fixed syncing error\n - Auto-Sync now works instantly\n - Fixed a lot of bugs\n - Performance improvements\n\n" +
+                            "VERSION 1.7 SEPTEMBER 6, 2019\n\n - Fixed issue with title not shown in some notes in widget\n\n" +
+                            "VERSION 1.6 SEPTEMBER 4, 2019\n\n - Added AMOLED Theme\n - Fixed bugs\n - Added colored notes to widget\n - Improved widget performance\n - Added drag and drop in Todo list\n - Checked items move to the bottom\n\n" +
+                            "VERSION 1.5 AUGUST 4, 2019\n\n - Added encrypted sync\n - Added app lock\n - More efficient auto sync\n\n" +
+                            "VERSION 1.3 JULY 25, 2019\n\n - Reduced size\n\n" +
+                            "VERSION 1.2 JULY 25,2019\n\n - Improved Performance\n\n" +
+                            "VERSION 1.1 JULY 24,2019\n\n - Added widget\n\n" +
+                            "VERSION 1.0  JULY 23,2019\n\n - Initial release"
                 )
                 .setPositiveButton("Close", null)
                 .show()

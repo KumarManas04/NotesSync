@@ -36,8 +36,7 @@ class WorkSchedulerHelper {
     }
 
     fun setAutoDelete(){
-        val deleteRequest = PeriodicWorkRequestBuilder<AutoDeleteWorker>(1, TimeUnit.DAYS)
-            .build()
+        val deleteRequest = PeriodicWorkRequestBuilder<AutoDeleteWorker>(1, TimeUnit.DAYS).build()
         WorkManager.getInstance().enqueueUniquePeriodicWork(AUTO_DELETE_WORK_ID, ExistingPeriodicWorkPolicy.REPLACE, deleteRequest)
     }
 

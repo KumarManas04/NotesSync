@@ -15,4 +15,10 @@ interface ImagesDao{
 
     @Query("Delete from images_table where image_id = :id")
     fun deleteImageById(id: Long)
+
+    @Query("UPDATE images_table SET image_id = :newId where image_id = :id")
+    fun updateImageId(id: Long, newId: Long)
+
+    @Query("SELECT image_id FROM images_table ORDER BY image_id DESC LIMIT 1")
+    fun getLastId(): Long
 }

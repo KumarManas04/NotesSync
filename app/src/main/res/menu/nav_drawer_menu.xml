@@ -2,23 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:id="@+id/destinations" android:checkableBehavior="single">
 
-        <item android:id="@+id/all"
-              android:icon="@drawable/all_items_nav_item"
-              android:title="All"/>
-
         <item android:id="@+id/notes"
               android:icon="@drawable/notes"
               android:title="Notes"/>
-
-        <item
-            android:id="@+id/lists"
-            android:icon="@drawable/todo_list_drawer_item"
-            android:title="To-do Lists"/>
-
-        <item
-            android:id="@+id/image_notes"
-            android:icon="@drawable/new_image_note"
-            android:title="Image Notes"/>
 
         <item
             android:id="@+id/archive"
@@ -37,6 +23,11 @@
             android:id="@+id/settings"
             android:icon="@drawable/settings_drawer_item"
             android:title="Settings"/>
+
+        <item
+            android:id="@+id/support_development"
+            android:icon="@drawable/support_icon"
+            android:title="Support Development"/>
 
         <item
             android:id="@+id/share"

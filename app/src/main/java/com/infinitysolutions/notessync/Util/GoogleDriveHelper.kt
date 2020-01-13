@@ -13,6 +13,7 @@ class GoogleDriveHelper(driveService: Drive) {
     private val TAG = "DriveHelperClass"
     lateinit var appFolderId: String
     lateinit var fileSystemId: String
+    lateinit var imageFileSystemId: String
 
     fun getFileContent(fileId: String?): String?{
         if(fileId == null || fileId == "-1")

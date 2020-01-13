@@ -9,14 +9,10 @@ class DropboxHelper(client: DbxClientV2) {
     private val TAG = "DropboxHelperClass"
     private val dropboxClient: DbxClientV2 = client
 
-    fun getFileContent(fileName: String?): String? {
-        return if (fileName != null) {
-            val outputStream = ByteArrayOutputStream()
-            dropboxClient.files()?.download("/$fileName")?.download(outputStream)
-            outputStream.toString()
-        }else{
-            null
-        }
+    fun getFileContent(fileName: String): String {
+        val outputStream = ByteArrayOutputStream()
+        dropboxClient.files()?.download("/$fileName")?.download(outputStream)
+        return outputStream.toString()
     }
 
     fun writeFile(fileName: String?, fileContent: String?) {

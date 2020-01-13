@@ -112,6 +112,10 @@
                     android:text="Google OAuth 2.0"
                     style="@style/openLinks"/>
 
+            <TextView
+                android:id="@+id/touch_image_view"
+                android:text="TouchImageView"
+                style="@style/openLinks"/>
         </LinearLayout>
 
     </ScrollView>

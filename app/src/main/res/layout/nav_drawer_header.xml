@@ -5,7 +5,7 @@
               android:paddingBottom="10dp"
               android:paddingStart="10dp"
               android:paddingEnd="10dp"
-              android:background="@drawable/header_gradient"
+              android:background="#e7364d"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 

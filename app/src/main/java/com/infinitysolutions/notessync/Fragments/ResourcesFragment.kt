@@ -90,6 +90,10 @@ class ResourcesFragment : Fragment() {
         rootView.google_oauth.setOnClickListener {
             openLink("https://developers.google.com/identity/protocols/OAuth2")
         }
+
+        rootView.touch_image_view.setOnClickListener {
+            openLink("https://github.com/MikeOrtiz/TouchImageView")
+        }
     }
 
     private fun openLink(link: String){

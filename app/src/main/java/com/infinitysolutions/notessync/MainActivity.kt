@@ -1,13 +1,15 @@
 package com.infinitysolutions.notessync
 
 import android.app.ActivityManager
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
@@ -26,6 +28,8 @@ import com.infinitysolutions.notessync.Services.NotesSyncService
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.support_development_dialog.*
+import kotlinx.android.synthetic.main.support_development_dialog.view.*
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
@@ -33,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         if (prefs.contains(PREF_THEME)) {
             when (prefs.getInt(PREF_THEME, THEME_DEFAULT)) {
                 THEME_DEFAULT -> setTheme(R.style.AppTheme)
@@ -105,35 +109,45 @@ class MainActivity : AppCompatActivity() {
             navigation_view.menu[0].isChecked = true
         navigation_view.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.all -> {
+                R.id.notes -> {
                     mainViewModel.setViewMode(1)
                     drawer_layout.closeDrawers()
                 }
-                R.id.notes -> {
+                R.id.archive -> {
                     mainViewModel.setViewMode(2)
                     drawer_layout.closeDrawers()
                 }
-                R.id.lists -> {
-                    mainViewModel.setViewMode(3)
-                    drawer_layout.closeDrawers()
-                }
-
-                R.id.archive -> {
-                    mainViewModel.setViewMode(4)
-                    drawer_layout.closeDrawers()
-                }
                 R.id.trash -> {
-                    mainViewModel.setViewMode(5)
-                    drawer_layout.closeDrawers()
-                }
-                R.id.image_notes-> {
-                    mainViewModel.setViewMode(6)
+                    mainViewModel.setViewMode(3)
                     drawer_layout.closeDrawers()
                 }
                 R.id.settings -> {
                     Navigation.findNavController(this, R.id.nav_host_fragment)
                         .navigate(R.id.action_mainFragment_to_settingsFragment)
                     drawer_layout.closeDrawers()
+                }
+                R.id.support_development ->{
+                    drawer_layout.closeDrawers()
+                    val dialogBuilder = AlertDialog.Builder(this)
+                    val inflater = getSystemService(LAYOUT_INFLATER_SERVICE ) as LayoutInflater
+                    val dialogView = inflater.inflate(R.layout.support_development_dialog, null)
+                    dialogView.iced_tea.setOnClickListener {
+                        openLink("")
+                    }
+                    dialogView.coffee.setOnClickListener {
+                        openLink("")
+                    }
+                    dialogView.apple_cider.setOnClickListener {
+                        openLink("")
+                    }
+                    dialogView.meal.setOnClickListener {
+                        openLink("")
+                    }
+                    dialogView.premium_meal.setOnClickListener {
+                        openLink("")
+                    }
+                    dialogBuilder.setView(dialogView)
+                    dialogBuilder.create().show()
                 }
                 R.id.share -> {
                     val message =
@@ -151,7 +165,7 @@ class MainActivity : AppCompatActivity() {
                     if (browserIntent.resolveActivity(packageManager) != null)
                         startActivity(browserIntent)
                     else
-                        Toast.makeText(this, "No browser found!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "No browser found!", LENGTH_SHORT).show()
                 }
                 R.id.about -> {
                     Navigation.findNavController(this, R.id.nav_host_fragment)
@@ -165,13 +179,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun syncFiles(driveType: Int) {
         if (!isServiceRunning()) {
-            Toast.makeText(this, "Syncing...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Syncing...", LENGTH_SHORT).show()
             val intent = Intent(this, NotesSyncService::class.java)
             intent.putExtra(DRIVE_EXTRA, driveType)
             intent.putExtra(SYNC_INDICATOR_EXTRA, true)
             startService(intent)
         } else {
-            Toast.makeText(this, "Already syncing. Please wait...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Already syncing. Please wait...", LENGTH_SHORT).show()
         }
     }
 
@@ -182,6 +196,14 @@ class MainActivity : AppCompatActivity() {
                 return true
         }
         return false
+    }
+
+    private fun openLink(link: String) {
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+        if (browserIntent.resolveActivity(packageManager) != null)
+            startActivity(browserIntent)
+        else
+            Toast.makeText(this, "No browser found!", LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {
