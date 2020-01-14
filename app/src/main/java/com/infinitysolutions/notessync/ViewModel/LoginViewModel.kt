@@ -77,7 +77,8 @@ class LoginViewModel : ViewModel() {
                     val result = uploadKey(encryptedKey, cloudType)
                     withContext(Dispatchers.Main) {
                         loadingMessage.value = null
-                        changePasswordResult.value = if (result) PASSWORD_CHANGE_SUCCESS else PASSWORD_CHANGE_NETWORK_ERROR
+                        changePasswordResult.value =
+                            if (result) PASSWORD_CHANGE_SUCCESS else PASSWORD_CHANGE_NETWORK_ERROR
                     }
                 } else {
                     withContext(Dispatchers.Main) {
@@ -86,7 +87,7 @@ class LoginViewModel : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
                     loadingMessage.value = null
                     changePasswordResult.value = PASSWORD_CHANGE_NETWORK_ERROR
                 }
@@ -96,7 +97,8 @@ class LoginViewModel : ViewModel() {
 
     private fun getPresentCredential(aesHelper: AES256Helper, cloudType: Int): String? {
         var content: String? = if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
-            val credentialFileId = googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT)
+            val credentialFileId =
+                googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT)
             if (credentialFileId != null)
                 googleDriveHelper.getFileContent(credentialFileId)
             else
@@ -121,17 +123,17 @@ class LoginViewModel : ViewModel() {
     fun checkCloudEncryption(cloudType: Int) {
         encryptionCheckLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {
-                        try {
-            val encryptionFound = checkForEncryption(cloudType)
-            withContext(Dispatchers.Main) {
-                encryptionCheckLoading.value = false
-                if (encryptionFound)
-                    encryptionCheckResult.value = ENCRYPTED_YES
-                else
-                    encryptionCheckResult.value = ENCRYPTED_NO
-                encryptionDetected = encryptionFound
-            }
-            }catch (e: Exception){
+            try {
+                val encryptionFound = checkForEncryption(cloudType)
+                withContext(Dispatchers.Main) {
+                    encryptionCheckLoading.value = false
+                    if (encryptionFound)
+                        encryptionCheckResult.value = ENCRYPTED_YES
+                    else
+                        encryptionCheckResult.value = ENCRYPTED_NO
+                    encryptionDetected = encryptionFound
+                }
+            } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     encryptionCheckLoading.value = false
                     encryptionCheckResult.value = ENCRYPTED_CHECK_ERROR
@@ -144,7 +146,8 @@ class LoginViewModel : ViewModel() {
     private fun checkForEncryption(cloudType: Int): Boolean {
         if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
             val credentialFileId =
-                googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT) ?: return false
+                googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT)
+                    ?: return false
 
             val content = googleDriveHelper.getFileContent(credentialFileId)
             return content != null
@@ -181,7 +184,8 @@ class LoginViewModel : ViewModel() {
         aesHelper.generateKey(password, userId)
 
         if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
-            val credentialFileId = googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT)
+            val credentialFileId =
+                googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT)
             return if (credentialFileId != null) {
                 val content = googleDriveHelper.getFileContent(credentialFileId)
                 if (content != null) {
@@ -289,7 +293,7 @@ class LoginViewModel : ViewModel() {
                 fileContentEncrypted = aesHelper.encrypt(fileContent)
                 googleDriveHelper.updateFile(file.gDriveId!!, fileContentEncrypted)
             } else {
-                fileContent = dropboxHelper.getFileContent("${file.nId}.txt") as String
+                fileContent = dropboxHelper.getFileContent("${file.nId}.txt")
                 fileContentEncrypted = aesHelper.encrypt(fileContent)
                 dropboxHelper.writeFile("${file.nId}.txt", fileContentEncrypted)
             }

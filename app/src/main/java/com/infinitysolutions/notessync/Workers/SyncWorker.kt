@@ -7,9 +7,9 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Base64
+import android.util.Base64InputStream
+import android.util.Base64OutputStream
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -20,6 +20,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.util.IOUtils
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.gson.Gson
@@ -50,9 +51,7 @@ import com.infinitysolutions.notessync.Util.AES256Helper
 import com.infinitysolutions.notessync.Util.DropboxHelper
 import com.infinitysolutions.notessync.Util.GoogleDriveHelper
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
+import java.io.*
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
@@ -69,16 +68,21 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     private val TAG = "SyncWorker"
 
     override fun doWork(): Result {
+        Log.d(TAG, "Started work of syncing...")
         val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         if (prefs.contains(PREF_SYNC_QUEUE)) {
             var set = prefs.getStringSet(PREF_SYNC_QUEUE, null)
             if (set != null && set.isNotEmpty()) {
-                when(val loginStatus = getLoginStatus(prefs)){
-                    -1 ->{
-                        val editor = prefs.edit()
+                val editor = prefs.edit()
+                editor.putStringSet(PREF_SYNC_QUEUE, null)
+                editor.commit()
+
+                when (val loginStatus = getLoginStatus(prefs)) {
+                    -1 -> {
                         set.clear()
                         editor.putStringSet(PREF_SYNC_QUEUE, set)
                         editor.apply()
+                        return Result.success()
                     }
                     else -> mDriveType = loginStatus
                 }
@@ -87,14 +91,14 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     val googleDriveService = getGoogleDriveService()
                     if (googleDriveService != null) {
                         googleDriveHelper = GoogleDriveHelper(googleDriveService)
-                    }else{
+                    } else {
                         return Result.failure()
                     }
                 } else {
                     val dropboxClient = getDropboxClient()
                     if (dropboxClient != null) {
                         dropboxHelper = DropboxHelper(dropboxClient)
-                    }else{
+                    } else {
                         return Result.failure()
                     }
                 }
@@ -102,24 +106,29 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 try {
                     checkAndPrepareEncryption()
                     var fileSystem = getFileSystem()
-
+                    Log.d(TAG, "Got the file system")
                     val database = NotesRoomDatabase.getDatabase(applicationContext)
                     notesDao = database.notesDao()
                     imagesDao = database.imagesDao()
 
-                    if(inputData.getBoolean("syncAll", true)){
+                    if (inputData.getBoolean("syncAll", true)) {
+                        Log.d(TAG, "Syncing all...")
                         val cloudIds = mutableListOf<String>()
-                        for(noteFile in fileSystem)
+                        for (noteFile in fileSystem)
                             cloudIds.add(noteFile.nId.toString())
                         val localIds = mutableListOf<String>()
                         val localIdList = notesDao.getAllIds()
-                        for(id in localIdList)
+                        for (id in localIdList)
                             localIds.add(id.toString())
                         set = cloudIds.union(localIds)
                     }
                     val idsList = mutableListOf<Long>()
-                    for(str in set)
-                        idsList.add(str.toLong())
+                    if (set.isNotEmpty()) {
+                        set.forEach { item->
+                            if(item != "null")
+                                idsList.add(item.toLong())
+                        }
+                    }
 
                     val availableNotesList = notesDao.getNotesByIds(idsList)
 
@@ -129,27 +138,36 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                             set.remove(note.nId.toString())
                         }
                     }
-                    if(set.isNotEmpty()){
+                    if (set.isNotEmpty()) {
                         val unavailableNotesIds = mutableListOf<Long>()
-                        for(string in set)
+                        for (string in set) {
+                            if(string != "null")
                             unavailableNotesIds.add(string.toLong())
-                        for(id in unavailableNotesIds) {
+                        }
+                        for (id in unavailableNotesIds) {
                             downloadCloudNote(id, fileSystem)
                             set.remove(id.toString())
                         }
                     }
 
+                    // TODO: Put failsafe for FileSystems
                     writeFileSystemToCloud(fileSystem)
-                    if(imageFileSystem != null){
+                    if (imageFileSystem != null) {
                         writeImageFileSystemToCloud(imageFileSystem!!)
                     }
-                }catch(e: Exception){
+                    Log.d(TAG, "Done syncing")
+                } catch (e: Exception) {
                     e.printStackTrace()
                     return Result.retry()
-                }finally {
+                } finally {
                     updateWidgets()
-                    val editor = prefs.edit()
-                    editor.putStringSet(PREF_SYNC_QUEUE, set)
+                    val set1 = prefs.getStringSet(PREF_SYNC_QUEUE, null)
+                    if (set1 != null) {
+                        set1.addAll(set)
+                        editor.putStringSet(PREF_SYNC_QUEUE, set1)
+                    } else {
+                        editor.putStringSet(PREF_SYNC_QUEUE, set)
+                    }
                     editor.commit()
                 }
             }
@@ -158,15 +176,18 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun downloadCloudNote(id: Long, fileSystem: List<NoteFile>) {
-        val index = fileSystem.binarySearchBy(id){it.nId}
-        if(id == fileSystem[index].nId){
+        var index = fileSystem.binarySearchBy(id) { it.nId }
+        if (index < 0)
+            index = 0
+        if (id == fileSystem[index].nId) {
             val cloudNoteFile = fileSystem[index]
             val fileContentString = getFileContent(cloudNoteFile)
             val fileContent = Gson().fromJson(fileContentString, NoteContent::class.java)
-            if(isImageType(fileContent.noteType!!)){
-                val imageNoteContent = Gson().fromJson(fileContent.noteContent, ImageNoteContent::class.java)
+            if (isImageType(fileContent.noteType!!)) {
+                val imageNoteContent =
+                    Gson().fromJson(fileContent.noteContent, ImageNoteContent::class.java)
                 val newIdList = downloadCloudImages(imageNoteContent.idList)
-                if(newIdList != imageNoteContent.idList) {
+                if (newIdList != imageNoteContent.idList) {
                     imageNoteContent.idList = newIdList
                     fileContent.noteContent = Gson().toJson(imageNoteContent)
                     updateFile(cloudNoteFile, Gson().toJson(fileContent))
@@ -188,7 +209,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 )
             )
 
-            if(fileContent.reminderTime != -1L)
+            if (fileContent.reminderTime != -1L)
                 WorkSchedulerHelper().setReminder(cloudNoteFile.nId, fileContent.reminderTime)
             else
                 WorkSchedulerHelper().cancelReminderByNoteId(cloudNoteFile.nId)
@@ -196,10 +217,12 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun syncNote(localNote: Note, fileSystem: List<NoteFile>): List<NoteFile> {
+        Log.d(TAG, "SyncNote called")
         var tempFileSystem = fileSystem.toMutableList()
         val noteIndex = tempFileSystem.binarySearchBy(localNote.nId) { it.nId }
-        val cloudNoteFile = tempFileSystem[noteIndex]
-        if (localNote.nId == cloudNoteFile.nId) {
+
+        if (noteIndex >= 0 && localNote.nId == tempFileSystem[noteIndex].nId) {
+            val cloudNoteFile = tempFileSystem[noteIndex]
             // Notes with same Id
             if (localNote.dateCreated != cloudNoteFile.dateCreated) {
                 // Notes created on different devices.
@@ -226,18 +249,18 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 val newId = notesDao.simpleInsert(note)
                 note.nId = newId
                 tempFileSystem = uploadNewNote(note, tempFileSystem)
-                if(note.reminderTime != -1L)
+                if (note.reminderTime != -1L)
                     WorkSchedulerHelper().setReminder(newId, note.reminderTime)
                 else
                     WorkSchedulerHelper().cancelReminderByNoteId(newId)
 
-            }else if (localNote.noteType == NOTE_DELETED || localNote.noteType == IMAGE_DELETED) {
+            } else if (localNote.noteType == NOTE_DELETED || localNote.noteType == IMAGE_DELETED) {
                 // If note deleted from device then delete from cloud too
                 notesDao.deleteNoteById(localNote.nId!!)
                 tempFileSystem.removeAt(noteIndex)
                 deleteFile(localNote)
                 WorkSchedulerHelper().cancelReminderByNoteId(localNote.nId)
-            }else if (localNote.dateModified > cloudNoteFile.dateModified) {
+            } else if (localNote.dateModified > cloudNoteFile.dateModified) {
                 // Local note is more recent
                 val noteData = NoteContent(
                     localNote.noteTitle,
@@ -246,21 +269,26 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     localNote.noteType,
                     localNote.reminderTime
                 )
-                if(isImageType(localNote.noteType)){
+                if (isImageType(localNote.noteType)) {
                     val gson = Gson()
                     val fileContentString = getFileContent(cloudNoteFile)
                     val fileContent = gson.fromJson(fileContentString, NoteContent::class.java)
-                    val localImageNoteContent = gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
-                    val cloudImageNoteContent = gson.fromJson(fileContent.noteContent, ImageNoteContent::class.java)
+                    val localImageNoteContent =
+                        gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
+                    val cloudImageNoteContent =
+                        gson.fromJson(fileContent.noteContent, ImageNoteContent::class.java)
                     val localIdList = localImageNoteContent.idList
                     val cloudIdList = cloudImageNoteContent.idList
                     val newIdList = compareIdListLocalPrefer(localIdList, cloudIdList)
                     localImageNoteContent.idList = newIdList
-                    if(newIdList != cloudIdList)
+                    if (newIdList != cloudIdList)
                         noteData.noteContent = gson.toJson(localImageNoteContent)
 
-                    if(newIdList != localIdList)
-                        notesDao.updateNoteContent(localNote.nId!!, gson.toJson(localImageNoteContent))
+                    if (newIdList != localIdList)
+                        notesDao.updateNoteContent(
+                            localNote.nId!!,
+                            gson.toJson(localImageNoteContent)
+                        )
                 }
 
                 val fileContent = Gson().toJson(noteData)
@@ -283,22 +311,24 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     fileContent.noteColor,
                     fileContent.reminderTime
                 )
-                if(isImageType(note.noteType)){
-                    val localImageNoteContent = gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
-                    val cloudImageNoteContent = gson.fromJson(note.noteContent, ImageNoteContent::class.java)
+                if (isImageType(note.noteType)) {
+                    val localImageNoteContent =
+                        gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
+                    val cloudImageNoteContent =
+                        gson.fromJson(note.noteContent, ImageNoteContent::class.java)
                     val localIdList = localImageNoteContent.idList
                     val cloudIdList = cloudImageNoteContent.idList
                     val newIdList = compareIdListCloudPrefer(localIdList, cloudIdList)
                     cloudImageNoteContent.idList = newIdList
 
-                    if(newIdList != cloudIdList)
+                    if (newIdList != cloudIdList)
                         updateFile(cloudNoteFile, gson.toJson(cloudImageNoteContent))
 
-                    if(newIdList != localIdList)
+                    if (newIdList != localIdList)
                         note.noteContent = gson.toJson(cloudImageNoteContent)
                 }
                 notesDao.simpleInsert(note)
-                if(note.reminderTime != -1L)
+                if (note.reminderTime != -1L)
                     WorkSchedulerHelper().setReminder(note.nId, note.reminderTime)
                 else
                     WorkSchedulerHelper().cancelReminderByNoteId(note.nId)
@@ -315,12 +345,12 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
         return tempFileSystem.toList()
     }
 
-    private fun compareIdListCloudPrefer(localIdList: ArrayList<Long>, cloudIdList: ArrayList<Long>): ArrayList<Long>{
+    private fun compareIdListCloudPrefer(localIdList: ArrayList<Long>, cloudIdList: ArrayList<Long>): ArrayList<Long> {
         val newIdList = ArrayList<Long>()
         val set = cloudIdList.toHashSet()
         val deletionList = ArrayList<Long>()
-        for(id in localIdList){
-            if(set.contains(id))
+        for (id in localIdList) {
+            if (set.contains(id))
                 newIdList.add(id)
             else
                 deletionList.add(id)
@@ -329,8 +359,8 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
 
         val downloadList = ArrayList<Long>()
         val set1 = localIdList.intersect(cloudIdList)
-        for(id in cloudIdList){
-            if(!set1.contains(id))
+        for (id in cloudIdList) {
+            if (!set1.contains(id))
                 downloadList.add(id)
         }
         val updatedList = downloadCloudImages(downloadList)
@@ -338,9 +368,9 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
         return newIdList
     }
 
-    private fun deleteImagesByIdFromStorage(idList: ArrayList<Long>){
+    private fun deleteImagesByIdFromStorage(idList: ArrayList<Long>) {
         val imagesList = imagesDao.getImagesByIds(idList)
-        for(image in imagesList){
+        for (image in imagesList) {
             val file = File(image.imagePath)
             if (file.exists())
                 file.delete()
@@ -348,12 +378,12 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
         }
     }
 
-    private fun compareIdListLocalPrefer(localIdList: ArrayList<Long>, cloudIdList: ArrayList<Long>): ArrayList<Long>{
+    private fun compareIdListLocalPrefer(localIdList: ArrayList<Long>, cloudIdList: ArrayList<Long>): ArrayList<Long> {
         val newIdList = ArrayList<Long>()
         val deletedList = ArrayList<Long>()
         val set1 = localIdList.toHashSet()
-        for(id in cloudIdList){
-            if(set1.contains(id))
+        for (id in cloudIdList) {
+            if (set1.contains(id))
                 newIdList.add(id)
             else
                 deletedList.add(id)
@@ -362,8 +392,8 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
 
         val set = localIdList.intersect(cloudIdList)
         val uploadList = ArrayList<Long>()
-        for(id in localIdList){
-            if(!set.contains(id))
+        for (id in localIdList) {
+            if (!set.contains(id))
                 uploadList.add(id)
         }
         val updatedList = uploadImages(uploadList)
@@ -371,70 +401,63 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
         return newIdList
     }
 
-    private fun downloadCloudImages(idList: List<Long>): ArrayList<Long>{
+    private fun downloadCloudImages(idList: List<Long>): ArrayList<Long> {
         val tempImageFileSystem: MutableList<ImageData> = imageFileSystem ?: getImageFileSystem().toMutableList()
         val newIdList = ArrayList<Long>()
-        var lastCloudId = tempImageFileSystem.last().imageId!! + 1
+        var lastCloudId: Long = if (tempImageFileSystem.isNotEmpty())
+            tempImageFileSystem.last().imageId!! + 1
+        else
+            1
         var lastLocalId = imagesDao.getLastId() + 1
         var index: Int
-        var imageBitmap: Bitmap?
-        for(id in idList){
-            index = tempImageFileSystem.binarySearchBy(id){it.imageId}
-            if(tempImageFileSystem[index].imageId == id){
-                imageBitmap = getImageFromCloud(tempImageFileSystem[index])
-                if(imageBitmap != null){
-                    val newId = if(id >= lastLocalId)
+        var imagePath: String?
+        for (id in idList) {
+            Log.d(TAG, "Downloading image id: $id")
+            index = tempImageFileSystem.binarySearchBy(id) { it.imageId }
+            if (index >= 0 && tempImageFileSystem[index].imageId == id) {
+                imagePath = getImageFromCloud(tempImageFileSystem[index])
+                if (imagePath != null) {
+                    Log.d(TAG, "image file path not null")
+                    val newId = if (id >= lastLocalId)
                         id
-                    else{
-                        if(lastLocalId > lastCloudId)
+                    else {
+                        if (lastLocalId > lastCloudId)
                             lastLocalId++
                         else
                             lastCloudId++
                     }
 
-                    val path = saveBitmapToStorage(imageBitmap)
-                    if(path != null) {
-                        val imageData = ImageData(
-                            newId,
-                            path,
-                            tempImageFileSystem[index].dateCreated,
-                            tempImageFileSystem[index].dateModified,
-                            tempImageFileSystem[index].gDriveId,
-                            tempImageFileSystem[index].type
-                        )
-                        imagesDao.insert(imageData)
-                        newIdList.add(newId)
-                        if(newId != id){
-                            tempImageFileSystem.removeAt(index)
-                            index = tempImageFileSystem.binarySearchBy(newId){it.imageId}
-                            tempImageFileSystem.add(index, imageData)
-                        }
+                    val imageData = ImageData(
+                        newId,
+                        imagePath,
+                        tempImageFileSystem[index].dateCreated,
+                        tempImageFileSystem[index].dateModified,
+                        tempImageFileSystem[index].gDriveId,
+                        tempImageFileSystem[index].type
+                    )
+                    imagesDao.insert(imageData)
+                    newIdList.add(newId)
+                    if (newId != id) {
+                        tempImageFileSystem.removeAt(index)
+                        index = tempImageFileSystem.binarySearchBy(newId) { it.imageId }
+                        if (index < 0)
+                            index = 0
+                        tempImageFileSystem.add(index, imageData)
                     }
-                    imageBitmap.recycle()
                 }
+            }else{
+                if(index < 0)
+                    Log.d(TAG, "index problem")
+                else
+                    Log.d(TAG, "other problem")
             }
         }
         imageFileSystem = tempImageFileSystem
         return newIdList
     }
 
-    private fun saveBitmapToStorage(image: Bitmap): String?{
-        val path = context.applicationContext.filesDir.toString()
-        val time = Calendar.getInstance().timeInMillis
-        val file = File(path, "$time.png")
-        try {
-            val fos = FileOutputStream(file)
-            image.compress(Bitmap.CompressFormat.PNG, 100, fos)
-            fos.flush()
-            fos.close()
-            return path
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-    }
-
-    private fun uploadNewNote(note: Note, fileSystem: MutableList<NoteFile>): MutableList<NoteFile>{
+    private fun uploadNewNote(note: Note, fileSystem: MutableList<NoteFile>): MutableList<NoteFile> {
+        Log.d(TAG, "Uploading new note...")
         val noteContent = if (isImageType(note.noteType)) {
             val imageNoteContent = Gson().fromJson(note.noteContent, ImageNoteContent::class.java)
             val newIdsList = uploadImages(imageNoteContent.idList)
@@ -455,7 +478,9 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
         )
         val fileId = createFile(note.nId!!, newFileContent)
         notesDao.updateSyncedState(note.nId!!, fileId, true)
-        val index = fileSystem.binarySearchBy(note.nId) { it.nId }
+        var index = fileSystem.binarySearchBy(note.nId) { it.nId }
+        if (index < 0)
+            index = 0
         fileSystem.add(
             index, NoteFile(
                 note.nId,
@@ -464,35 +489,41 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 fileId
             )
         )
+        Log.d(TAG, "Uploading note done")
         return fileSystem
     }
 
     private fun uploadImages(idsList: ArrayList<Long>): ArrayList<Long> {
+        Log.d(TAG, "Uploading images...")
         val tempImageFileSystem: MutableList<ImageData> = imageFileSystem ?: getImageFileSystem().toMutableList()
 
         val imagesList = imagesDao.getImagesByIds(idsList)
         val newIdsList = ArrayList<Long>()
-        var lastCloudId = tempImageFileSystem.last().imageId!!
+        var lastCloudId: Long = if (tempImageFileSystem.isNotEmpty())
+            tempImageFileSystem.last().imageId!!
+        else
+            0
         var lastLocalId = imagesDao.getLastId()
         var index: Int
 
         for (imageData in imagesList) {
             index = tempImageFileSystem.binarySearchBy(imageData.imageId) { it.imageId }
-            val imageId: Long = if (tempImageFileSystem[index].imageId == imageData.imageId) {
-                if (lastCloudId + 1 > lastLocalId) {
-                    imagesDao.updateImageId(imageData.imageId!!, lastCloudId + 1)
-                    ++lastCloudId
-                }else{
-                    imagesDao.updateImageId(imageData.imageId!!, lastLocalId + 1)
-                    ++lastLocalId
+            val imageId: Long =
+                if (index >= 0 && tempImageFileSystem[index].imageId == imageData.imageId) {
+                    if (lastCloudId + 1 > lastLocalId) {
+                        imagesDao.updateImageId(imageData.imageId!!, lastCloudId + 1)
+                        ++lastCloudId
+                    } else {
+                        imagesDao.updateImageId(imageData.imageId!!, lastLocalId + 1)
+                        ++lastLocalId
+                    }
+                } else {
+                    imageData.imageId!!
                 }
-            } else {
-                imageData.imageId!!
-            }
 
-            val file = File(imageData.imagePath)
-            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-            val fileId = createImageFile(imageId, bitmap)
+            val fileId = createImageFile(imageId, imageData.imagePath)
+            if (index < 0)
+                index = 0
             tempImageFileSystem.add(
                 index, ImageData(
                     imageId,
@@ -505,6 +536,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
             newIdsList.add(imageId)
         }
         imageFileSystem = tempImageFileSystem
+        Log.d(TAG, "Uploading images done")
         return newIdsList
     }
 
@@ -521,16 +553,18 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun getImageFileSystem(): List<ImageData> {
-        return if (mDriveType == CLOUD_GOOGLE_DRIVE) {
+        Log.d(TAG, "Getting image file system")
+        val list = if (mDriveType == CLOUD_GOOGLE_DRIVE) {
             val imageFileSystemId = getImageFileSystemId(googleDriveHelper.appFolderId)
             googleDriveHelper.imageFileSystemId = imageFileSystemId
             getImagesListGD(imageFileSystemId)
-        }else{
+        } else {
             getImagesListDB()
         }
+        return list.sortedBy { it.imageId }
     }
 
-    private fun getImageFileSystemId(parentFolderId: String): String{
+    private fun getImageFileSystemId(parentFolderId: String): String {
         var imageFileSystemId: String? = googleDriveHelper.searchFile(IMAGE_FILE_SYSTEM_FILENAME, FILE_TYPE_TEXT)
         if (imageFileSystemId == null) {
             Log.d(TAG, "Image File system not found")
@@ -546,12 +580,14 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 FILE_TYPE_TEXT,
                 fileContent
             )
+        }else{
+            Log.d(TAG, "Image file system found")
         }
         return imageFileSystemId
     }
 
     private fun getFileSystem(): List<NoteFile> {
-        return if (mDriveType == CLOUD_GOOGLE_DRIVE) {
+        val list =  if (mDriveType == CLOUD_GOOGLE_DRIVE) {
             val appFolderId = getAppFolderId()
             val fileSystemId = getFileSystemId(appFolderId)
             googleDriveHelper.appFolderId = appFolderId
@@ -560,10 +596,12 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
         } else {
             getFilesListDB()
         }
+        return list.sortedBy { it.nId }
     }
 
     private fun getAppFolderId(): String {
-        var folderId = googleDriveHelper.searchFile("notes_sync_data_folder_19268", FILE_TYPE_FOLDER)
+        var folderId =
+            googleDriveHelper.searchFile("notes_sync_data_folder_19268", FILE_TYPE_FOLDER)
         if (folderId == null)
             folderId = googleDriveHelper.createFile(
                 null, "notes_sync_data_folder_19268",
@@ -592,21 +630,21 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
         return fileSystemId
     }
 
-    private fun getImagesListGD(imageFileSystemId: String): List<ImageData>{
+    private fun getImagesListGD(imageFileSystemId: String): List<ImageData> {
         val fileContentString = googleDriveHelper.getFileContent(imageFileSystemId) as String
         val fileContent = if (isEncrypted)
             aesHelper.decrypt(fileContentString)
         else
             fileContentString
 
-        return try{
+        return try {
             Gson().fromJson(fileContent, Array<ImageData>::class.java).asList()
-        }catch(e: Exception){
+        } catch (e: Exception) {
             ArrayList()
         }
     }
 
-    private fun getImagesListDB(): List<ImageData>{
+    private fun getImagesListDB(): List<ImageData> {
         return if (dropboxHelper.checkIfFileExists(IMAGE_FILE_SYSTEM_FILENAME)) {
             val fileContentString = dropboxHelper.getFileContent(IMAGE_FILE_SYSTEM_FILENAME)
             val fileContent = if (isEncrypted)
@@ -615,7 +653,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 fileContentString
             try {
                 Gson().fromJson(fileContent, Array<ImageData>::class.java).asList()
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 ArrayList<ImageData>()
             }
         } else {
@@ -630,9 +668,9 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
         else
             fileContentString
 
-        return try{
+        return try {
             Gson().fromJson(fileContent, Array<NoteFile>::class.java).asList()
-        }catch(e: Exception){
+        } catch (e: Exception) {
             ArrayList()
         }
     }
@@ -646,7 +684,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 fileContentString
             try {
                 Gson().fromJson(fileContent, Array<NoteFile>::class.java).asList()
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 ArrayList<NoteFile>()
             }
         } else {
@@ -657,7 +695,8 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     private fun getGoogleDriveService(): Drive? {
         val googleAccount = GoogleSignIn.getLastSignedInAccount(context)
         return if (googleAccount != null) {
-            val credential = GoogleAccountCredential.usingOAuth2(context, listOf(DriveScopes.DRIVE_FILE))
+            val credential =
+                GoogleAccountCredential.usingOAuth2(context, listOf(DriveScopes.DRIVE_FILE))
             credential.selectedAccount = googleAccount.account
             Drive.Builder(
                 AndroidHttp.newCompatibleTransport(),
@@ -717,26 +756,70 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
         }
     }
 
-    private fun createImageFile(imageId: Long, imageBitmap: Bitmap): String {
-        val baos = ByteArrayOutputStream()
-        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        val byteArray = baos.toByteArray()
-        val fileContentString = Base64.encodeToString(byteArray, Base64.DEFAULT)
-        val fileContent = if (isEncrypted)
-            aesHelper.encrypt(fileContentString)
-        else
-            fileContentString
+    private fun createImageFile(imageId: Long, path: String): String {
+        val imageFile = File(path)
+        val fis = FileInputStream(imageFile)
+        val tempFilePath = context.applicationContext.filesDir.toString() + "/temp.txt"
 
+        if (isEncrypted)
+            aesHelper.encryptStream(fis, tempFilePath)
+        else {
+            val tempFile = File(tempFilePath)
+            if (tempFile.exists())
+                tempFile.delete()
+            val fos = FileOutputStream(tempFile)
+            val base64stream = Base64OutputStream(fos, Base64.DEFAULT)
+
+            IOUtils.copy(fis, base64stream)
+            fis.close()
+
+            base64stream.flush()
+            base64stream.close()
+        }
+
+        val tempFile = File(tempFilePath)
+        val tempFileFis = FileInputStream(tempFile)
         return if (mDriveType == CLOUD_GOOGLE_DRIVE) {
-            googleDriveHelper.createFile(
+            googleDriveHelper.createFileFromStream(
                 googleDriveHelper.appFolderId,
                 "image_$imageId.txt",
                 FILE_TYPE_TEXT,
-                fileContent
+                tempFilePath
             )
         } else {
-            dropboxHelper.writeFile("image_$imageId.txt", fileContent)
+            dropboxHelper.writeFileStream("image_$imageId.txt", tempFileFis)
             "-1"
+        }
+    }
+
+    private fun getImageFromCloud(imageData: ImageData): String? {
+        Log.d(TAG, "getImageFromCloud called")
+        val path = context.applicationContext.filesDir.toString()
+        if (mDriveType == CLOUD_GOOGLE_DRIVE)
+            googleDriveHelper.getFileContentStream(imageData.gDriveId, path)
+        else
+            dropboxHelper.getFileContentStream("image_${imageData.imageId}.txt", path)
+
+        val tempFile = File(path, "temp.txt")
+        return if (tempFile.exists()) {
+
+            val tempFis = FileInputStream(tempFile)
+            if (isEncrypted)
+                aesHelper.decryptStream(tempFis, path)
+            else {
+                val time = Calendar.getInstance().timeInMillis
+                val imageFile = File(path, "$time.jpg")
+                val imageFos = FileOutputStream(imageFile)
+                val base64stream = Base64InputStream(tempFis, Base64.DEFAULT)
+                IOUtils.copy(base64stream, imageFos)
+                base64stream.close()
+                imageFos.flush()
+                imageFos.close()
+
+                imageFile.absolutePath
+            }
+        } else {
+            null
         }
     }
 
@@ -773,7 +856,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun deleteFile(note: Note) {
-        if(isImageType(note.noteType)){
+        if (isImageType(note.noteType)) {
             val imageNoteContent = Gson().fromJson(note.noteContent, ImageNoteContent::class.java)
             deleteImagesFromCloud(imageNoteContent.idList)
         }
@@ -783,13 +866,14 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
             dropboxHelper.deleteFile("${note.nId}.txt")
     }
 
-    private fun deleteImagesFromCloud(idList: List<Long>){
-        val tempImageFileSystem: MutableList<ImageData> = imageFileSystem ?: getImageFileSystem().toMutableList()
+    private fun deleteImagesFromCloud(idList: List<Long>) {
+        val tempImageFileSystem: MutableList<ImageData> =
+            imageFileSystem ?: getImageFileSystem().toMutableList()
 
         var index: Int
-        for(id in idList) {
-            index = tempImageFileSystem.binarySearchBy(id){it.imageId}
-            if(id == tempImageFileSystem[index].imageId) {
+        for (id in idList) {
+            index = tempImageFileSystem.binarySearchBy(id) { it.imageId }
+            if (index >= 0 && id == tempImageFileSystem[index].imageId) {
                 if (mDriveType == CLOUD_GOOGLE_DRIVE)
                     googleDriveHelper.deleteFile(tempImageFileSystem[index].gDriveId)
                 else
@@ -816,23 +900,6 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
             null
     }
 
-    private fun getImageFromCloud(imageData: ImageData): Bitmap? {
-        val fileContent = if (mDriveType == CLOUD_GOOGLE_DRIVE) {
-            googleDriveHelper.getFileContent(imageData.gDriveId)
-        } else {
-            dropboxHelper.getFileContent("image_${imageData.imageId}.txt")
-        }
-
-        return if (fileContent != null) {
-            val fileContentString = if (isEncrypted)
-                aesHelper.decrypt(fileContent)
-            else
-                fileContent
-            val imageBytes = Base64.decode(fileContentString, Base64.DEFAULT)
-            BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-        } else
-            null
-    }
 
     private fun writeFileSystemToCloud(filesList: List<NoteFile>) {
         val fileSystemJsonString = Gson().toJson(filesList)
@@ -872,7 +939,11 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     private fun getLoginStatus(prefs: SharedPreferences?): Int {
         if (prefs != null && prefs.contains(PREF_CLOUD_TYPE)) {
             if (prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE) == CLOUD_DROPBOX) {
-                if (prefs.contains(PREF_ACCESS_TOKEN) && prefs.getString(PREF_ACCESS_TOKEN, null) != null)
+                if (prefs.contains(PREF_ACCESS_TOKEN) && prefs.getString(
+                        PREF_ACCESS_TOKEN,
+                        null
+                    ) != null
+                )
                     return CLOUD_DROPBOX
             } else {
                 if (GoogleSignIn.getLastSignedInAccount(context) != null)

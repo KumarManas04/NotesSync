@@ -156,7 +156,7 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         }
 
         val time = Calendar.getInstance().timeInMillis
-        val file = File(path, "$time.png")
+        val file = File(path, "$time.jpg")
         try {
             val fos = FileOutputStream(file)
             if(imageBitmap == null)

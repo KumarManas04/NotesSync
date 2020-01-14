@@ -3,7 +3,10 @@ package com.infinitysolutions.notessync.Util
 import com.dropbox.core.v2.DbxClientV2
 import com.dropbox.core.v2.files.SearchMode
 import com.dropbox.core.v2.files.WriteMode
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
+import java.io.InputStream
 
 class DropboxHelper(client: DbxClientV2) {
     private val TAG = "DropboxHelperClass"
@@ -15,9 +18,25 @@ class DropboxHelper(client: DbxClientV2) {
         return outputStream.toString()
     }
 
+    fun getFileContentStream(fileName: String, path: String){
+        val tempFile = java.io.File(path, "temp.txt")
+        if(tempFile.exists())
+            tempFile.delete()
+        val fos = FileOutputStream(tempFile)
+        dropboxClient.files()?.download("/$fileName")?.download(fos)
+        fos.flush()
+        fos.close()
+    }
+
     fun writeFile(fileName: String?, fileContent: String?) {
         if (fileName != null && fileContent != null) {
             val inputStream = fileContent.byteInputStream()
+            dropboxClient.files().uploadBuilder("/$fileName").withMode(WriteMode.OVERWRITE).uploadAndFinish(inputStream)
+        }
+    }
+
+    fun writeFileStream(fileName: String?, inputStream: InputStream) {
+        if (fileName != null) {
             dropboxClient.files().uploadBuilder("/$fileName").withMode(WriteMode.OVERWRITE).uploadAndFinish(inputStream)
         }
     }

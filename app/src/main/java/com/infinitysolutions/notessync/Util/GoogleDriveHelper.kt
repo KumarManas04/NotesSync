@@ -2,10 +2,13 @@ package com.infinitysolutions.notessync.Util
 
 import android.util.Log
 import com.google.api.client.http.ByteArrayContent
+import com.google.api.client.http.FileContent
 import com.google.api.client.http.InputStreamContent
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
 import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.util.*
 
 class GoogleDriveHelper(driveService: Drive) {
@@ -15,12 +18,24 @@ class GoogleDriveHelper(driveService: Drive) {
     lateinit var fileSystemId: String
     lateinit var imageFileSystemId: String
 
-    fun getFileContent(fileId: String?): String?{
-        if(fileId == null || fileId == "-1")
+    fun getFileContent(fileId: String?): String? {
+        if (fileId == null || fileId == "-1")
             return null
         val outputStream = ByteArrayOutputStream()
         googleDriveService.files().get(fileId).executeMediaAndDownloadTo(outputStream)
         return outputStream.toString()
+    }
+
+    fun getFileContentStream(fileId: String?, path: String){
+        if (fileId == null || fileId == "-1")
+            return
+        val tempFile = java.io.File(path, "temp.txt")
+        if(tempFile.exists())
+            tempFile.delete()
+        val fos = FileOutputStream(tempFile)
+        googleDriveService.files().get(fileId).executeMediaAndDownloadTo(fos)
+        fos.flush()
+        fos.close()
     }
 
     fun updateFile(fileId: String, fileContent: String): String? {
@@ -28,10 +43,6 @@ class GoogleDriveHelper(driveService: Drive) {
         val contentFile = File()
         val file = googleDriveService.files().update(fileId, contentFile, mediaStream)
             .execute()
-        if (file != null)
-            Log.d(TAG, "FileId = ${file.id}")
-        else
-            Log.d(TAG, "Failed to update file")
 
         return file.id
     }
@@ -72,7 +83,23 @@ class GoogleDriveHelper(driveService: Drive) {
         return file.id
     }
 
-    fun deleteFile(fileId: String?){
+    fun createFileFromStream(parentFolderId: String?, fileName: String, fileMimeType: String, path: String): String {
+        val fileMetadata = File()
+        fileMetadata.name = fileName
+        fileMetadata.mimeType = fileMimeType
+        if (parentFolderId != null)
+            fileMetadata.parents = Collections.singletonList(parentFolderId)
+
+        val file = java.io.File(path)
+        val fileContent = FileContent("text/plain", file)
+        val cloudFile = googleDriveService.files().create(fileMetadata, fileContent)
+            .setFields("id")
+            .execute()
+
+        return cloudFile.id
+    }
+
+    fun deleteFile(fileId: String?) {
         if (fileId != null)
             googleDriveService.files().delete(fileId).execute()
     }

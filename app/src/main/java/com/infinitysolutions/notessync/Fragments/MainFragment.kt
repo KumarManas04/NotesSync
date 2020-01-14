@@ -87,20 +87,15 @@ class MainFragment : Fragment() {
 
         val notesRecyclerView = rootView.notes_recycler_view
         val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && prefs.getBoolean(
-                PREF_COMPACT_VIEW_MODE_ENABLED,
-                true
-            )
-        ) {
+        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && !prefs.getBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)) {
+            notesRecyclerView.layoutManager = LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
+            toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
+            toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
+        } else {
             val columnCount = resources.getInteger(R.integer.columns_count)
             notesRecyclerView.layoutManager = StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
             toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
             toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = false
-        } else {
-            notesRecyclerView.layoutManager =
-                LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
-            toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
-            toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
         }
 
         toolbar.setOnMenuItemClickListener { item ->
