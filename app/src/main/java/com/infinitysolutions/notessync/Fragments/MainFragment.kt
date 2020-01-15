@@ -62,6 +62,7 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.max
 
 class MainFragment : Fragment() {
     private val TAG = "MainFragment"
@@ -307,8 +308,7 @@ class MainFragment : Fragment() {
                 }
                 if (photoFile != null) {
                     mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
-                    val photoUri =
-                        FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, photoFile)
+                    val photoUri = FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, photoFile)
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
                     startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
                 } else
@@ -333,8 +333,7 @@ class MainFragment : Fragment() {
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
-        val timeStamp: String =
-            SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val storageDir: File? = activity?.filesDir
         Log.d("MainActivity", "extDir: $storageDir")
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
@@ -356,7 +355,9 @@ class MainFragment : Fragment() {
                 val uri: Uri? = data?.data
                 bitmap = getBitmapFromUri(uri)
             } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
-                bitmap = BitmapFactory.decodeFile(mainViewModel.getCurrentPhotoPath())
+                val photoFile = File(mainViewModel.getCurrentPhotoPath())
+                val photoUri = FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, photoFile)
+                bitmap = getBitmapFromUri(photoUri)
                 if (mainViewModel.getCurrentPhotoPath() != null) {
                     val file = File(mainViewModel.getCurrentPhotoPath())
                     if (file.exists())
@@ -399,8 +400,22 @@ class MainFragment : Fragment() {
 
     private fun getBitmapFromUri(uri: Uri?): Bitmap? {
         return if (uri != null) {
-            val imageStream = activity!!.contentResolver.openInputStream(uri)
-            BitmapFactory.decodeStream(imageStream)
+            var imageStream = activity!!.contentResolver.openInputStream(uri)
+            val options = BitmapFactory.Options()
+            options.inJustDecodeBounds = true
+            BitmapFactory.decodeStream(imageStream, null, options)
+            val width = options.outWidth
+            val height = options.outHeight
+            if(width > 1000 || height > 1000) {
+                val ratio = (maxOf(width, height)).toFloat() / 1000.0f
+                val newWidth = (width * ratio).toInt()
+                val newHeight = (height * ratio).toInt()
+                imageStream = activity!!.contentResolver.openInputStream(uri)
+                options.inSampleSize = max(options.outWidth/newWidth, options.outHeight/newHeight)
+            }
+
+            options.inJustDecodeBounds = false
+            BitmapFactory.decodeStream(imageStream, null, options)
         } else {
             null
         }

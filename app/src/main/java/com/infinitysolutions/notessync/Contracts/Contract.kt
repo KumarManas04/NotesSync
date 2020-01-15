@@ -18,8 +18,6 @@ class Contract{
         const val IMAGE_LIST_TRASH = 13
         const val FILE_TYPE_FOLDER = "application/vnd.google-apps.folder"
         const val FILE_TYPE_TEXT = "text/plain"
-        const val DRIVE_EXTRA = "DriveExtra"
-        const val SYNC_INDICATOR_EXTRA = "syncIndicatorExtra"
         const val NOTE_ID_EXTRA = "noteIdExtra"
         const val CLOUD_GOOGLE_DRIVE = 0
         const val CLOUD_DROPBOX = 1
@@ -65,5 +63,7 @@ class Contract{
         const val IMAGE_PICKER_REQUEST_CODE = 1020
         const val FILE_PROVIDER_AUTHORITY = "com.infinitysolutions.notessync.fileprovider"
         const val TYPE_IMAGE = 0
+        const val PREF_FILESYSTEM_STASH = "sharedPrefs.filesystemStash"
+        const val PREF_IMAGE_FILESYSTEM_STASH = "sharedPrefs.imageFilesystemStash"
     }
 }

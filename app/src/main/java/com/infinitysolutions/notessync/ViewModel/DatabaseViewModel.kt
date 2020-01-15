@@ -143,26 +143,14 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun insertImage(image: Bitmap): ImageData {
+    fun insertImage(imageBitmap: Bitmap): ImageData {
         val path = getApplication<Application>().applicationContext.filesDir.toString()
-
-        var imageBitmap: Bitmap? = null
-        if(image.width > 1000 || image.height > 1000){
-            val ratio = (maxOf(image.width, image.height)).toFloat() / 1000.0f
-            val newWidth = (image.width * ratio).toInt()
-            val newHeight = (image.height * ratio).toInt()
-            imageBitmap = Bitmap.createScaledBitmap(image, newWidth, newHeight, false)
-            image.recycle()
-        }
 
         val time = Calendar.getInstance().timeInMillis
         val file = File(path, "$time.jpg")
         try {
             val fos = FileOutputStream(file)
-            if(imageBitmap == null)
-                image.compress(Bitmap.CompressFormat.PNG, 100, fos)
-            else
-                imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
             fos.flush()
             fos.close()
         } catch (e: Exception) {

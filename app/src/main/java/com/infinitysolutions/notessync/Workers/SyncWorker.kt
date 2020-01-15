@@ -42,6 +42,8 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_FILESYSTEM_STASH
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_IMAGE_FILESYSTEM_STASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SYNC_QUEUE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Fragments.NotesWidget
@@ -103,9 +105,11 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     }
                 }
 
+                var fileSystem: List<NoteFile> = listOf()
                 try {
                     checkAndPrepareEncryption()
-                    var fileSystem = getFileSystem()
+                    checkAndClearStash(prefs, editor)
+                    fileSystem = getFileSystem()
                     Log.d(TAG, "Got the file system")
                     val database = NotesRoomDatabase.getDatabase(applicationContext)
                     notesDao = database.notesDao()
@@ -150,7 +154,6 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                         }
                     }
 
-                    // TODO: Put failsafe for FileSystems
                     writeFileSystemToCloud(fileSystem)
                     if (imageFileSystem != null) {
                         writeImageFileSystemToCloud(imageFileSystem!!)
@@ -158,6 +161,18 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     Log.d(TAG, "Done syncing")
                 } catch (e: Exception) {
                     e.printStackTrace()
+
+                    //Stash the file system changes for later syncing
+                    if(prefs.getString(PREF_FILESYSTEM_STASH, null) == null) {
+                        val fileSystemString = Gson().toJson(fileSystem)
+                        editor.putString(PREF_FILESYSTEM_STASH, fileSystemString)
+                    }
+                    if(imageFileSystem != null && prefs.getString(PREF_IMAGE_FILESYSTEM_STASH, null) == null){
+                        val imageFileSystemString = Gson().toJson(imageFileSystem)
+                        editor.putString(PREF_IMAGE_FILESYSTEM_STASH, imageFileSystemString)
+                    }
+                    editor.commit()
+
                     return Result.retry()
                 } finally {
                     updateWidgets()
@@ -173,6 +188,26 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
             }
         }
         return Result.success()
+    }
+
+    private fun checkAndClearStash(prefs: SharedPreferences, editor: SharedPreferences.Editor){
+        if(prefs.contains(PREF_FILESYSTEM_STASH)){
+            val fileSystemString = prefs.getString(PREF_FILESYSTEM_STASH, null)
+            if(fileSystemString != null){
+                val fileSystem = Gson().fromJson(fileSystemString, Array<NoteFile>::class.java).asList()
+                writeFileSystemToCloud(fileSystem)
+                editor.putString(PREF_FILESYSTEM_STASH, null)
+            }
+        }
+        if(prefs.contains(PREF_IMAGE_FILESYSTEM_STASH)){
+            val imageFileSystemString = prefs.getString(PREF_IMAGE_FILESYSTEM_STASH, null)
+            if(imageFileSystemString != null){
+                val imageFileSystem = Gson().fromJson(imageFileSystemString, Array<ImageData>::class.java).asList()
+                writeImageFileSystemToCloud(imageFileSystem)
+                editor.putString(PREF_IMAGE_FILESYSTEM_STASH, null)
+            }
+        }
+        editor.commit()
     }
 
     private fun downloadCloudNote(id: Long, fileSystem: List<NoteFile>) {
