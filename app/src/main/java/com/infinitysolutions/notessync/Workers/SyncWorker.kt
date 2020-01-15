@@ -141,12 +141,17 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                             fileSystem = syncNote(note, fileSystem)
                             set.remove(note.nId.toString())
                         }
+                    }else{
+                        //TODO: Fix this
+                        Log.d(TAG, "Available notes list empty")
+                        return Result.retry()
                     }
+
                     if (set.isNotEmpty()) {
                         val unavailableNotesIds = mutableListOf<Long>()
                         for (string in set) {
                             if(string != "null")
-                            unavailableNotesIds.add(string.toLong())
+                                unavailableNotesIds.add(string.toLong())
                         }
                         for (id in unavailableNotesIds) {
                             downloadCloudNote(id, fileSystem)
@@ -163,11 +168,11 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     e.printStackTrace()
 
                     //Stash the file system changes for later syncing
-                    if(prefs.getString(PREF_FILESYSTEM_STASH, null) == null) {
+                    if((prefs.getString(PREF_FILESYSTEM_STASH, null) == null) && fileSystem.isNotEmpty()){
                         val fileSystemString = Gson().toJson(fileSystem)
                         editor.putString(PREF_FILESYSTEM_STASH, fileSystemString)
                     }
-                    if(imageFileSystem != null && prefs.getString(PREF_IMAGE_FILESYSTEM_STASH, null) == null){
+                    if(imageFileSystem != null && imageFileSystem!!.isNotEmpty() && prefs.getString(PREF_IMAGE_FILESYSTEM_STASH, null) == null){
                         val imageFileSystemString = Gson().toJson(imageFileSystem)
                         editor.putString(PREF_IMAGE_FILESYSTEM_STASH, imageFileSystemString)
                     }
@@ -185,6 +190,8 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     }
                     editor.commit()
                 }
+            }else{
+                Log.d(TAG, "Set is empty")
             }
         }
         return Result.success()
@@ -195,6 +202,9 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
             val fileSystemString = prefs.getString(PREF_FILESYSTEM_STASH, null)
             if(fileSystemString != null){
                 val fileSystem = Gson().fromJson(fileSystemString, Array<NoteFile>::class.java).asList()
+                val appFolderId = getAppFolderId()
+                googleDriveHelper.appFolderId = appFolderId
+                googleDriveHelper.fileSystemId = getFileSystemId(appFolderId)
                 writeFileSystemToCloud(fileSystem)
                 editor.putString(PREF_FILESYSTEM_STASH, null)
             }
@@ -258,6 +268,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
 
         if (noteIndex >= 0 && localNote.nId == tempFileSystem[noteIndex].nId) {
             val cloudNoteFile = tempFileSystem[noteIndex]
+            Log.d(TAG, "Notes with the same id")
             // Notes with same Id
             if (localNote.dateCreated != cloudNoteFile.dateCreated) {
                 // Notes created on different devices.
@@ -290,12 +301,14 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     WorkSchedulerHelper().cancelReminderByNoteId(newId)
 
             } else if (localNote.noteType == NOTE_DELETED || localNote.noteType == IMAGE_DELETED) {
+                Log.d(TAG, "Note deleted from device then delete from cloud")
                 // If note deleted from device then delete from cloud too
                 notesDao.deleteNoteById(localNote.nId!!)
                 tempFileSystem.removeAt(noteIndex)
                 deleteFile(localNote)
                 WorkSchedulerHelper().cancelReminderByNoteId(localNote.nId)
             } else if (localNote.dateModified > cloudNoteFile.dateModified) {
+                Log.d(TAG, "Local note is more recent")
                 // Local note is more recent
                 val noteData = NoteContent(
                     localNote.noteTitle,
@@ -330,6 +343,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 updateFile(cloudNoteFile, fileContent)
                 fileSystem[noteIndex].dateModified = localNote.dateModified
             } else if (localNote.dateModified < cloudNoteFile.dateModified) {
+                Log.d(TAG, "Cloud note is more recent")
                 //Cloud note is more recent
                 val gson = Gson()
                 val fileContentString = getFileContent(cloudNoteFile)
@@ -369,11 +383,13 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     WorkSchedulerHelper().cancelReminderByNoteId(note.nId)
             }
         } else {
+            Log.d(TAG, "Note exists on the device but not online")
             // Note exists on the device but not online
             if (localNote.noteType == NOTE_DELETED || localNote.noteType == IMAGE_DELETED || localNote.synced) {
                 // The note was deleted from another device or, it was never synced and was deleted from device
                 notesDao.deleteNoteById(localNote.nId!!)
             } else {
+                Log.d(TAG, "Upload new note")
                 tempFileSystem = uploadNewNote(localNote, tempFileSystem)
             }
         }
@@ -381,6 +397,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun compareIdListCloudPrefer(localIdList: ArrayList<Long>, cloudIdList: ArrayList<Long>): ArrayList<Long> {
+        Log.d(TAG, "Compare id list cloud prefer")
         val newIdList = ArrayList<Long>()
         val set = cloudIdList.toHashSet()
         val deletionList = ArrayList<Long>()
@@ -404,6 +421,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun deleteImagesByIdFromStorage(idList: ArrayList<Long>) {
+        Log.d(TAG, "delete images by id from storage")
         val imagesList = imagesDao.getImagesByIds(idList)
         for (image in imagesList) {
             val file = File(image.imagePath)
@@ -414,6 +432,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun compareIdListLocalPrefer(localIdList: ArrayList<Long>, cloudIdList: ArrayList<Long>): ArrayList<Long> {
+        Log.d(TAG, "Compare id list local prefer")
         val newIdList = ArrayList<Long>()
         val deletedList = ArrayList<Long>()
         val set1 = localIdList.toHashSet()
@@ -480,11 +499,6 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                         tempImageFileSystem.add(index, imageData)
                     }
                 }
-            }else{
-                if(index < 0)
-                    Log.d(TAG, "index problem")
-                else
-                    Log.d(TAG, "other problem")
             }
         }
         imageFileSystem = tempImageFileSystem
@@ -615,8 +629,6 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 FILE_TYPE_TEXT,
                 fileContent
             )
-        }else{
-            Log.d(TAG, "Image file system found")
         }
         return imageFileSystemId
     }
@@ -792,6 +804,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun createImageFile(imageId: Long, path: String): String {
+        Log.d(TAG, "Create image file called")
         val imageFile = File(path)
         val fis = FileInputStream(imageFile)
         val tempFilePath = context.applicationContext.filesDir.toString() + "/temp.txt"
@@ -859,6 +872,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun createFile(noteId: Long, noteContent: NoteContent): String {
+        Log.d(TAG, "create file called")
         val fileContentString = Gson().toJson(noteContent)
         val fileContent = if (isEncrypted)
             aesHelper.encrypt(fileContentString)
@@ -879,6 +893,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun updateFile(file: NoteFile, fileContentString: String) {
+        Log.d(TAG, "update file called")
         val fileContent = if (isEncrypted)
             aesHelper.encrypt(fileContentString)
         else
@@ -891,7 +906,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun deleteFile(note: Note) {
-        if (isImageType(note.noteType)) {
+        if (note.noteType == IMAGE_DELETED) {
             val imageNoteContent = Gson().fromJson(note.noteContent, ImageNoteContent::class.java)
             deleteImagesFromCloud(imageNoteContent.idList)
         }
@@ -902,6 +917,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun deleteImagesFromCloud(idList: List<Long>) {
+        Log.d(TAG, "delete images by id from cloud")
         val tempImageFileSystem: MutableList<ImageData> =
             imageFileSystem ?: getImageFileSystem().toMutableList()
 

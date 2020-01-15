@@ -33,9 +33,6 @@ interface NotesDao {
     @Query("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13 AND (title LIKE:query OR content LIKE:query)")
     fun getSearchResult(query: String): LiveData<List<Note>>
 
-    @Query("SELECT * FROM notes_table ORDER BY note_id ASC")
-    suspend fun getCurrentData(): List<Note>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: Note)
 

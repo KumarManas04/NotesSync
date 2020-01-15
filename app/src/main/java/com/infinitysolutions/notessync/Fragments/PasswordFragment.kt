@@ -6,6 +6,7 @@ import android.app.Service
 import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -48,6 +49,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.Model.ImageData
 import com.infinitysolutions.notessync.Model.NoteFile
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.DropboxHelper
@@ -117,6 +119,7 @@ class PasswordFragment : Fragment() {
 
     private fun initDataBinding(rootView: View, cloudType: Int, userId: String, passwordMode: Int) {
         loginViewModel = ViewModelProviders.of(activity!!).get(LoginViewModel::class.java)
+        loginViewModel.setLocalStoragePath(context!!.filesDir.toString())
         if (!loginViewModel.isLoginInitialized)
             initializeLogin(cloudType)
 
@@ -245,9 +248,9 @@ class PasswordFragment : Fragment() {
                 if (googleDriveService != null) {
                     loginViewModel.googleDriveHelper = GoogleDriveHelper(googleDriveService)
                     val appFolderId = getAppFolderId()
-                    val fileSystemId = getFileSystemId(appFolderId)
                     loginViewModel.googleDriveHelper.appFolderId = appFolderId
-                    loginViewModel.googleDriveHelper.fileSystemId = fileSystemId
+                    loginViewModel.googleDriveHelper.fileSystemId = getFileSystemId(appFolderId)
+                    loginViewModel.googleDriveHelper.imageFileSystemId = getImageFileSystemId(appFolderId)
                 }
             } else {
                 val dropboxClient = getDropboxClient()
@@ -273,6 +276,25 @@ class PasswordFragment : Fragment() {
         Toast.makeText(activity, "Login successful", LENGTH_SHORT).show()
         loginViewModel.isLoginSuccess = true
         activity?.onBackPressed()
+    }
+
+    private fun getImageFileSystemId(parentFolderId: String): String {
+        var imageFileSystemId: String? = loginViewModel.googleDriveHelper.searchFile(Contract.IMAGE_FILE_SYSTEM_FILENAME, FILE_TYPE_TEXT)
+        if (imageFileSystemId == null) {
+            Log.d(TAG, "Image File system not found")
+            val imagesList = ArrayList<ImageData>()
+            val fileContent = Gson().toJson(imagesList)
+
+            imageFileSystemId = loginViewModel.googleDriveHelper.createFile(
+                parentFolderId,
+                Contract.IMAGE_FILE_SYSTEM_FILENAME,
+                FILE_TYPE_TEXT,
+                fileContent
+            )
+        }else{
+            Log.d(TAG, "Image file system found")
+        }
+        return imageFileSystemId
     }
 
     private fun getFileSystemId(parentFolderId: String): String {

@@ -38,6 +38,7 @@ class DropboxHelper(client: DbxClientV2) {
     fun writeFileStream(fileName: String?, inputStream: InputStream) {
         if (fileName != null) {
             dropboxClient.files().uploadBuilder("/$fileName").withMode(WriteMode.OVERWRITE).uploadAndFinish(inputStream)
+            inputStream.close()
         }
     }
 

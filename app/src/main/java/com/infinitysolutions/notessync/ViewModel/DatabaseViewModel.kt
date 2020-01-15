@@ -107,6 +107,7 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
                             file = File(imageData.imagePath)
                             bitmap = BitmapFactory.decodeFile(file.absolutePath)
                             newIdList.add(insertImage(bitmap).imageId!!)
+                            bitmap.recycle()
                         }
                         val newNoteContent = Gson().toJson(ImageNoteContent(imageNoteContent.noteContent, newIdList))
                         val newNote = Note(

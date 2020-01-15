@@ -37,7 +37,7 @@ class WorkSchedulerHelper {
             .setInputData(data)
             .build()
 
-        WorkManager.getInstance().enqueueUniqueWork(SYNC_WORK_ID, ExistingWorkPolicy.REPLACE, syncRequest)
+        WorkManager.getInstance().enqueueUniqueWork(SYNC_WORK_ID, ExistingWorkPolicy.APPEND, syncRequest)
     }
 
     fun setAutoDelete(){

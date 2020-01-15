@@ -527,7 +527,6 @@ class NoteEditFragment : Fragment() {
                     )
                 }
             } else {
-                Log.d("TAG", "GDriveId = ${selectedNote.gDriveId}")
                 databaseViewModel.insert(
                     Note(
                         selectedNote.nId,
@@ -666,7 +665,6 @@ class NoteEditFragment : Fragment() {
             val selectedNote = mainViewModel.getSelectedNote()
             if (selectedNote != null) {
                 val noteContentText = getNoteText()
-                Log.d(TAG, "Note Content last = $noteContentText")
                 if (!activity!!.isChangingConfigurations) {
                     if ((selectedNote.noteContent != noteContentText)
                         || (selectedNote.noteType != mainViewModel.noteType)

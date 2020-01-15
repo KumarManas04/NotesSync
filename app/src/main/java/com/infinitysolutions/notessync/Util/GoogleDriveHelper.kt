@@ -47,6 +47,14 @@ class GoogleDriveHelper(driveService: Drive) {
         return file.id
     }
 
+    fun updateFileStream(fileId: String, path: String){
+        val localFile = java.io.File(path)
+        val fileContent = FileContent("text/plain", localFile)
+        val contentFile = File()
+        googleDriveService.files().update(fileId, contentFile, fileContent)
+            .execute()
+    }
+
     fun searchFile(fileName: String, fileMimeType: String): String? {
         var fileId: String? = null
         val result = googleDriveService.files().list().apply {

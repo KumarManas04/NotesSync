@@ -1,20 +1,29 @@
 package com.infinitysolutions.notessync.ViewModel
 
+import android.util.Base64
+import android.util.Base64InputStream
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.api.client.util.IOUtils
 import com.google.gson.Gson
-import com.infinitysolutions.notessync.Contracts.Contract
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.CREDENTIALS_FILENAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.ENCRYPTED_CHECK_ERROR
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.ENCRYPTED_NO
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.ENCRYPTED_YES
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_SYSTEM_FILENAME
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_TYPE_TEXT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_FILE_SYSTEM_FILENAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_CHANGE_NETWORK_ERROR
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_CHANGE_OLD_INVALID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_CHANGE_SUCCESS
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_VERIFY_CORRECT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_VERIFY_ERROR
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_VERIFY_INVALID
+import com.infinitysolutions.notessync.Model.ImageData
 import com.infinitysolutions.notessync.Model.NoteFile
 import com.infinitysolutions.notessync.Util.AES256Helper
 import com.infinitysolutions.notessync.Util.DropboxHelper
@@ -22,6 +31,9 @@ import com.infinitysolutions.notessync.Util.GoogleDriveHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.security.SecureRandom
 import javax.crypto.AEADBadTagException
 
@@ -38,7 +50,12 @@ class LoginViewModel : ViewModel() {
     var isLoginSuccess = false
     lateinit var googleDriveHelper: GoogleDriveHelper
     lateinit var dropboxHelper: DropboxHelper
+    private lateinit var localStoragePath: String
     private val TAG = "LoginViewModel"
+
+    fun setLocalStoragePath(path: String){
+        localStoragePath = path
+    }
 
     fun getEncryptionCheckLoading(): LiveData<Boolean> {
         return encryptionCheckLoading
@@ -96,16 +113,15 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun getPresentCredential(aesHelper: AES256Helper, cloudType: Int): String? {
-        var content: String? = if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
-            val credentialFileId =
-                googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT)
+        var content: String? = if (cloudType == CLOUD_GOOGLE_DRIVE) {
+            val credentialFileId = googleDriveHelper.searchFile(CREDENTIALS_FILENAME, FILE_TYPE_TEXT)
             if (credentialFileId != null)
                 googleDriveHelper.getFileContent(credentialFileId)
             else
                 null
         } else {
-            if (dropboxHelper.checkIfFileExists(Contract.CREDENTIALS_FILENAME))
-                dropboxHelper.getFileContent(Contract.CREDENTIALS_FILENAME)
+            if (dropboxHelper.checkIfFileExists(CREDENTIALS_FILENAME))
+                dropboxHelper.getFileContent(CREDENTIALS_FILENAME)
             else
                 null
         }
@@ -144,20 +160,13 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun checkForEncryption(cloudType: Int): Boolean {
-        if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
-            val credentialFileId =
-                googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT)
-                    ?: return false
+        if (cloudType == CLOUD_GOOGLE_DRIVE) {
+            val credentialFileId = googleDriveHelper.searchFile(CREDENTIALS_FILENAME, FILE_TYPE_TEXT) ?: return false
 
             val content = googleDriveHelper.getFileContent(credentialFileId)
             return content != null
         } else {
-            return if (dropboxHelper.checkIfFileExists(Contract.CREDENTIALS_FILENAME)) {
-                val content = dropboxHelper.getFileContent(Contract.CREDENTIALS_FILENAME)
-                content != null
-            } else {
-                false
-            }
+            return dropboxHelper.checkIfFileExists(CREDENTIALS_FILENAME)
         }
     }
 
@@ -183,9 +192,9 @@ class LoginViewModel : ViewModel() {
         val aesHelper = AES256Helper()
         aesHelper.generateKey(password, userId)
 
-        if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
+        if (cloudType == CLOUD_GOOGLE_DRIVE) {
             val credentialFileId =
-                googleDriveHelper.searchFile(Contract.CREDENTIALS_FILENAME, Contract.FILE_TYPE_TEXT)
+                googleDriveHelper.searchFile(CREDENTIALS_FILENAME, FILE_TYPE_TEXT)
             return if (credentialFileId != null) {
                 val content = googleDriveHelper.getFileContent(credentialFileId)
                 if (content != null) {
@@ -202,17 +211,13 @@ class LoginViewModel : ViewModel() {
                 null
             }
         } else {
-            return if (dropboxHelper.checkIfFileExists(Contract.CREDENTIALS_FILENAME)) {
-                val content = dropboxHelper.getFileContent(Contract.CREDENTIALS_FILENAME)
-                if (content != null) {
-                    try {
-                        aesHelper.decrypt(content)
-                        true
-                    } catch (e: AEADBadTagException) {
-                        false
-                    }
-                } else {
-                    null
+            return if (dropboxHelper.checkIfFileExists(CREDENTIALS_FILENAME)) {
+                val content = dropboxHelper.getFileContent(CREDENTIALS_FILENAME)
+                try {
+                    aesHelper.decrypt(content)
+                    true
+                } catch (e: AEADBadTagException) {
+                    false
                 }
             } else {
                 null
@@ -246,49 +251,80 @@ class LoginViewModel : ViewModel() {
         return try {
             val aesHelper = AES256Helper()
             aesHelper.generateKey(password, userId)
-            val filesList = if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
+            val filesList = if (cloudType == CLOUD_GOOGLE_DRIVE)
                 getFilesListGD(googleDriveHelper.fileSystemId)
-            } else {
+            else
                 getFilesListDB()
-            }
-            uploadFiles(filesList, aesHelper, cloudType)
+
+            encryptNoteFiles(filesList, aesHelper, cloudType)
+            val imageFilesList = if(cloudType == CLOUD_GOOGLE_DRIVE)
+                getImagesListGD(googleDriveHelper.imageFileSystemId)
+            else
+                getImagesListDB()
+            Log.d(TAG, "Encrypted file system")
+
+            encryptImageFiles(imageFilesList, aesHelper, cloudType)
+            Log.d(TAG, "Encrypted image file system")
             true
         } catch (e: java.lang.Exception) {
+            e.printStackTrace()
             false
         }
     }
 
-    private fun uploadKey(encryptedKey: String, cloudType: Int): Boolean {
-        return try {
-            if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
-                val credentialFileId = googleDriveHelper.searchFile(
-                    Contract.CREDENTIALS_FILENAME,
-                    Contract.FILE_TYPE_TEXT
-                )
-                if (credentialFileId != null) {
-                    googleDriveHelper.updateFile(credentialFileId, encryptedKey)
-                } else {
-                    googleDriveHelper.createFile(
-                        googleDriveHelper.appFolderId,
-                        Contract.CREDENTIALS_FILENAME,
-                        Contract.FILE_TYPE_TEXT,
-                        encryptedKey
-                    )
-                }
-            } else {
-                dropboxHelper.writeFile(Contract.CREDENTIALS_FILENAME, encryptedKey)
+    private fun encryptImageFiles(filesList: List<ImageData>, aesHelper: AES256Helper, cloudType: Int){
+        val tempFile = File(localStoragePath, "temp.txt")
+        val tempFile1 = File(localStoragePath, "temp1.txt")
+        var tempFis: FileInputStream
+        var tempFos: FileOutputStream
+        var base64Stream: Base64InputStream
+        var fis: FileInputStream
+        var inputStream: FileInputStream
+        for (imageFile in filesList) {
+            Log.d(TAG, "ImageId: ${imageFile.imageId}")
+            // Get the file and write it to 'temp.txt'
+            if (cloudType == CLOUD_GOOGLE_DRIVE)
+                googleDriveHelper.getFileContentStream(imageFile.gDriveId, localStoragePath)
+            else
+                dropboxHelper.getFileContentStream("image_${imageFile.imageId}.txt", localStoragePath)
+
+            // Read from 'temp.txt' and write Base64Decoded content to 'temp1.txt'
+            if(tempFile1.exists())
+                tempFile1.delete()
+            tempFis = FileInputStream(tempFile)
+            tempFos = FileOutputStream(tempFile1)
+            base64Stream = Base64InputStream(tempFis, Base64.DEFAULT)
+            IOUtils.copy(base64Stream, tempFos)
+            base64Stream.close()
+            tempFos.flush()
+            tempFos.close()
+
+            // Send 'temp1.txt' content to encrypt and save to 'temp.txt'
+            fis = FileInputStream(tempFile1)
+            aesHelper.encryptStream(fis, tempFile.absolutePath)
+
+            // Upload 'temp.txt' content to cloud
+            if(cloudType == CLOUD_GOOGLE_DRIVE){
+                googleDriveHelper.updateFileStream(imageFile.gDriveId!!, tempFile.absolutePath)
+            }else{
+                inputStream = FileInputStream(tempFile)
+                dropboxHelper.writeFileStream("image_${imageFile.imageId}.txt", inputStream)
             }
-            true
-        } catch (e: Exception) {
-            false
         }
+
+        val imageFileSystemString = Gson().toJson(filesList)
+        val imageFileSystemStringEncrypted = aesHelper.encrypt(imageFileSystemString)
+        if(cloudType == CLOUD_GOOGLE_DRIVE)
+            googleDriveHelper.updateFile(googleDriveHelper.imageFileSystemId, imageFileSystemStringEncrypted)
+        else
+            dropboxHelper.writeFile(IMAGE_FILE_SYSTEM_FILENAME, imageFileSystemStringEncrypted)
     }
 
-    private fun uploadFiles(filesList: List<NoteFile>, aesHelper: AES256Helper, cloudType: Int) {
+    private fun encryptNoteFiles(filesList: List<NoteFile>, aesHelper: AES256Helper, cloudType: Int) {
         var fileContent: String
         var fileContentEncrypted: String
         for (file in filesList) {
-            if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
+            if (cloudType == CLOUD_GOOGLE_DRIVE) {
                 fileContent = googleDriveHelper.getFileContent(file.gDriveId) as String
                 fileContentEncrypted = aesHelper.encrypt(fileContent)
                 googleDriveHelper.updateFile(file.gDriveId!!, fileContentEncrypted)
@@ -301,10 +337,50 @@ class LoginViewModel : ViewModel() {
 
         val fileSystemJson = Gson().toJson(filesList)
         val fileSystemJsonEncrypted = aesHelper.encrypt(fileSystemJson)
-        if (cloudType == Contract.CLOUD_GOOGLE_DRIVE) {
+        if (cloudType == CLOUD_GOOGLE_DRIVE) {
             googleDriveHelper.updateFile(googleDriveHelper.fileSystemId, fileSystemJsonEncrypted)
         } else {
-            dropboxHelper.writeFile(Contract.FILE_SYSTEM_FILENAME, fileSystemJsonEncrypted)
+            dropboxHelper.writeFile(FILE_SYSTEM_FILENAME, fileSystemJsonEncrypted)
+        }
+    }
+
+    private fun uploadKey(encryptedKey: String, cloudType: Int): Boolean {
+        return try {
+            if (cloudType == CLOUD_GOOGLE_DRIVE) {
+                val credentialFileId = googleDriveHelper.searchFile(
+                    CREDENTIALS_FILENAME,
+                    FILE_TYPE_TEXT
+                )
+                if (credentialFileId != null) {
+                    googleDriveHelper.updateFile(credentialFileId, encryptedKey)
+                } else {
+                    googleDriveHelper.createFile(
+                        googleDriveHelper.appFolderId,
+                        CREDENTIALS_FILENAME,
+                        FILE_TYPE_TEXT,
+                        encryptedKey
+                    )
+                }
+            } else {
+                dropboxHelper.writeFile(CREDENTIALS_FILENAME, encryptedKey)
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun getImagesListGD(imageFileSystemId: String): List<ImageData> {
+        val fileContentString = googleDriveHelper.getFileContent(imageFileSystemId) as String
+        return Gson().fromJson(fileContentString, Array<ImageData>::class.java).asList()
+    }
+
+    private fun getImagesListDB(): List<ImageData> {
+        return if (dropboxHelper.checkIfFileExists(IMAGE_FILE_SYSTEM_FILENAME)) {
+            val fileContentString = dropboxHelper.getFileContent(IMAGE_FILE_SYSTEM_FILENAME)
+            Gson().fromJson(fileContentString, Array<ImageData>::class.java).asList()
+        } else {
+            ArrayList()
         }
     }
 
@@ -314,13 +390,13 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun getFilesListDB(): List<NoteFile> {
-        return if (dropboxHelper.checkIfFileExists(Contract.FILE_SYSTEM_FILENAME)) {
-            val fileContent = dropboxHelper.getFileContent(Contract.FILE_SYSTEM_FILENAME)
+        return if (dropboxHelper.checkIfFileExists(FILE_SYSTEM_FILENAME)) {
+            val fileContent = dropboxHelper.getFileContent(FILE_SYSTEM_FILENAME)
             Gson().fromJson(fileContent, Array<NoteFile>::class.java).asList()
         } else {
             val filesList = ArrayList<NoteFile>()
             val fileContent = Gson().toJson(filesList)
-            dropboxHelper.writeFile(Contract.FILE_SYSTEM_FILENAME, fileContent)
+            dropboxHelper.writeFile(FILE_SYSTEM_FILENAME, fileContent)
             filesList
         }
     }
