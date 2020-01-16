@@ -68,16 +68,16 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
 
     fun insert(note: Note) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.insert(note)
+            val noteId = repository.insert(note)
             withContext(Dispatchers.Main) {
                 val context = getApplication<Application>().applicationContext
                 updateWidgets(context)
                 val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
                 var set = prefs.getStringSet(PREF_SYNC_QUEUE, null)
                 if(set == null)
-                   set = hashSetOf(note.nId.toString())
+                   set = hashSetOf(noteId.toString())
                 else
-                    set.add(note.nId.toString())
+                    set.add(noteId.toString())
 
                 val editor = prefs.edit()
                 editor.putStringSet(PREF_SYNC_QUEUE, set)

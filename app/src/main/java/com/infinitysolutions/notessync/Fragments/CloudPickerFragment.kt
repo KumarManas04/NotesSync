@@ -99,7 +99,6 @@ class CloudPickerFragment : Fragment() {
                     if (googleAccount != null) {
                         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
                         prefs?.edit()?.putString(PREF_ID, googleAccount.id)?.commit()
-                        val id = googleAccount.id
                         loginSuccess(CLOUD_GOOGLE_DRIVE, googleAccount.id!!)
                         Log.d(TAG, "GDrive login complete")
                     }

@@ -19,6 +19,7 @@ class MainViewModel: ViewModel(){
     private val openImageView = MutableLiveData<Event<Int>>()
     private val mToolbar = MutableLiveData<Toolbar>()
     private val viewMode = MutableLiveData<Int>()
+    private val isExitBlocked = MutableLiveData<Boolean>()
     var noteType: Int? = null
     private var currentPhotoPath: String? = null
     var intent: Intent? = null
@@ -26,6 +27,14 @@ class MainViewModel: ViewModel(){
 
     init{
         viewMode.value = 1
+    }
+
+    fun setExitBlocked(isBlocked: Boolean){
+        isExitBlocked.value = isBlocked
+    }
+
+    fun getIsExitBlocked(): LiveData<Boolean>{
+        return isExitBlocked
     }
 
     fun getCurrentPhotoPath(): String?{

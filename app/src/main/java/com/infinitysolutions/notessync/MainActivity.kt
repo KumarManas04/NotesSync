@@ -2,6 +2,7 @@ package com.infinitysolutions.notessync
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -29,6 +30,7 @@ import kotlinx.android.synthetic.main.support_development_dialog.view.*
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
+    private var isExitBlocked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +60,10 @@ class MainActivity : AppCompatActivity() {
                 editor.commit()
                 WorkSchedulerHelper().syncNotes(true)
             }
+        })
+
+        mainViewModel.getIsExitBlocked().observe(this, Observer{
+            isExitBlocked = it
         })
 
         mainViewModel.getToolbar().observe(this, Observer { toolbar ->
@@ -191,5 +197,23 @@ class MainActivity : AppCompatActivity() {
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         mainViewModel.intent = null
         super.onDestroy()
+    }
+
+    override fun onBackPressed() {
+        if(isExitBlocked){
+            AlertDialog.Builder(this)
+                .setTitle("Warning!")
+                .setMessage("Encryption process should not be interrupted. It may cause loss of data. Exit anyway?")
+                .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                    isExitBlocked = false
+//                    onBackPressed()
+                    super.onBackPressed()
+                }
+                .setNegativeButton("No", null)
+                .setCancelable(true)
+                .show()
+        }else{
+            super.onBackPressed()
+        }
     }
 }

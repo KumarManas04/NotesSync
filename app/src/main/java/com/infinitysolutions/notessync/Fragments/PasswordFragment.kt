@@ -55,6 +55,7 @@ import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.DropboxHelper
 import com.infinitysolutions.notessync.Util.GoogleDriveHelper
 import com.infinitysolutions.notessync.ViewModel.LoginViewModel
+import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_password.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -103,15 +104,34 @@ class PasswordFragment : Fragment() {
                     }
                 } else {
                     if (rootView.password_edit_text.text.isNotEmpty())
-                        loginViewModel.runVerification(userId, cloudType, rootView.password_edit_text.text.toString())
+                        loginViewModel.runVerification(
+                            userId,
+                            cloudType,
+                            rootView.password_edit_text.text.toString()
+                        )
                     else
                         Toast.makeText(activity, "Please enter a password", LENGTH_SHORT).show()
                 }
             } else {
-                if (rootView.password_edit_text.text.isNotEmpty() && rootView.password_edit_text.text.toString() == rootView.again_password_edit_text.text.toString())
-                    loginViewModel.secureCloudData(userId, cloudType, rootView.password_edit_text.text.toString())
-                else
+                if (rootView.password_edit_text.text.isNotEmpty() && rootView.password_edit_text.text.toString() == rootView.again_password_edit_text.text.toString()) {
+                    AlertDialog.Builder(context)
+                        .setTitle("Warning!")
+                        .setMessage("Encryption may take some time. The process should not be interrupted. Make sure you have a steady internet connection. Do you want to proceed?")
+                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                            val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+                            mainViewModel.setExitBlocked(true)
+                            loginViewModel.secureCloudData(
+                                userId,
+                                cloudType,
+                                rootView.password_edit_text.text.toString()
+                            )
+                        }
+                        .setNegativeButton("No", null)
+                        .setCancelable(true)
+                        .show()
+                } else {
                     Toast.makeText(activity, "Passwords do not match", LENGTH_SHORT).show()
+                }
             }
         }
         return rootView
@@ -123,95 +143,108 @@ class PasswordFragment : Fragment() {
         if (!loginViewModel.isLoginInitialized)
             initializeLogin(cloudType)
 
-        loginViewModel.getLoadingMessage().observe(this, androidx.lifecycle.Observer { loadingMessage ->
-            if (loadingMessage != null) {
-                rootView.loading_panel.visibility = VISIBLE
-                rootView.input_bar.visibility = GONE
-                rootView.loading_message.text = loadingMessage
-                rootView.skip_button.visibility = GONE
-            } else {
-                rootView.loading_panel.visibility = GONE
-                rootView.input_bar.visibility = VISIBLE
-            }
-        })
-
-        loginViewModel.getEncryptionCheckLoading().observe(this, androidx.lifecycle.Observer { showLoading ->
-            if (showLoading != null) {
-                if (showLoading) {
+        loginViewModel.getLoadingMessage()
+            .observe(this, androidx.lifecycle.Observer { loadingMessage ->
+                if (loadingMessage != null) {
                     rootView.loading_panel.visibility = VISIBLE
                     rootView.input_bar.visibility = GONE
-                    rootView.warning_text_view.visibility = GONE
-                    rootView.loading_message.text = getString(R.string.check_encryption_loading_text)
+                    rootView.loading_message.text = loadingMessage
                     rootView.skip_button.visibility = GONE
                 } else {
                     rootView.loading_panel.visibility = GONE
                     rootView.input_bar.visibility = VISIBLE
                 }
-            }
-        })
+            })
 
-        loginViewModel.getEncryptionCheckResult().observe(this, androidx.lifecycle.Observer { encryptionResult ->
-            if (encryptionResult != null) {
-                when (encryptionResult) {
-                    ENCRYPTED_NO -> {
-                        rootView.info_text_view.text = getString(R.string.will_user_encrypt_message)
-                        rootView.password_edit_text.hint = "Enter new password"
-                        rootView.warning_text_view.visibility = VISIBLE
-                        rootView.again_password_edit_text.visibility = VISIBLE
-                        rootView.skip_button.visibility = VISIBLE
-                    }
-                    ENCRYPTED_YES -> {
-                        if (passwordMode == MODE_CHANGE_PASSWORD) {
-                            rootView.info_text_view.text = getString(R.string.change_password)
-                            rootView.password_edit_text.hint = "Enter old password"
-                            rootView.again_password_edit_text.visibility = VISIBLE
-                            rootView.again_password_edit_text.hint = "Enter new password"
-                        } else {
-                            rootView.info_text_view.text = getString(R.string.enter_password_to_decrypt_message)
-                            rootView.password_edit_text.hint = "Enter password"
-                            rootView.again_password_edit_text.visibility = GONE
-                        }
+        loginViewModel.getEncryptionCheckLoading()
+            .observe(this, androidx.lifecycle.Observer { showLoading ->
+                if (showLoading != null) {
+                    if (showLoading) {
+                        rootView.loading_panel.visibility = VISIBLE
+                        rootView.input_bar.visibility = GONE
                         rootView.warning_text_view.visibility = GONE
+                        rootView.loading_message.text =
+                            getString(R.string.check_encryption_loading_text)
                         rootView.skip_button.visibility = GONE
-                    }
-                    ENCRYPTED_CHECK_ERROR -> {
-                        AlertDialog.Builder(context)
-                            .setTitle("Network error")
-                            .setMessage("Please connect to the internet and press retry.")
-                            .setPositiveButton("Retry") { _: DialogInterface, _: Int ->
-                                initializeLogin(cloudType)
-                            }
-                            .setNegativeButton("Cancel") { _: DialogInterface, _: Int ->
-                                activity?.onBackPressed()
-                            }
-                            .setCancelable(false)
-                            .show()
-                    }
-                }
-            }
-        })
-
-        loginViewModel.getVerifyPasswordResult().observe(this, androidx.lifecycle.Observer { result ->
-            if (result != null) {
-                when (result) {
-                    PASSWORD_VERIFY_INVALID -> {
-                        Toast.makeText(activity, "Incorrect password", LENGTH_SHORT).show()
-                        rootView.loading_panel.visibility = GONE
-                        rootView.input_bar.visibility = VISIBLE
-                    }
-                    PASSWORD_VERIFY_CORRECT -> finishLogin(rootView.password_edit_text.text.toString(), userId, cloudType)
-
-                    PASSWORD_VERIFY_ERROR -> {
-                        Toast.makeText(activity, "Error occurred", LENGTH_SHORT).show()
+                    } else {
                         rootView.loading_panel.visibility = GONE
                         rootView.input_bar.visibility = VISIBLE
                     }
                 }
-            }
-        })
+            })
+
+        loginViewModel.getEncryptionCheckResult()
+            .observe(this, androidx.lifecycle.Observer { encryptionResult ->
+                if (encryptionResult != null) {
+                    when (encryptionResult) {
+                        ENCRYPTED_NO -> {
+                            rootView.info_text_view.text =
+                                getString(R.string.will_user_encrypt_message)
+                            rootView.password_edit_text.hint = "Enter new password"
+                            rootView.warning_text_view.visibility = VISIBLE
+                            rootView.again_password_edit_text.visibility = VISIBLE
+                            rootView.skip_button.visibility = VISIBLE
+                        }
+                        ENCRYPTED_YES -> {
+                            if (passwordMode == MODE_CHANGE_PASSWORD) {
+                                rootView.info_text_view.text = getString(R.string.change_password)
+                                rootView.password_edit_text.hint = "Enter old password"
+                                rootView.again_password_edit_text.visibility = VISIBLE
+                                rootView.again_password_edit_text.hint = "Enter new password"
+                            } else {
+                                rootView.info_text_view.text =
+                                    getString(R.string.enter_password_to_decrypt_message)
+                                rootView.password_edit_text.hint = "Enter password"
+                                rootView.again_password_edit_text.visibility = GONE
+                            }
+                            rootView.warning_text_view.visibility = GONE
+                            rootView.skip_button.visibility = GONE
+                        }
+                        ENCRYPTED_CHECK_ERROR -> {
+                            AlertDialog.Builder(context)
+                                .setTitle("Network error")
+                                .setMessage("Please connect to the internet and press retry.")
+                                .setPositiveButton("Retry") { _: DialogInterface, _: Int ->
+                                    initializeLogin(cloudType)
+                                }
+                                .setNegativeButton("Cancel") { _: DialogInterface, _: Int ->
+                                    activity?.onBackPressed()
+                                }
+                                .setCancelable(false)
+                                .show()
+                        }
+                    }
+                }
+            })
+
+        loginViewModel.getVerifyPasswordResult()
+            .observe(this, androidx.lifecycle.Observer { result ->
+                if (result != null) {
+                    when (result) {
+                        PASSWORD_VERIFY_INVALID -> {
+                            Toast.makeText(activity, "Incorrect password", LENGTH_SHORT).show()
+                            rootView.loading_panel.visibility = GONE
+                            rootView.input_bar.visibility = VISIBLE
+                        }
+                        PASSWORD_VERIFY_CORRECT -> finishLogin(
+                            rootView.password_edit_text.text.toString(),
+                            userId,
+                            cloudType
+                        )
+
+                        PASSWORD_VERIFY_ERROR -> {
+                            Toast.makeText(activity, "Error occurred", LENGTH_SHORT).show()
+                            rootView.loading_panel.visibility = GONE
+                            rootView.input_bar.visibility = VISIBLE
+                        }
+                    }
+                }
+            })
 
         loginViewModel.getSecureDataResult().observe(this, androidx.lifecycle.Observer { result ->
             if (result != null) {
+                val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+                mainViewModel.setExitBlocked(false)
                 if (result) {
                     Toast.makeText(activity, "Success", LENGTH_SHORT).show()
                     finishLogin(rootView.password_edit_text.text.toString(), userId, cloudType)
@@ -223,22 +256,28 @@ class PasswordFragment : Fragment() {
             }
         })
 
-        loginViewModel.getChangePasswordResult().observe(this, androidx.lifecycle.Observer { result ->
-            if (result != null) {
-                when (result) {
-                    PASSWORD_CHANGE_OLD_INVALID -> {
-                        Toast.makeText(activity, "Old password is invalid!", LENGTH_SHORT).show()
-                    }
-                    PASSWORD_CHANGE_SUCCESS -> {
-                        Toast.makeText(activity, "Password changed", LENGTH_SHORT).show()
-                        finishLogin(rootView.again_password_edit_text.text.toString(), userId, cloudType)
-                    }
-                    PASSWORD_CHANGE_NETWORK_ERROR -> {
-                        Toast.makeText(activity, "Network error", LENGTH_SHORT).show()
+        loginViewModel.getChangePasswordResult()
+            .observe(this, androidx.lifecycle.Observer { result ->
+                if (result != null) {
+                    when (result) {
+                        PASSWORD_CHANGE_OLD_INVALID -> {
+                            Toast.makeText(activity, "Old password is invalid!", LENGTH_SHORT)
+                                .show()
+                        }
+                        PASSWORD_CHANGE_SUCCESS -> {
+                            Toast.makeText(activity, "Password changed", LENGTH_SHORT).show()
+                            finishLogin(
+                                rootView.again_password_edit_text.text.toString(),
+                                userId,
+                                cloudType
+                            )
+                        }
+                        PASSWORD_CHANGE_NETWORK_ERROR -> {
+                            Toast.makeText(activity, "Network error", LENGTH_SHORT).show()
+                        }
                     }
                 }
-            }
-        })
+            })
     }
 
     private fun initializeLogin(cloudType: Int) {
@@ -250,7 +289,8 @@ class PasswordFragment : Fragment() {
                     val appFolderId = getAppFolderId()
                     loginViewModel.googleDriveHelper.appFolderId = appFolderId
                     loginViewModel.googleDriveHelper.fileSystemId = getFileSystemId(appFolderId)
-                    loginViewModel.googleDriveHelper.imageFileSystemId = getImageFileSystemId(appFolderId)
+                    loginViewModel.googleDriveHelper.imageFileSystemId =
+                        getImageFileSystemId(appFolderId)
                 }
             } else {
                 val dropboxClient = getDropboxClient()
@@ -279,7 +319,10 @@ class PasswordFragment : Fragment() {
     }
 
     private fun getImageFileSystemId(parentFolderId: String): String {
-        var imageFileSystemId: String? = loginViewModel.googleDriveHelper.searchFile(Contract.IMAGE_FILE_SYSTEM_FILENAME, FILE_TYPE_TEXT)
+        var imageFileSystemId: String? = loginViewModel.googleDriveHelper.searchFile(
+            Contract.IMAGE_FILE_SYSTEM_FILENAME,
+            FILE_TYPE_TEXT
+        )
         if (imageFileSystemId == null) {
             Log.d(TAG, "Image File system not found")
             val imagesList = ArrayList<ImageData>()
@@ -291,14 +334,15 @@ class PasswordFragment : Fragment() {
                 FILE_TYPE_TEXT,
                 fileContent
             )
-        }else{
+        } else {
             Log.d(TAG, "Image file system found")
         }
         return imageFileSystemId
     }
 
     private fun getFileSystemId(parentFolderId: String): String {
-        var fileSystemId: String? = loginViewModel.googleDriveHelper.searchFile(FILE_SYSTEM_FILENAME, FILE_TYPE_TEXT)
+        var fileSystemId: String? =
+            loginViewModel.googleDriveHelper.searchFile(FILE_SYSTEM_FILENAME, FILE_TYPE_TEXT)
         if (fileSystemId == null) {
             val filesList = ArrayList<NoteFile>()
             val fileContent = Gson().toJson(filesList)
@@ -315,7 +359,10 @@ class PasswordFragment : Fragment() {
 
     private fun getAppFolderId(): String {
         var folderId =
-            loginViewModel.googleDriveHelper.searchFile("notes_sync_data_folder_19268", Contract.FILE_TYPE_FOLDER)
+            loginViewModel.googleDriveHelper.searchFile(
+                "notes_sync_data_folder_19268",
+                Contract.FILE_TYPE_FOLDER
+            )
         if (folderId == null)
             folderId = loginViewModel.googleDriveHelper.createFile(
                 null, "notes_sync_data_folder_19268",
@@ -327,9 +374,14 @@ class PasswordFragment : Fragment() {
     private fun getGoogleDriveService(): Drive? {
         val googleAccount = GoogleSignIn.getLastSignedInAccount(activity)
         return if (googleAccount != null) {
-            val credential = GoogleAccountCredential.usingOAuth2(activity, listOf(DriveScopes.DRIVE_FILE))
+            val credential =
+                GoogleAccountCredential.usingOAuth2(activity, listOf(DriveScopes.DRIVE_FILE))
             credential.selectedAccount = googleAccount.account
-            Drive.Builder(AndroidHttp.newCompatibleTransport(), JacksonFactory.getDefaultInstance(), credential)
+            Drive.Builder(
+                AndroidHttp.newCompatibleTransport(),
+                JacksonFactory.getDefaultInstance(),
+                credential
+            )
                 .setApplicationName(getString(R.string.app_name))
                 .build()
         } else {

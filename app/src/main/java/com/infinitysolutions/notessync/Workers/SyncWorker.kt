@@ -55,6 +55,7 @@ import com.infinitysolutions.notessync.Util.GoogleDriveHelper
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import java.io.*
 import java.lang.Exception
+import java.lang.NumberFormatException
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -129,8 +130,9 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     val idsList = mutableListOf<Long>()
                     if (set.isNotEmpty()) {
                         set.forEach { item->
-                            if(item != "null")
+                            try {
                                 idsList.add(item.toLong())
+                            }catch(e: NumberFormatException){}
                         }
                     }
 
@@ -141,17 +143,14 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                             fileSystem = syncNote(note, fileSystem)
                             set.remove(note.nId.toString())
                         }
-                    }else{
-                        //TODO: Fix this
-                        Log.d(TAG, "Available notes list empty")
-                        return Result.retry()
                     }
 
                     if (set.isNotEmpty()) {
                         val unavailableNotesIds = mutableListOf<Long>()
                         for (string in set) {
-                            if(string != "null")
+                            try {
                                 unavailableNotesIds.add(string.toLong())
+                            }catch(e: NumberFormatException){}
                         }
                         for (id in unavailableNotesIds) {
                             downloadCloudNote(id, fileSystem)

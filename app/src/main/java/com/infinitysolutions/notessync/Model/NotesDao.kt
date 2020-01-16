@@ -34,7 +34,7 @@ interface NotesDao {
     fun getSearchResult(query: String): LiveData<List<Note>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(note: Note)
+    suspend fun insert(note: Note): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun simpleInsert(note: Note): Long

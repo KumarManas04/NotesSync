@@ -20,7 +20,7 @@ class NotesRepository(private val notesDao: NotesDao){
     }
 
     @WorkerThread
-    suspend fun insert(note: Note){
-        notesDao.insert(note)
+    suspend fun insert(note: Note): Long{
+        return notesDao.insert(note)
     }
 }
