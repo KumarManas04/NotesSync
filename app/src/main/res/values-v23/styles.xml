@@ -39,6 +39,18 @@
         <item name="navDrawerItemTint">#ffffff</item>
     </style>
 
+    <style name="LightDialogStyle" parent="android:Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorBackground">#ffffff</item>
+    </style>
+
+    <style name="DarkDialogStyle" parent="android:Theme.Material.Dialog.Alert">
+        <item name="android:colorBackground">#171717</item>
+    </style>
+
+    <style name="AmoledDialogStyle" parent="android:Theme.Material.Dialog.Alert">
+        <item name="android:colorBackground">#000000</item>
+    </style>
+
     <style name="NavigationDrawerStyle">
         <item name="android:textSize">16sp</item>
         <item name="android:fontFamily">sans-serif</item>

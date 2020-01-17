@@ -136,7 +136,15 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.support_development ->{
                     drawer_layout.closeDrawers()
-                    val dialogBuilder = AlertDialog.Builder(this)
+                    val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+                    val dialogBuilder = when (prefs.getInt(PREF_THEME, THEME_DEFAULT)) {
+                        THEME_DEFAULT -> AlertDialog.Builder(this, R.style.LightDialogStyle)
+                        THEME_DARK -> AlertDialog.Builder(this, R.style.DarkDialogStyle)
+                        THEME_AMOLED -> AlertDialog.Builder(this, R.style.AmoledDialogStyle)
+                        else->{
+                            AlertDialog.Builder(this)
+                        }
+                    }
                     val inflater = getSystemService(LAYOUT_INFLATER_SERVICE ) as LayoutInflater
                     val dialogView = inflater.inflate(R.layout.support_development_dialog, null)
                     dialogView.iced_tea.setOnClickListener {
@@ -206,7 +214,6 @@ class MainActivity : AppCompatActivity() {
                 .setMessage("Encryption process should not be interrupted. It may cause loss of data. Exit anyway?")
                 .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
                     isExitBlocked = false
-//                    onBackPressed()
                     super.onBackPressed()
                 }
                 .setNegativeButton("No", null)

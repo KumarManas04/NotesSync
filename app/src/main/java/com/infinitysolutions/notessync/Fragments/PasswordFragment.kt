@@ -54,6 +54,7 @@ import com.infinitysolutions.notessync.Model.NoteFile
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.DropboxHelper
 import com.infinitysolutions.notessync.Util.GoogleDriveHelper
+import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.LoginViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_password.view.*
@@ -314,6 +315,7 @@ class PasswordFragment : Fragment() {
         editor?.putInt(PREF_CLOUD_TYPE, cloudType)
         editor?.commit()
         Toast.makeText(activity, "Login successful", LENGTH_SHORT).show()
+        WorkSchedulerHelper().syncNotes(true)
         loginViewModel.isLoginSuccess = true
         activity?.onBackPressed()
     }

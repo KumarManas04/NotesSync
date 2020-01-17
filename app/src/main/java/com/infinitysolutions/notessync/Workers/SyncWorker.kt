@@ -11,6 +11,8 @@ import android.util.Base64
 import android.util.Base64InputStream
 import android.util.Base64OutputStream
 import android.util.Log
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.dropbox.core.DbxRequestConfig
@@ -320,10 +322,8 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     val gson = Gson()
                     val fileContentString = getFileContent(cloudNoteFile)
                     val fileContent = gson.fromJson(fileContentString, NoteContent::class.java)
-                    val localImageNoteContent =
-                        gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
-                    val cloudImageNoteContent =
-                        gson.fromJson(fileContent.noteContent, ImageNoteContent::class.java)
+                    val localImageNoteContent = gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
+                    val cloudImageNoteContent = gson.fromJson(fileContent.noteContent, ImageNoteContent::class.java)
                     val localIdList = localImageNoteContent.idList
                     val cloudIdList = cloudImageNoteContent.idList
                     val newIdList = compareIdListLocalPrefer(localIdList, cloudIdList)
