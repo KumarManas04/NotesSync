@@ -11,8 +11,6 @@ import android.util.Base64
 import android.util.Base64InputStream
 import android.util.Base64OutputStream
 import android.util.Log
-import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.dropbox.core.DbxRequestConfig
@@ -318,28 +316,37 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     localNote.noteType,
                     localNote.reminderTime
                 )
-                if (isImageType(localNote.noteType)) {
-                    val gson = Gson()
-                    val fileContentString = getFileContent(cloudNoteFile)
-                    val fileContent = gson.fromJson(fileContentString, NoteContent::class.java)
-                    val localImageNoteContent = gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
-                    val cloudImageNoteContent = gson.fromJson(fileContent.noteContent, ImageNoteContent::class.java)
-                    val localIdList = localImageNoteContent.idList
-                    val cloudIdList = cloudImageNoteContent.idList
-                    val newIdList = compareIdListLocalPrefer(localIdList, cloudIdList)
-                    localImageNoteContent.idList = newIdList
-                    if (newIdList != cloudIdList)
-                        noteData.noteContent = gson.toJson(localImageNoteContent)
 
-                    if (newIdList != localIdList)
-                        notesDao.updateNoteContent(
-                            localNote.nId!!,
-                            gson.toJson(localImageNoteContent)
-                        )
+                val gson = Gson()
+                val fileContentString = getFileContent(cloudNoteFile)
+                val fileContent = gson.fromJson(fileContentString, NoteContent::class.java)
+                if (isImageType(localNote.noteType)) {
+                    val localImageNoteContent = gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
+                    val localIdList = localImageNoteContent.idList
+                    if(isImageType(fileContent.noteType!!)){
+                        val cloudImageNoteContent = gson.fromJson(fileContent.noteContent, ImageNoteContent::class.java)
+                        val cloudIdList = cloudImageNoteContent.idList
+                        val newIdList = compareIdListLocalPrefer(localIdList, cloudIdList)
+                        localImageNoteContent.idList = newIdList
+                        if (newIdList != cloudIdList)
+                            noteData.noteContent = gson.toJson(localImageNoteContent)
+                    }else{
+                        // If local note type was changed to image type
+                        val newIdList = uploadImages(localIdList)
+                        localImageNoteContent.idList = newIdList
+                        noteData.noteContent = gson.toJson(localImageNoteContent)
+                    }
+
+                    if (localImageNoteContent.idList != localIdList)
+                        notesDao.updateNoteContent(localNote.nId!!, gson.toJson(localImageNoteContent))
+                }else if(isImageType(fileContent.noteType!!)){
+                    // If local note type was changed to non-image type
+                    val cloudImageNoteContent = gson.fromJson(fileContent.noteContent, ImageNoteContent::class.java)
+                    deleteImagesFromCloud(cloudImageNoteContent.idList)
                 }
 
-                val fileContent = Gson().toJson(noteData)
-                updateFile(cloudNoteFile, fileContent)
+                val fileContentNew = Gson().toJson(noteData)
+                updateFile(cloudNoteFile, fileContentNew)
                 fileSystem[noteIndex].dateModified = localNote.dateModified
             } else if (localNote.dateModified < cloudNoteFile.dateModified) {
                 Log.d(TAG, "Cloud note is more recent")
@@ -347,7 +354,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 val gson = Gson()
                 val fileContentString = getFileContent(cloudNoteFile)
                 val fileContent = gson.fromJson(fileContentString, NoteContent::class.java)
-                val note = Note(
+                val cloudNote = Note(
                     cloudNoteFile.nId,
                     fileContent.noteTitle,
                     fileContent.noteContent,
@@ -359,27 +366,36 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                     fileContent.noteColor,
                     fileContent.reminderTime
                 )
-                if (isImageType(note.noteType)) {
-                    val localImageNoteContent =
-                        gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
-                    val cloudImageNoteContent =
-                        gson.fromJson(note.noteContent, ImageNoteContent::class.java)
-                    val localIdList = localImageNoteContent.idList
+                if (isImageType(cloudNote.noteType)) {
+                    val cloudImageNoteContent = gson.fromJson(cloudNote.noteContent, ImageNoteContent::class.java)
                     val cloudIdList = cloudImageNoteContent.idList
-                    val newIdList = compareIdListCloudPrefer(localIdList, cloudIdList)
-                    cloudImageNoteContent.idList = newIdList
 
-                    if (newIdList != cloudIdList)
+                    if(isImageType(localNote.noteType)){
+                        val localImageNoteContent = gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
+                        val localIdList = localImageNoteContent.idList
+                        val newIdList = compareIdListCloudPrefer(localIdList, cloudIdList)
+                        cloudImageNoteContent.idList = newIdList
+                        if (newIdList != localIdList)
+                            cloudNote.noteContent = gson.toJson(cloudImageNoteContent)
+                    }else{
+                        // If cloud note was changed to image note
+                        val newIdList = downloadCloudImages(cloudIdList)
+                        cloudImageNoteContent.idList = newIdList
+                        cloudNote.noteContent = gson.toJson(cloudImageNoteContent)
+                    }
+                    if (cloudImageNoteContent.idList != cloudIdList)
                         updateFile(cloudNoteFile, gson.toJson(cloudImageNoteContent))
-
-                    if (newIdList != localIdList)
-                        note.noteContent = gson.toJson(cloudImageNoteContent)
+                }else if(isImageType(localNote.noteType)){
+                    // If cloud note was changed to non-image note
+                    val localImageNoteContent = gson.fromJson(localNote.noteContent, ImageNoteContent::class.java)
+                    deleteImagesByIdFromStorage(localImageNoteContent.idList)
                 }
-                notesDao.simpleInsert(note)
-                if (note.reminderTime != -1L)
-                    WorkSchedulerHelper().setReminder(note.nId, note.reminderTime)
+
+                notesDao.simpleInsert(cloudNote)
+                if (cloudNote.reminderTime != -1L)
+                    WorkSchedulerHelper().setReminder(cloudNote.nId, cloudNote.reminderTime)
                 else
-                    WorkSchedulerHelper().cancelReminderByNoteId(note.nId)
+                    WorkSchedulerHelper().cancelReminderByNoteId(cloudNote.nId)
             }
         } else {
             Log.d(TAG, "Note exists on the device but not online")
@@ -917,8 +933,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
 
     private fun deleteImagesFromCloud(idList: List<Long>) {
         Log.d(TAG, "delete images by id from cloud")
-        val tempImageFileSystem: MutableList<ImageData> =
-            imageFileSystem ?: getImageFileSystem().toMutableList()
+        val tempImageFileSystem: MutableList<ImageData> = imageFileSystem ?: getImageFileSystem().toMutableList()
 
         var index: Int
         for (id in idList) {
