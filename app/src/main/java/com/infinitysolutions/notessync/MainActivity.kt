@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        WorkSchedulerHelper().setAutoDelete()
+        WorkSchedulerHelper().setAutoDelete(this)
         setContentView(R.layout.activity_main)
         initDataBinding()
     }
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                 val editor = prefs.edit()
                 editor.putStringSet(PREF_SYNC_QUEUE, hashSetOf("1"))
                 editor.commit()
-                WorkSchedulerHelper().syncNotes(true)
+                WorkSchedulerHelper().syncNotes(true, this)
             }
         })
 

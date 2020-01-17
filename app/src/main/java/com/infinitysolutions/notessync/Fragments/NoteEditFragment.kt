@@ -54,7 +54,6 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
-import com.infinitysolutions.notessync.Model.ImageData
 import com.infinitysolutions.notessync.Model.ImageNoteContent
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
@@ -310,7 +309,7 @@ class NoteEditFragment : Fragment() {
             }
 
             if (mainViewModel.reminderTime != -1L) {
-                dialogView.cancel_reminder_button.visibility = View.VISIBLE
+                dialogView.cancel_reminder_button.visibility = VISIBLE
                 val formatter = SimpleDateFormat("h:mm a MMM d, YYYY", Locale.ENGLISH)
                 dialogView.reminder_text.text =
                     getString(R.string.reminder_set, formatter.format(mainViewModel.reminderTime))
@@ -326,7 +325,7 @@ class NoteEditFragment : Fragment() {
                         .setTitle("Cancel reminder")
                         .setMessage("Are you sure you want to cancel the reminder?")
                         .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
-                            WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
+                            WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId, context!!)
                             mainViewModel.reminderTime = -1L
                             dialog.hide()
                         }
@@ -450,13 +449,13 @@ class NoteEditFragment : Fragment() {
                     0
                 )
                 if (cal.timeInMillis > Calendar.getInstance().timeInMillis) {
-                    WorkSchedulerHelper().setReminder(noteId, cal.timeInMillis)
+                    WorkSchedulerHelper().setReminder(noteId, cal.timeInMillis, context!!)
                     mainViewModel.reminderTime = cal.timeInMillis
                 } else {
                     Toast.makeText(
                         activity,
                         "Reminder cannot be set before present time",
-                        Toast.LENGTH_SHORT
+                        LENGTH_SHORT
                     ).show()
                 }
             }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false)
@@ -586,7 +585,7 @@ class NoteEditFragment : Fragment() {
                         )
 
                         if (selectedNote.reminderTime != -1L) {
-                            WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId)
+                            WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId, context!!)
                         }
                     }
                 }
@@ -623,22 +622,22 @@ class NoteEditFragment : Fragment() {
                         photoFile
                     )
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                    startActivityForResult(intent, Contract.IMAGE_CAPTURE_REQUEST_CODE)
+                    startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
                 } else
                     Toast.makeText(
                         context,
                         "Couldn't access file system",
-                        Toast.LENGTH_SHORT
+                        LENGTH_SHORT
                     ).show()
             } else {
-                Toast.makeText(context, "No camera app found!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "No camera app found!", LENGTH_SHORT).show()
             }
             true
         }
         menu.add("Pick an image").setOnMenuItemClickListener {
             val i = Intent(Intent.ACTION_PICK)
             i.type = "image/*"
-            startActivityForResult(i, Contract.IMAGE_PICKER_REQUEST_CODE)
+            startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)
             true
         }
     }
@@ -695,7 +694,7 @@ class NoteEditFragment : Fragment() {
             } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
                 bitmap = BitmapFactory.decodeFile(mainViewModel.getCurrentPhotoPath())
                 if (mainViewModel.getCurrentPhotoPath() != null) {
-                    val file = File(mainViewModel.getCurrentPhotoPath())
+                    val file = File(mainViewModel.getCurrentPhotoPath()!!)
                     if (file.exists())
                         file.delete()
                 }

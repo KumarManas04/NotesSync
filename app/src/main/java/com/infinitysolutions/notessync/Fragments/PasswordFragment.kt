@@ -315,7 +315,7 @@ class PasswordFragment : Fragment() {
         editor?.putInt(PREF_CLOUD_TYPE, cloudType)
         editor?.commit()
         Toast.makeText(activity, "Login successful", LENGTH_SHORT).show()
-        WorkSchedulerHelper().syncNotes(true)
+        WorkSchedulerHelper().syncNotes(true, context!!)
         loginViewModel.isLoginSuccess = true
         activity?.onBackPressed()
     }

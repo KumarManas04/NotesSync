@@ -254,9 +254,9 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
             )
 
             if (fileContent.reminderTime != -1L)
-                WorkSchedulerHelper().setReminder(cloudNoteFile.nId, fileContent.reminderTime)
+                WorkSchedulerHelper().setReminder(cloudNoteFile.nId, fileContent.reminderTime, context)
             else
-                WorkSchedulerHelper().cancelReminderByNoteId(cloudNoteFile.nId)
+                WorkSchedulerHelper().cancelReminderByNoteId(cloudNoteFile.nId, context)
         }
     }
 
@@ -295,9 +295,9 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 note.nId = newId
                 tempFileSystem = uploadNewNote(note, tempFileSystem)
                 if (note.reminderTime != -1L)
-                    WorkSchedulerHelper().setReminder(newId, note.reminderTime)
+                    WorkSchedulerHelper().setReminder(newId, note.reminderTime, context)
                 else
-                    WorkSchedulerHelper().cancelReminderByNoteId(newId)
+                    WorkSchedulerHelper().cancelReminderByNoteId(newId, context)
 
             } else if (localNote.noteType == NOTE_DELETED || localNote.noteType == IMAGE_DELETED) {
                 Log.d(TAG, "Note deleted from device then delete from cloud")
@@ -305,7 +305,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 notesDao.deleteNoteById(localNote.nId!!)
                 tempFileSystem.removeAt(noteIndex)
                 deleteFile(localNote)
-                WorkSchedulerHelper().cancelReminderByNoteId(localNote.nId)
+                WorkSchedulerHelper().cancelReminderByNoteId(localNote.nId, context)
             } else if (localNote.dateModified > cloudNoteFile.dateModified) {
                 Log.d(TAG, "Local note is more recent")
                 // Local note is more recent
@@ -393,9 +393,9 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
 
                 notesDao.simpleInsert(cloudNote)
                 if (cloudNote.reminderTime != -1L)
-                    WorkSchedulerHelper().setReminder(cloudNote.nId, cloudNote.reminderTime)
+                    WorkSchedulerHelper().setReminder(cloudNote.nId, cloudNote.reminderTime, context)
                 else
-                    WorkSchedulerHelper().cancelReminderByNoteId(cloudNote.nId)
+                    WorkSchedulerHelper().cancelReminderByNoteId(cloudNote.nId, context)
             }
         } else {
             Log.d(TAG, "Note exists on the device but not online")
@@ -803,15 +803,15 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
     }
 
     private fun getCloudKey(): String? {
-        if (mDriveType == CLOUD_GOOGLE_DRIVE) {
+        return if (mDriveType == CLOUD_GOOGLE_DRIVE) {
             val credentialFileId =
                 googleDriveHelper.searchFile(CREDENTIALS_FILENAME, FILE_TYPE_TEXT)
-            return if (credentialFileId != null)
+            if (credentialFileId != null)
                 googleDriveHelper.getFileContent(credentialFileId)
             else
                 null
         } else {
-            return if (dropboxHelper.checkIfFileExists(CREDENTIALS_FILENAME))
+            if (dropboxHelper.checkIfFileExists(CREDENTIALS_FILENAME))
                 dropboxHelper.getFileContent(CREDENTIALS_FILENAME)
             else
                 null

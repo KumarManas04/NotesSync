@@ -1,5 +1,6 @@
 package com.infinitysolutions.notessync.Util
 
+import android.content.Context
 import androidx.work.*
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.AUTO_DELETE_WORK_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SYNC_WORK_ID
@@ -11,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 class WorkSchedulerHelper {
 
-    fun setReminder(noteId: Long?, reminderTime: Long) {
+    fun setReminder(noteId: Long?, reminderTime: Long, context: Context) {
         if (noteId != null) {
             val data = Data.Builder()
                 .putLong("NOTE_ID", noteId)
@@ -23,11 +24,11 @@ class WorkSchedulerHelper {
                 .setInitialDelay(delay, TimeUnit.MILLISECONDS)
                 .setInputData(data)
                 .build()
-            WorkManager.getInstance().enqueueUniqueWork(noteId.toString(), ExistingWorkPolicy.REPLACE, reminderBuilder)
+            WorkManager.getInstance(context).enqueueUniqueWork(noteId.toString(), ExistingWorkPolicy.REPLACE, reminderBuilder)
         }
     }
 
-    fun syncNotes(syncAll: Boolean){
+    fun syncNotes(syncAll: Boolean, context: Context){
         val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
         val data = Data.Builder()
             .putBoolean("syncAll", syncAll)
@@ -37,16 +38,16 @@ class WorkSchedulerHelper {
             .setInputData(data)
             .build()
 
-        WorkManager.getInstance().enqueueUniqueWork(SYNC_WORK_ID, ExistingWorkPolicy.APPEND, syncRequest)
+        WorkManager.getInstance(context).enqueueUniqueWork(SYNC_WORK_ID, ExistingWorkPolicy.APPEND, syncRequest)
     }
 
-    fun setAutoDelete(){
+    fun setAutoDelete(context: Context){
         val deleteRequest = PeriodicWorkRequestBuilder<AutoDeleteWorker>(1, TimeUnit.DAYS).build()
-        WorkManager.getInstance().enqueueUniquePeriodicWork(AUTO_DELETE_WORK_ID, ExistingPeriodicWorkPolicy.REPLACE, deleteRequest)
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(AUTO_DELETE_WORK_ID, ExistingPeriodicWorkPolicy.REPLACE, deleteRequest)
     }
 
-    fun cancelReminderByNoteId(noteId: Long?) {
+    fun cancelReminderByNoteId(noteId: Long?, context: Context) {
         if (noteId != null)
-            WorkManager.getInstance().cancelUniqueWork(noteId.toString())
+            WorkManager.getInstance(context).cancelUniqueWork(noteId.toString())
     }
 }

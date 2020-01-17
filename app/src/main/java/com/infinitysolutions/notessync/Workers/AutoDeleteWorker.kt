@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
-class AutoDeleteWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+class AutoDeleteWorker(private val context: Context, params: WorkerParameters) : Worker(context, params) {
 
     override fun doWork(): Result {
         val notesRoomDatabase = NotesRoomDatabase.getDatabase(applicationContext)
@@ -44,7 +44,7 @@ class AutoDeleteWorker(context: Context, params: WorkerParameters) : Worker(cont
             }
         }
         if(deletedIds.isNotEmpty()){
-            val prefs = applicationContext.getSharedPreferences(Contract.SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+            val prefs = context.getSharedPreferences(Contract.SHARED_PREFS_NAME, Context.MODE_PRIVATE)
             var set = prefs.getStringSet(Contract.PREF_SYNC_QUEUE, null)
             if(set == null)
                 set = deletedIds
@@ -53,7 +53,7 @@ class AutoDeleteWorker(context: Context, params: WorkerParameters) : Worker(cont
             val editor = prefs.edit()
             editor.putStringSet(Contract.PREF_SYNC_QUEUE, set)
             editor.commit()
-            WorkSchedulerHelper().syncNotes(false)
+            WorkSchedulerHelper().syncNotes(false, context)
         }
         return Result.success()
     }

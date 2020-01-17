@@ -82,7 +82,7 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
                 val editor = prefs.edit()
                 editor.putStringSet(PREF_SYNC_QUEUE, set)
                 editor.commit()
-                WorkSchedulerHelper().syncNotes(false)
+                WorkSchedulerHelper().syncNotes(false, context)
             }
         }
     }
