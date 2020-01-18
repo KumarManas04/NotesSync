@@ -1,7 +1,6 @@
 package com.infinitysolutions.notessync.ViewModel
 
 import android.content.Intent
-import android.util.Log
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

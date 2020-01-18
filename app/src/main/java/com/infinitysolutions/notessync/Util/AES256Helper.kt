@@ -3,8 +3,10 @@ package com.infinitysolutions.notessync.Util
 import android.util.Base64
 import android.util.Base64InputStream
 import android.util.Base64OutputStream
-import android.util.Log
-import java.io.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.nio.ByteBuffer
 import java.security.SecureRandom
 import java.util.*

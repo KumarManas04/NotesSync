@@ -1,7 +1,6 @@
 package com.infinitysolutions.notessync.Workers
 
 import android.content.Context
-import androidx.lifecycle.viewModelScope
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.google.gson.Gson
@@ -12,8 +11,6 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Model.*
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 

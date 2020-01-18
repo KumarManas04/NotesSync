@@ -2,7 +2,6 @@ package com.infinitysolutions.notessync.Fragments
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.content.Intent
@@ -28,6 +27,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
@@ -62,7 +62,6 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.max
 
 class MainFragment : Fragment() {
     private val TAG = "MainFragment"
@@ -256,8 +255,12 @@ class MainFragment : Fragment() {
                     }
                 }else if(intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true){
                     (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {uri->
-                        val bitmap = getBitmapFromUri(uri)
-                        createNewNoteWithBitmap(bitmap)
+                        GlobalScope.launch(Dispatchers.IO) {
+                            val bitmap = getBitmapFromUri(uri)
+                            withContext(Dispatchers.Main) {
+                                createNewNoteWithBitmap(bitmap)
+                            }
+                        }
                     }
                 }else if (intent.hasExtra(WIDGET_BUTTON_EXTRA)) {
                     val text = intent.getStringExtra(WIDGET_BUTTON_EXTRA)
@@ -350,21 +353,29 @@ class MainFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
-            var bitmap: Bitmap? = null
             if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
                 val uri: Uri? = data?.data
-                bitmap = getBitmapFromUri(uri)
+                GlobalScope.launch(Dispatchers.IO) {
+                    val bitmap = getBitmapFromUri(uri)
+                    withContext(Dispatchers.Main){
+                        createNewNoteWithBitmap(bitmap)
+                    }
+                }
             } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
                 val photoFile = File(mainViewModel.getCurrentPhotoPath())
                 val photoUri = FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, photoFile)
-                bitmap = getBitmapFromUri(photoUri)
-                if (mainViewModel.getCurrentPhotoPath() != null) {
-                    val file = File(mainViewModel.getCurrentPhotoPath())
-                    if (file.exists())
-                        file.delete()
+                GlobalScope.launch(Dispatchers.IO) {
+                    val bitmap = getBitmapFromUri(photoUri)
+                    withContext(Dispatchers.Main) {
+                        if (mainViewModel.getCurrentPhotoPath() != null) {
+                            val file = File(mainViewModel.getCurrentPhotoPath())
+                            if (file.exists())
+                                file.delete()
+                        }
+                        createNewNoteWithBitmap(bitmap)
+                    }
                 }
             }
-            createNewNoteWithBitmap(bitmap)
         }
     }
 
@@ -400,7 +411,7 @@ class MainFragment : Fragment() {
 
     private fun getBitmapFromUri(uri: Uri?): Bitmap? {
         return if (uri != null) {
-            var imageStream = activity!!.contentResolver.openInputStream(uri)
+            val imageStream = activity!!.contentResolver.openInputStream(uri)
             val options = BitmapFactory.Options()
             options.inJustDecodeBounds = true
             BitmapFactory.decodeStream(imageStream, null, options)
@@ -410,12 +421,18 @@ class MainFragment : Fragment() {
                 val ratio = (maxOf(width, height)).toFloat() / 1000.0f
                 val newWidth = (width * ratio).toInt()
                 val newHeight = (height * ratio).toInt()
-                imageStream = activity!!.contentResolver.openInputStream(uri)
-                options.inSampleSize = max(options.outWidth/newWidth, options.outHeight/newHeight)
+                Glide.with(context!!)
+                    .asBitmap()
+                    .load(uri)
+                    .submit(newWidth, newHeight)
+                    .get()
+            }else {
+                Glide.with(context!!)
+                    .asBitmap()
+                    .load(uri)
+                    .submit(width, height)
+                    .get()
             }
-
-            options.inJustDecodeBounds = false
-            BitmapFactory.decodeStream(imageStream, null, options)
         } else {
             null
         }

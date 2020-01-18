@@ -16,7 +16,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -39,7 +38,6 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 
 class SettingsFragment : Fragment() {

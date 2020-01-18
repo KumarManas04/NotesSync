@@ -3,7 +3,6 @@ package com.infinitysolutions.notessync.Util
 import com.dropbox.core.v2.DbxClientV2
 import com.dropbox.core.v2.files.SearchMode
 import com.dropbox.core.v2.files.WriteMode
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.io.InputStream

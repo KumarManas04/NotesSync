@@ -10,17 +10,6 @@ import com.infinitysolutions.notessync.R
 
 class NotificationHelper {
 
-    fun getSyncNotification(context: Context): Notification {
-        val channelId = "notes_sync"
-        buildNotificationChannel(context, channelId, "Notes Sync", "Used to sync notes to the cloud")
-
-        val notificationBuilder = NotificationCompat.Builder(context, channelId)
-        notificationBuilder.setSmallIcon(R.drawable.sync_notes)
-            .setContentTitle("Notes Sync")
-            .setContentText("Syncing notes...")
-        return notificationBuilder.build()
-    }
-
     fun getReminderNotificationBuilder(context: Context, contentTitle: String, contentText: String) : NotificationCompat.Builder{
         val channelId = "reminder"
         buildNotificationChannel(context, channelId, "Reminders", "Used to show reminders for notes")

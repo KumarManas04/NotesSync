@@ -2,16 +2,13 @@ package com.infinitysolutions.notessync.Adapters
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color
-import android.net.Uri
 import android.os.Binder
 import android.util.SparseArray
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_DEFAULT

@@ -148,19 +148,19 @@ class MainActivity : AppCompatActivity() {
                     val inflater = getSystemService(LAYOUT_INFLATER_SERVICE ) as LayoutInflater
                     val dialogView = inflater.inflate(R.layout.support_development_dialog, null)
                     dialogView.iced_tea.setOnClickListener {
-                        openLink("")
+                        openLink("https://rzp.io/i/AS8eWQZ")
                     }
                     dialogView.coffee.setOnClickListener {
-                        openLink("")
+                        openLink("https://rzp.io/i/93dGQCN")
                     }
                     dialogView.apple_cider.setOnClickListener {
-                        openLink("")
+                        openLink("https://rzp.io/i/DBerESE")
                     }
                     dialogView.meal.setOnClickListener {
-                        openLink("")
+                        openLink("https://rzp.io/i/hhlPjyz")
                     }
                     dialogView.premium_meal.setOnClickListener {
-                        openLink("")
+                        openLink("https://rzp.io/i/h5K7T9q")
                     }
                     dialogBuilder.setView(dialogView)
                     dialogBuilder.create().show()

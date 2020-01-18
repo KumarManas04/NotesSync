@@ -253,7 +253,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 )
             )
 
-            if (fileContent.reminderTime != -1L)
+            if (fileContent.reminderTime != -1L && fileContent.reminderTime >= Calendar.getInstance().timeInMillis)
                 WorkSchedulerHelper().setReminder(cloudNoteFile.nId, fileContent.reminderTime, context)
             else
                 WorkSchedulerHelper().cancelReminderByNoteId(cloudNoteFile.nId, context)
@@ -294,7 +294,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 val newId = notesDao.simpleInsert(note)
                 note.nId = newId
                 tempFileSystem = uploadNewNote(note, tempFileSystem)
-                if (note.reminderTime != -1L)
+                if (note.reminderTime != -1L && note.reminderTime >= Calendar.getInstance().timeInMillis)
                     WorkSchedulerHelper().setReminder(newId, note.reminderTime, context)
                 else
                     WorkSchedulerHelper().cancelReminderByNoteId(newId, context)
@@ -392,7 +392,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                 }
 
                 notesDao.simpleInsert(cloudNote)
-                if (cloudNote.reminderTime != -1L)
+                if (cloudNote.reminderTime != -1L && cloudNote.reminderTime >= Calendar.getInstance().timeInMillis)
                     WorkSchedulerHelper().setReminder(cloudNote.nId, cloudNote.reminderTime, context)
                 else
                     WorkSchedulerHelper().cancelReminderByNoteId(cloudNote.nId, context)
