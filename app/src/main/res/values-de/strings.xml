@@ -1,0 +1,98 @@
+<resources>
+    <string name="app_name">Notes Sync</string>
+    <string name="menu_archive">Archiv</string>
+    <string name="menu_notes">Notizen</string>
+    <string name="menu_settings">Einstellungen</string>
+    <string name="menu_trash">Papierkorb</string>
+    <string name="menu_rate_app">App bewerten</string>
+    <string name="menu_share_app">App teilen</string>
+    <string name="menu_support_development">Unterstützung</string>
+    <string name="new_note">Notiz hinzufügen...</string>
+    <string name="all_empty_message">Noch keine Notizen vorhanden</string>
+    <string name="title">Titel</string>
+    <string name="write_something">Notiz schreiben...</string>
+    <string name="archive_note">Notiz archivieren</string>
+    <string name="make_a_copy">Kopie erstellen</string>
+    <string name="share">Teilen</string>
+    <string name="set_reminder">Erinnerung</string>
+    <string name="edited_time_stamp">Bearbeitet am %1$s</string>
+    <string name="toast_copy_done">Notiz kopiert</string>
+    <string name="delete_note">Notiz löschen</string>
+    <string name="delete_question">Diese Notiz wirklich löschen?</string>
+    <string name="no">Nein</string>
+    <string name="yes">Ja</string>
+    <string name="pick_image">Bild auswählen</string>
+    <string name="take_photo">Neues Foto</string>
+    <string name="add_item">Neuer Eintrag</string>
+    <string name="search_notes">Notizen durchsuchen...</string>
+    <string name="unarchive_note">Notiz dearchivieren</string>
+    <string name="archived_empty_message">Archivierte Notizen erscheinen hier</string>
+    <string name="trash_empty_message">Gelöschte Notizen verbleiben hier für 30 Tage</string>
+    <string name="empty_trash">Papierkorb löschen</string>
+    <string name="empty_trash_question">Sollen wirklich alle Notizen im Papierkorb unwiderruflich gelöscht werden?</string>
+    <string name="preferences">Allgemeine Einstellungen</string>
+    <string name="app_theme">Aussehen</string>
+    <string name="pick_theme">Design auswählen</string>
+    <string name="light">Hell</string>
+    <string name="dark">Dunkel</string>
+    <string name="amoled">Dark Mode</string>
+    <string name="app_lock">App-Sperre</string>
+    <string name="app_lock_summary">Erfordert die Eingabe einer PIN zum Sperren der App.</string>
+    <string name="app_lock_button">App-Sperre aktivieren</string>
+    <string name="enter_new_pin">Neue PIN eingeben</string>
+    <string name="enter_old_pin">Alte PIN eingeben</string>
+    <string name="clear_button">C</string>
+    <string name="change_pin">PIN ändern</string>
+    <string name="change_pin_summary">Die PIN zum Entsperren der App ändern.</string>
+    <string name="toast_enable_app_lock_first">Bitte zuerst die App-Sperre aktivieren</string>
+    <string name="re_enter_pin">PIN erneut eingeben</string>
+    <string name="toast_pins_dont_match">Die PINs stimmen nicht überein. Bitte noch einmal versuchen</string>
+    <string name="toast_old_pins_incorrect">Alte PIN falsch. Bitte noch einmal versuchen</string>
+    <string name="enter_pin">PIN zum Entsperren eingeben</string>
+    <string name="toast_pin_incorrect">PIN falsch. Bitte noch einmal versuchen</string>
+    <string name="other">Weiteres</string>
+    <string name="about">Über</string>
+    <string name="about_pref_summary">Details über diese App</string>
+    <string name="app_version">App-Version</string>
+    <string name="rate">Bewerten</string>
+    <string name="rate_pref_summary">Bitte gib eine positive Bewertung im Play Store ab, wenn Dir Notes Sync gefällt</string>
+    <string name="open_source">Open Soure</string>
+    <string name="open_source_prefs_summary">Bei GitHub findest Du den Quellcode und Deine Hilfe ist willkommen</string>
+    <string name="resources">Ressourcen</string>
+    <string name="resources_pref_summary">Alle verwendeten Bibliotheken und Ressourcen</string>
+    <string name="resources_used">Liste der in Notes Sync verwendeten Ressourcen</string>
+    <string name="report_bugs">Fehlerbericht</string>
+    <string name="report_bugs_pref_summary">Melde Fehler, schlage neue Funktionen vor oder sende einen Gruß</string>
+    <string name="translate">Übersetzung</string>
+    <string name="translate_pref_summary">Bitte hilf beim Übersetzen von Notes Sync in Deine Sprache</string>
+    <string name="more_apps">Mehr Apps</string>
+    <string name="more_apps_prefs_summary">Teste auch meine anderen Apps im Play Store</string>
+    <string name="changelog">Änderungsprotokoll</string>
+    <string name="changelog_pref_summary">Betrachte das Änderungsprotokoll von Notes Sync</string>
+    <string name="archive">Archiv</string>
+    <string name="developer">Entwickler</string>
+    <string name="dropbox">Dropbox</string>
+    <string name="google_drive">Google Drive</string>
+    <string name="new_list">Neue Liste</string>
+    <string name="close">Schließen</string>
+    <string name="changelog_details"><![CDATA[<html><b>VERSION 2.0 (20.01.2020)</b><li>Neu: Bilder können zu jeder Art von Notizen hinzugefügt werden</li><li>Neu: Kompaktansicht</li><li>Neu: Kopierfunktion</li><li>Bilder von und nach Notes Sync teilen</li><li>Neu: Papierkorb leeren</li><li>App-Icon geändert</li><li>Bugfix: Synchronisationsfehler</li><li>Bugfix: Automatische Synchronisation wird nun sofort ausgeführt</li><li>Viele Bugfixes</li><li>Performance verbessert</li>
+<b>VERSION 1.7 (06.09.2019)</b><li>Bugfix: Titel mancher Notizen wurden im Widget nicht angezeigt</li>
+<b>VERSION 1.6 (04.09.2019)</b><li>Neu: Dark Mode</li><li>Bugfixes</li><li>Neu: Farbige Notizen im Widget</li><li>Widget-Performance verbessert</li><li>Neu: Drag+Drop in der Todo-Liste</li><li>Neu: Erledigte Einträge werden an das Listenende verschoben</li>
+<b>VERSION 1.5 (04.08.2019)</b><li>Neu: Verschlüsselte Synchronisation</li><li>Neu: App-Sperre</li><li>Effizientere automatische Synchronisation</li>
+<b>VERSION 1.3 (25.07.2019)</b><li>Größe reduziert</li>
+<b>VERSION 1.2 (25.07.2019)</b><li>Performance verbessert</li>
+<b>VERSION 1.1 (24.07.2019)</b><li>Neu: Widget</li>
+<b>VERSION 1.0 (23.07.2019)</b><li>Erstes Release</li></html>]]></string>
+    <string name="login">Login</string>
+    <string name="login_success">Login erfolgreich</string>
+    <string name="login_pref_summary">Login zu Deinem bevorzugten Cloud-Speicher</string>
+    <string name="logout">Logout</string>
+    <string name="select_cloud_storage">Wähle Deinen bevorzugten Cloud-Speicher</string>
+    <string name="change_password">Passwort ändern</string>
+    <string name="change_password_summary">Das Passwort zur Verschlüsselung der Daten in der Cloud ändern.</string>
+    <string name="check_encryption_loading_text">Teste...</string>
+    <string name="toast_please_login_first">Bitte zuerst einloggen</string>
+    <string name="enable_encrypted_sync">Verschlüsselte Synchronisation</string>
+    <string name="encrypted_sync_summary">"Ein Passwort zur Verschlüsselung der Daten in der Cloud zum Datenschutz einstellen. "</string>
+    <string name="sync">Notizen synchronisieren</string>
+</resources>

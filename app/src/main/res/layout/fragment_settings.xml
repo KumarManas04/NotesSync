@@ -102,7 +102,7 @@
             </LinearLayout>
 
             <TextView
-                    android:text="App lock"
+                    android:text="@string/app_lock"
                     style="@style/prefsCategoryTitle"/>
 
             <LinearLayout
@@ -116,11 +116,11 @@
                 <LinearLayout style="@style/prefsTextContainer">
 
                     <TextView
-                            android:text="App lock"
+                            android:text="@string/app_lock_button"
                             style="@style/prefsMain"/>
 
                     <TextView
-                            android:text="Set a PIN to lock the app."
+                            android:text="@string/app_lock_summary"
                             style="@style/prefsSummary"/>
 
                 </LinearLayout>
@@ -145,11 +145,11 @@
                 <LinearLayout style="@style/prefsTextContainer">
 
                     <TextView
-                            android:text="Change app lock PIN"
+                            android:text="@string/change_pin"
                             style="@style/prefsMain"/>
 
                     <TextView
-                            android:text="Change the PIN used to lock the app."
+                            android:text="@string/change_pin_summary"
                             style="@style/prefsSummary"/>
 
                 </LinearLayout>

@@ -38,6 +38,7 @@
                             style="@style/prefsMain"/>
 
                     <TextView
+                            android:id="@+id/app_version"
                             android:text="1.7"
                             style="@style/prefsSummary"/>
 
