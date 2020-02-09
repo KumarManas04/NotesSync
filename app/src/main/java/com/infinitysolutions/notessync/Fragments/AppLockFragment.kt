@@ -139,7 +139,7 @@ class AppLockFragment : Fragment() {
                             activity?.onBackPressed()
                         }
                     } else {
-                        Toast.makeText(activity, "PINs don't match. Try again", LENGTH_SHORT).show()
+                        Toast.makeText(activity, getString(R.string.toast_pins_dont_match), LENGTH_SHORT).show()
                         passCode.value = ""
                         pass2 = ""
                         rootView.message_text_view.text = getString(R.string.enter_new_pin)
@@ -154,7 +154,7 @@ class AppLockFragment : Fragment() {
                             passCode.value = ""
                             rootView.message_text_view.text = getString(R.string.enter_new_pin)
                         } else {
-                            Toast.makeText(activity, "Old PIN incorrect. Try again", LENGTH_SHORT).show()
+                            Toast.makeText(activity, getString(R.string.toast_old_pins_incorrect), LENGTH_SHORT).show()
                             passCode.value = ""
                         }
                     }
@@ -169,7 +169,7 @@ class AppLockFragment : Fragment() {
                 if (pin != null && pin == code) {
                     findNavController(this).navigate(R.id.action_appLockFragment_to_mainFragment)
                 }else{
-                    Toast.makeText(activity, "PIN Incorrect. Try again", LENGTH_SHORT).show()
+                    Toast.makeText(activity, getString(R.string.toast_pin_incorrect), LENGTH_SHORT).show()
                     passCode.value = ""
                 }
             }

@@ -4,17 +4,17 @@
 
         <item android:id="@+id/notes"
               android:icon="@drawable/notes"
-              android:title="Notes"/>
+              android:title="@string/menu_notes"/>
 
         <item
             android:id="@+id/archive"
             android:icon="@drawable/archive_drawer_item"
-            android:title="Archive"/>
+            android:title="@string/menu_archive"/>
 
         <item
             android:id="@+id/trash"
             android:icon="@drawable/delete_menu_icon"
-            android:title="Trash"/>
+            android:title="@string/menu_trash"/>
     </group>
 
     <group android:id="@+id/others">
@@ -22,26 +22,26 @@
         <item
             android:id="@+id/settings"
             android:icon="@drawable/settings_drawer_item"
-            android:title="Settings"/>
+            android:title="@string/menu_settings"/>
 
         <item
             android:id="@+id/support_development"
             android:icon="@drawable/support_icon"
-            android:title="Support Development"/>
+            android:title="@string/menu_support_development"/>
 
         <item
             android:id="@+id/share"
             android:icon="@drawable/share_menu_item"
-            android:title="Share app"/>
+            android:title="@string/menu_share_app"/>
 
         <item
             android:id="@+id/rate"
             android:icon="@drawable/rate_icon"
-            android:title="Rate app"/>
+            android:title="@string/menu_rate_app"/>
 
         <item
             android:id="@+id/about"
             android:icon="@drawable/about_drawer_item"
-            android:title="About"/>
+            android:title="@string/about"/>
     </group>
 </menu>

@@ -127,16 +127,16 @@ class MainFragment : Fragment() {
                     val adapter = notesRecyclerView.adapter as NotesAdapter
                     if (adapter.itemCount > 0) {
                         AlertDialog.Builder(context)
-                            .setTitle("Empty trash")
-                            .setMessage("Are you sure you want to permanently delete all notes in trash?")
-                            .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                            .setTitle(getString(R.string.empty_trash))
+                            .setMessage(getString(R.string.empty_trash_question))
+                            .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                                 val list = adapter.getList()
                                 if (list.isNotEmpty()) {
                                     for (note in list)
                                         databaseViewModel.deleteNote(note)
                                 }
                             }
-                            .setNegativeButton("No", null)
+                            .setNegativeButton(getString(R.string.no), null)
                             .setCancelable(false)
                             .show()
                     }
@@ -193,21 +193,21 @@ class MainFragment : Fragment() {
             if (mode != null) {
                 when (mode) {
                     1 -> {
-                        toolbar.title = "Notes"
+                        toolbar.title = getString(R.string.menu_notes)
                         toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = false
                         databaseViewModel.setViewMode(1)
                         rootView.empty_image.setImageResource(R.drawable.all_empty)
                         rootView.empty_text.text = getString(R.string.all_empty_message)
                     }
                     2 -> {
-                        toolbar.title = "Archive"
+                        toolbar.title = getString(R.string.menu_archive)
                         toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = false
                         databaseViewModel.setViewMode(2)
                         rootView.empty_image.setImageResource(R.drawable.archive_empty)
                         rootView.empty_text.text = getString(R.string.archived_empty_message)
                     }
                     3 -> {
-                        toolbar.title = "Trash"
+                        toolbar.title = getString(R.string.menu_trash)
                         toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = true
                         databaseViewModel.setViewMode(3)
                         rootView.empty_image.setImageResource(R.drawable.trash_empty)
@@ -300,7 +300,7 @@ class MainFragment : Fragment() {
     }
 
     private fun openNewImageMenu(menu: Menu) {
-        menu.add("Take a photo").setOnMenuItemClickListener {
+        menu.add(getString(R.string.take_photo)).setOnMenuItemClickListener {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             if (intent.resolveActivity(activity!!.packageManager) != null) {
                 val photoFile: File? = try {
@@ -326,7 +326,7 @@ class MainFragment : Fragment() {
             true
         }
 
-        menu.add("Pick an image").setOnMenuItemClickListener {
+        menu.add(getString(R.string.pick_image)).setOnMenuItemClickListener {
             val i = Intent(Intent.ACTION_PICK)
             i.type = "image/*"
             startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)

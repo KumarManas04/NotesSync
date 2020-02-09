@@ -170,10 +170,10 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                         AlertDialog.Builder(context)
                             .setTitle("Delete forever")
                             .setMessage("Are you sure you want to delete this note forever?")
-                            .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                            .setPositiveButton(this.context.getString(R.string.yes)) { _: DialogInterface, _: Int ->
                                 databaseViewModel.deleteNote(items[position])
                             }
-                            .setNegativeButton("No", null)
+                            .setNegativeButton(this.context.getString(R.string.no), null)
                             .setCancelable(false)
                             .show()
                         true

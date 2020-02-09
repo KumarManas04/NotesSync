@@ -11,7 +11,7 @@
 
     <TextView
             android:id="@+id/message_text_view"
-            android:text="Enter PIN to unlock"
+            android:text="@string/enter_pin"
             android:layout_margin="10dp"
             android:textColor="?attr/mainTextColor"
             android:textSize="18sp"
@@ -135,6 +135,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/btn_0"
             app:layout_constraintEnd_toEndOf="parent"
-            android:text="Clear"
+            android:text="@string/clear_button"
             style="@style/appLockButton"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -212,11 +212,11 @@ class MainActivity : AppCompatActivity() {
             AlertDialog.Builder(this)
                 .setTitle("Warning!")
                 .setMessage("Encryption process should not be interrupted. It may cause loss of data. Exit anyway?")
-                .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                     isExitBlocked = false
                     super.onBackPressed()
                 }
-                .setNegativeButton("No", null)
+                .setNegativeButton(getString(R.string.no), null)
                 .setCancelable(true)
                 .show()
         }else{

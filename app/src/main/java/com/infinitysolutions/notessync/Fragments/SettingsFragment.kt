@@ -51,7 +51,7 @@ class SettingsFragment : Fragment() {
 
     private fun setupViews(rootView: View) {
         val toolbar = rootView.toolbar
-        toolbar.title = "Settings"
+        toolbar.title = getString(R.string.menu_settings)
         toolbar.setNavigationOnClickListener {
             activity?.onBackPressed()
         }
@@ -59,18 +59,18 @@ class SettingsFragment : Fragment() {
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         if (prefs!!.contains(PREF_THEME)) {
             when(prefs.getInt(PREF_THEME, THEME_DEFAULT)){
-                THEME_DEFAULT-> rootView.pref_theme_text.text = "Light"
-                THEME_DARK -> rootView.pref_theme_text.text = "Dark"
-                THEME_AMOLED -> rootView.pref_theme_text.text = "AMOLED"
+                THEME_DEFAULT-> rootView.pref_theme_text.text = getString(R.string.light)
+                THEME_DARK -> rootView.pref_theme_text.text = getString(R.string.dark)
+                THEME_AMOLED -> rootView.pref_theme_text.text = getString(R.string.amoled)
             }
         }else{
-            rootView.pref_theme_text.text = "Light"
+            rootView.pref_theme_text.text = getString(R.string.light)
         }
 
         rootView.night_mode_button.setOnClickListener {
-            val content = arrayOf("Light", "Dark", "AMOLED")
+            val content = arrayOf(getString(R.string.light), getString(R.string.dark), getString(R.string.amoled))
             val optionsDialog = AlertDialog.Builder(activity)
-            optionsDialog.setTitle("Pick a theme")
+            optionsDialog.setTitle(getString(R.string.pick_theme))
             optionsDialog.setItems(content) { dialog, which ->
                 val editor = prefs.edit()
                 when(which){
@@ -107,14 +107,14 @@ class SettingsFragment : Fragment() {
                     AlertDialog.Builder(context)
                         .setTitle("Logout")
                         .setMessage("Are you sure you want to logout from your Dropbox account?")
-                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                        .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             val editor = prefs.edit()
                             editor.putString(PREF_ACCESS_TOKEN, null)
                             editor.remove(PREF_CLOUD_TYPE)
                             editor.commit()
                             resetLoginButton(rootView)
                         }
-                        .setNegativeButton("No", null)
+                        .setNegativeButton(getString(R.string.no), null)
                         .show()
                 }
             } else {
@@ -123,13 +123,13 @@ class SettingsFragment : Fragment() {
                     AlertDialog.Builder(context)
                         .setTitle("Logout")
                         .setMessage("Are you sure you want to logout from your Google Drive account?")
-                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                        .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
                             val googleSignInClient = GoogleSignIn.getClient(activity!!, gso)
                             googleSignInClient.signOut()
                             resetLoginButton(rootView)
                         }
-                        .setNegativeButton("No", null)
+                        .setNegativeButton(getString(R.string.no), null)
                         .show()
                 }
             }
@@ -150,7 +150,7 @@ class SettingsFragment : Fragment() {
         }else{
             rootView.app_lock_toggle.isChecked = false
             rootView.change_pin_button.setOnClickListener {
-                Toast.makeText(activity, "Please enable app lock first", LENGTH_SHORT).show()
+                Toast.makeText(activity, getString(R.string.toast_enable_app_lock_first), LENGTH_SHORT).show()
             }
         }
 
@@ -208,7 +208,7 @@ class SettingsFragment : Fragment() {
         rootView.change_pass_title.text = getString(R.string.enable_encrypted_sync)
         rootView.change_pass_text.text = getString(R.string.encrypted_sync_summary)
         rootView.change_pass_button.setOnClickListener {
-            Toast.makeText(activity, "Please login first", LENGTH_SHORT).show()
+            Toast.makeText(activity, getString(R.string.toast_please_login_first), LENGTH_SHORT).show()
         }
     }
 

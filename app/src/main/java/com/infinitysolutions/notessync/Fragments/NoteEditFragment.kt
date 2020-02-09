@@ -322,14 +322,14 @@ class NoteEditFragment : Fragment() {
                 )
                 dialogView.cancel_reminder_button.setOnClickListener {
                     AlertDialog.Builder(context)
-                        .setTitle("Cancel reminder")
-                        .setMessage("Are you sure you want to cancel the reminder?")
-                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                        .setTitle(getString(R.string.cancel_reminder))
+                        .setMessage(getString(R.string.cancel_reminder_question))
+                        .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId, context!!)
                             mainViewModel.reminderTime = -1L
                             dialog.hide()
                         }
-                        .setNegativeButton("No", null)
+                        .setNegativeButton(getString(R.string.no), null)
                         .show()
                 }
                 dialogView.cancel_reminder_button.setColorFilter(
@@ -366,7 +366,7 @@ class NoteEditFragment : Fragment() {
         dialogView.make_copy_button.setOnClickListener {
             databaseViewModel.makeCopy(mainViewModel.getSelectedNote(), mainViewModel.noteType, noteTitle.text.toString(), getNoteText())
             dialog.hide()
-            Toast.makeText(context, "Done", LENGTH_SHORT).show()
+            Toast.makeText(context, getString(R.string.toast_copy_done), LENGTH_SHORT).show()
         }
 
         val layoutManager = LinearLayoutManager(this@NoteEditFragment.context!!, RecyclerView.HORIZONTAL, false)
@@ -546,9 +546,9 @@ class NoteEditFragment : Fragment() {
 
     private fun deleteNote() {
         AlertDialog.Builder(context)
-            .setTitle("Delete note")
-            .setMessage("Are you sure you want to delete this note?")
-            .setPositiveButton("Yes") { _, _ ->
+            .setTitle(getString(R.string.delete_note))
+            .setMessage(getString(R.string.delete_question))
+            .setPositiveButton(getString(R.string.yes)) { _, _ ->
                 val selectedNote = mainViewModel.getSelectedNote()
                 if (selectedNote?.nId == -1L) {
                     mainViewModel.setSelectedNote(null)
@@ -591,7 +591,7 @@ class NoteEditFragment : Fragment() {
                 }
                 findNavController(this).navigateUp()
             }
-            .setNegativeButton("No", null)
+            .setNegativeButton(getString(R.string.no), null)
             .show()
     }
 
@@ -605,7 +605,7 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun openNewImageMenu(menu: Menu) {
-        menu.add("Take a photo").setOnMenuItemClickListener {
+        menu.add(getString(R.string.take_photo)).setOnMenuItemClickListener {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             if (intent.resolveActivity(activity!!.packageManager) != null) {
                 val photoFile: File? = try {
@@ -634,7 +634,7 @@ class NoteEditFragment : Fragment() {
             }
             true
         }
-        menu.add("Pick an image").setOnMenuItemClickListener {
+        menu.add(getString(R.string.pick_image)).setOnMenuItemClickListener {
             val i = Intent(Intent.ACTION_PICK)
             i.type = "image/*"
             startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)

@@ -118,7 +118,7 @@ class PasswordFragment : Fragment() {
                     AlertDialog.Builder(context)
                         .setTitle("Warning!")
                         .setMessage("Encryption may take some time. The process should not be interrupted. Make sure you have a steady internet connection. Do you want to proceed?")
-                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                        .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
                             mainViewModel.setExitBlocked(true)
                             loginViewModel.secureCloudData(
@@ -127,7 +127,7 @@ class PasswordFragment : Fragment() {
                                 rootView.password_edit_text.text.toString()
                             )
                         }
-                        .setNegativeButton("No", null)
+                        .setNegativeButton(getString(R.string.no), null)
                         .setCancelable(true)
                         .show()
                 } else {
