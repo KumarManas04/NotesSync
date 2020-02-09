@@ -91,7 +91,7 @@
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:focusable="true"
-            android:contentDescription="New image note"/>
+            android:contentDescription="@string/new_image_note"/>
 
         <ImageView
                 android:id="@+id/new_list_button"

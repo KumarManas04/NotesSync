@@ -169,7 +169,7 @@
                             style="@style/prefsMain"/>
 
                     <TextView
-                            android:text="Kumar Manas"
+                            android:text="@string/developer_summary"
                             style="@style/prefsSummary"/>
 
                 </LinearLayout>

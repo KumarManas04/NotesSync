@@ -22,8 +22,13 @@
     <string name="delete_question">Diese Notiz wirklich löschen?</string>
     <string name="no">Nein</string>
     <string name="yes">Ja</string>
+    <string name="new_image">Neues Bild</string>
+    <string name="new_image_note">Neue Bildnotiz</string>
     <string name="pick_image">Bild auswählen</string>
+    <string name="processing_image">Verarbeite Bild&#8230;</string>
     <string name="take_photo">Neues Foto</string>
+    <string name="delete_image">Löschen</string>
+    <string name="delete_image_question">Soll dieses Bild wirklich gelöscht werden?</string>
     <string name="add_item">Neuer Eintrag</string>
     <string name="search_notes">Notizen durchsuchen&#8230;</string>
     <string name="unarchive_note">Notiz dearchivieren</string>
@@ -88,6 +93,7 @@
     <string name="changelog_pref_summary">Betrachte das Änderungsprotokoll von Notes Sync</string>
     <string name="archive">Archiv</string>
     <string name="developer">Entwickler</string>
+    <string name="developer_summary">Kumar Manas (Programmierung)\nRonny Steiner (Deutsche Übersetzung)</string>
     <string name="dropbox">Dropbox</string>
     <string name="google_drive">Google Drive</string>
     <string name="new_list">Neue Liste</string>

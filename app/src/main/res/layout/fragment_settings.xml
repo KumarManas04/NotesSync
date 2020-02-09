@@ -94,7 +94,7 @@
 
                     <TextView
                             android:id="@+id/change_pass_text"
-                            android:text="Change the password used to encrypt your data in the cloud."
+                            android:text="@string/change_password_summary"
                             style="@style/prefsSummary"/>
 
                 </LinearLayout>
