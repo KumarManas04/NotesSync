@@ -105,8 +105,8 @@ class SettingsFragment : Fragment() {
                 rootView.logout_text.text = getString(R.string.dropbox_logout_text)
                 rootView.logout_button.setOnClickListener {
                     AlertDialog.Builder(context)
-                        .setTitle("Logout")
-                        .setMessage("Are you sure you want to logout from your Dropbox account?")
+                        .setTitle(getString(R.string.logout))
+                        .setMessage(getString(R.string.dropbox_logout_question))
                         .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             val editor = prefs.edit()
                             editor.putString(PREF_ACCESS_TOKEN, null)
@@ -121,8 +121,8 @@ class SettingsFragment : Fragment() {
                 rootView.logout_text.text = getString(R.string.gdrive_logout_text)
                 rootView.logout_button.setOnClickListener {
                     AlertDialog.Builder(context)
-                        .setTitle("Logout")
-                        .setMessage("Are you sure you want to logout from your Google Drive account?")
+                        .setTitle(getString(R.string.logout))
+                        .setMessage(getString(R.string.gdrive_logout_question))
                         .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
                             val googleSignInClient = GoogleSignIn.getClient(activity!!, gso)

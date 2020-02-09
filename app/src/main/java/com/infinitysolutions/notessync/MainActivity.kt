@@ -210,8 +210,8 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if(isExitBlocked){
             AlertDialog.Builder(this)
-                .setTitle("Warning!")
-                .setMessage("Encryption process should not be interrupted. It may cause loss of data. Exit anyway?")
+                .setTitle(getString(R.string.warning))
+                .setMessage(getString(R.string.encryption_warning_exit))
                 .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                     isExitBlocked = false
                     super.onBackPressed()

@@ -1,5 +1,6 @@
 package com.infinitysolutions.notessync.ViewModel
 
+import android.content.res.Resources
 import android.util.Base64
 import android.util.Base64InputStream
 import android.util.Log

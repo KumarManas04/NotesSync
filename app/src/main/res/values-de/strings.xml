@@ -49,6 +49,9 @@
     <string name="re_enter_pin">PIN erneut eingeben</string>
     <string name="toast_pins_dont_match">Die PINs stimmen nicht überein. Bitte noch einmal versuchen</string>
     <string name="toast_old_pins_incorrect">Alte PIN falsch. Bitte noch einmal versuchen</string>
+    <string name="toast_login_successful">Login erfolgreich</string>
+    <string name="toast_passwords_dont_match">Die Passwörter stimmen nicht überein oder sind leer</string>
+    <string name="toast_enter_password">Bitte ein Passwort eingeben</string>
     <string name="enter_pin">PIN zum Entsperren eingeben</string>
     <string name="toast_pin_incorrect">PIN falsch. Bitte noch einmal versuchen</string>
     <string name="other">Weiteres</string>
@@ -59,6 +62,10 @@
     <string name="rate_pref_summary">Bitte gib eine positive Bewertung im Play Store ab, wenn Dir Notes Sync gefällt</string>
     <string name="open_source">Open Soure</string>
     <string name="open_source_prefs_summary">Bei GitHub findest Du den Quellcode und Deine Hilfe ist willkommen</string>
+    <string name="dropbox_logout_text">Von Deinem Dropbox-Konto abmelden</string>
+    <string name="gdrive_logout_text">Von Deinem Google-Drive-Konto abmelden</string>
+    <string name="dropbox_logout_question">Möchtest Du Dich wirklich von Deinem Dropbox-Konto abmelden?</string>
+    <string name="gdrive_logout_question">Möchtest Du Dich wirklich von Deinem Google-Drive-Konto abmelden?</string>
     <string name="resources">Ressourcen</string>
     <string name="resources_pref_summary">Alle verwendeten Bibliotheken und Ressourcen</string>
     <string name="resources_used">Liste der in Notes Sync verwendeten Ressourcen</string>
@@ -87,10 +94,18 @@
     <string name="login">Login</string>
     <string name="login_pref_summary">Login zu Deinem bevorzugten Cloud-Speicher</string>
     <string name="logout">Logout</string>
+    <string name="logout_prefs_summary">Aus Deinem Cloud-Speicher-Account ausloggen</string>
     <string name="select_cloud_storage">Wähle Deinen bevorzugten Cloud-Speicher</string>
+    <string name="enter_password">Passwort eingeben</string>
+    <string name="enter_new_password">Neues Passwort eingeben</string>
+    <string name="enter_old_password">Altes Passwort eingeben</string>
+    <string name="re_enter_password">Passwort erneut eingeben</string>
     <string name="change_password">Passwort ändern</string>
     <string name="change_password_summary">Das Passwort zur Verschlüsselung der Daten in der Cloud ändern.</string>
+    <string name="warning_password">Achtung! Wenn Du das Passwort vergisst, gibt es keinen Weg Deine Daten wiederherzustellen!</string>
+    <string name="submit">Anwenden</string>
     <string name="check_encryption_loading_text">Teste&#8230;</string>
+    <string name="enter_password_to_decrypt_message">Verschlüsselung gefunden. Bitte das Passwort zur Entschlüsselung Deiner Daten eingeben</string>
     <string name="toast_please_login_first">Bitte zuerst einloggen</string>
     <string name="enable_encrypted_sync">Verschlüsselte Synchronisation</string>
     <string name="encrypted_sync_summary">Ein Passwort zur Verschlüsselung der Daten in der Cloud zum Datenschutz einstellen.</string>
@@ -102,4 +117,9 @@
     <string name="reminder_set">Erinnerung:\n%1$s</string>
     <string name="cancel_reminder_button">Button zum Erinnerungsabbruch</string>
     <string name="cancel_reminder_question">Die aktivierte Erinnerung wirklich abbrechen?</string>
+    <string name="will_user_encrypt_message">Möchtest Du Deine Daten verschlüsseln?</string>
+    <string name="skip">Überspringen</string>
+    <string name="warning">Achtung!</string>
+    <string name="encryption_warning">Die Verschlüsselung könnte etwas Zeit in Anspruch nehmen. Der Prozess sollte nicht unterbrochen werden, deshalb achte bitte auf eine stabile Internetverbindung. Fortfahren?</string>
+    <string name="encryption_warning_exit">Der Verschlüsselungsprozess sollte nicht unterbrochen werden, da dies zum Datenverlust führen kann. Trotzdem beenden?</string>
 </resources>

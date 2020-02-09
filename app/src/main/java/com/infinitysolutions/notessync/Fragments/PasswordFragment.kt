@@ -85,7 +85,7 @@ class PasswordFragment : Fragment() {
             editor?.putString(PREF_ID, userId)
             editor?.putInt(PREF_CLOUD_TYPE, cloudType)
             editor?.commit()
-            Toast.makeText(activity, "Login successful", LENGTH_SHORT).show()
+            Toast.makeText(activity, getString(R.string.toast_login_successful), LENGTH_SHORT).show()
             loginViewModel.isLoginSuccess = true
             activity?.onBackPressed()
         }
@@ -101,7 +101,7 @@ class PasswordFragment : Fragment() {
                             rootView.again_password_edit_text.text.toString()
                         )
                     } else {
-                        Toast.makeText(activity, "Please enter a password", LENGTH_SHORT).show()
+                        Toast.makeText(activity, getString(R.string.enter_password), LENGTH_SHORT).show()
                     }
                 } else {
                     if (rootView.password_edit_text.text.isNotEmpty())
@@ -111,13 +111,13 @@ class PasswordFragment : Fragment() {
                             rootView.password_edit_text.text.toString()
                         )
                     else
-                        Toast.makeText(activity, "Please enter a password", LENGTH_SHORT).show()
+                        Toast.makeText(activity, getString(R.string.enter_password), LENGTH_SHORT).show()
                 }
             } else {
                 if (rootView.password_edit_text.text.isNotEmpty() && rootView.password_edit_text.text.toString() == rootView.again_password_edit_text.text.toString()) {
                     AlertDialog.Builder(context)
-                        .setTitle("Warning!")
-                        .setMessage("Encryption may take some time. The process should not be interrupted. Make sure you have a steady internet connection. Do you want to proceed?")
+                        .setTitle(getString(R.string.warning))
+                        .setMessage(getString(R.string.encryption_warning))
                         .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
                             mainViewModel.setExitBlocked(true)
@@ -131,7 +131,7 @@ class PasswordFragment : Fragment() {
                         .setCancelable(true)
                         .show()
                 } else {
-                    Toast.makeText(activity, "Passwords do not match", LENGTH_SHORT).show()
+                    Toast.makeText(activity, getString(R.string.toast_passwords_dont_match), LENGTH_SHORT).show()
                 }
             }
         }
@@ -181,7 +181,7 @@ class PasswordFragment : Fragment() {
                         ENCRYPTED_NO -> {
                             rootView.info_text_view.text =
                                 getString(R.string.will_user_encrypt_message)
-                            rootView.password_edit_text.hint = "Enter new password"
+                            rootView.password_edit_text.hint = getString(R.string.enter_new_password)
                             rootView.warning_text_view.visibility = VISIBLE
                             rootView.again_password_edit_text.visibility = VISIBLE
                             rootView.skip_button.visibility = VISIBLE
@@ -189,13 +189,13 @@ class PasswordFragment : Fragment() {
                         ENCRYPTED_YES -> {
                             if (passwordMode == MODE_CHANGE_PASSWORD) {
                                 rootView.info_text_view.text = getString(R.string.change_password)
-                                rootView.password_edit_text.hint = "Enter old password"
+                                rootView.password_edit_text.hint = getString(R.string.enter_old_password)
                                 rootView.again_password_edit_text.visibility = VISIBLE
-                                rootView.again_password_edit_text.hint = "Enter new password"
+                                rootView.again_password_edit_text.hint = getString(R.string.enter_new_password)
                             } else {
                                 rootView.info_text_view.text =
                                     getString(R.string.enter_password_to_decrypt_message)
-                                rootView.password_edit_text.hint = "Enter password"
+                                rootView.password_edit_text.hint = getString(R.string.enter_password)
                                 rootView.again_password_edit_text.visibility = GONE
                             }
                             rootView.warning_text_view.visibility = GONE
@@ -314,7 +314,7 @@ class PasswordFragment : Fragment() {
         editor?.putString(PREF_ID, userId)
         editor?.putInt(PREF_CLOUD_TYPE, cloudType)
         editor?.commit()
-        Toast.makeText(activity, "Login successful", LENGTH_SHORT).show()
+        Toast.makeText(activity, getString(R.string.toast_login_successful), LENGTH_SHORT).show()
         WorkSchedulerHelper().syncNotes(true, context!!)
         loginViewModel.isLoginSuccess = true
         activity?.onBackPressed()

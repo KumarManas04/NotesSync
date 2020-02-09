@@ -89,7 +89,7 @@
 
                     <TextView
                             android:id="@+id/change_pass_title"
-                            android:text="Change password"
+                            android:text="@string/change_password"
                             style="@style/prefsMain"/>
 
                     <TextView
