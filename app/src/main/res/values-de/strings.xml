@@ -36,7 +36,7 @@
     <string name="pick_theme">Design auswählen</string>
     <string name="light">Hell</string>
     <string name="dark">Dunkel</string>
-    <string name="amoled">Dark Mode</string>
+    <string name="amoled">Schwarz</string>
     <string name="app_lock">App-Sperre</string>
     <string name="app_lock_summary">Erfordert die Eingabe einer PIN zum Sperren der App.</string>
     <string name="app_lock_button">App-Sperre aktivieren</string>
@@ -85,7 +85,6 @@
 <b>VERSION 1.1 (24.07.2019)</b><li>Neu: Widget</li>
 <b>VERSION 1.0 (23.07.2019)</b><li>Erstes Release</li></html>]]></string>
     <string name="login">Login</string>
-    <string name="login_success">Login erfolgreich</string>
     <string name="login_pref_summary">Login zu Deinem bevorzugten Cloud-Speicher</string>
     <string name="logout">Logout</string>
     <string name="select_cloud_storage">Wähle Deinen bevorzugten Cloud-Speicher</string>
@@ -97,12 +96,10 @@
     <string name="encrypted_sync_summary">Ein Passwort zur Verschlüsselung der Daten in der Cloud zum Datenschutz einstellen.</string>
     <string name="sync">Notizen synchronisieren</string>
     <string name="no_match_found">Keine Übereinstimmung gefunden</string>
-    <string name="auto_sync">Automatische Synchronisation</string>
-    <string name="auto_sync_pref_summary">Notizen automatisch mit Deinem bevorzugten Cloud-Speicher synchronisieren</string>
     <string name="cancel_reminder">Erinnerung abbrechen</string>
     <string name="search_button">Such-Button</string>
     <string name="more_options">Mehr Optionen</string>
-    <string name="reminder_set">Erinnerung: %1$s</string>
+    <string name="reminder_set">Erinnerung:\n%1$s</string>
     <string name="cancel_reminder_button">Button zum Erinnerungsabbruch</string>
     <string name="cancel_reminder_question">Die aktivierte Erinnerung wirklich abbrechen?</string>
 </resources>

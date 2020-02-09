@@ -24,7 +24,6 @@
     <string name="select_cloud_storage">Choose your preferred cloud storage</string>
     <string name="google_drive">Google Drive</string>
     <string name="dropbox">Dropbox</string>
-    <string name="login_success">Login successful</string>
     <string name="new_note">Take a note&#8230;</string>
     <string name="new_list">New List</string>
     <string name="search_button">Search button</string>
@@ -36,8 +35,6 @@
     <string name="app_theme">App Theme</string>
     <string name="logout">Logout</string>
     <string name="logout_prefs_summary">Logout from your cloud storage account</string>
-    <string name="auto_sync">Auto sync</string>
-    <string name="auto_sync_pref_summary">Automatically sync your notes to your preferred cloud storage</string>
     <string name="other">Other</string>
     <string name="about">About</string>
     <string name="about_pref_summary">Get details about the app</string>
@@ -49,7 +46,6 @@
     <string name="gdrive_logout_text">Logout from your Google Drive account</string>
     <string name="login">Login</string>
     <string name="login_pref_summary">Login to your preferred cloud storage</string>
-    <string name="last_modified_indicator">Last modified indicator</string>
     <string name="check_encryption_loading_text">Checking&#8230;</string>
     <string name="enter_password_to_decrypt_message">Encryption found. Please enter your password to decrypt your data</string>
     <string name="will_user_encrypt_message">Would you like to encrypt your data?</string>
@@ -62,7 +58,7 @@
     <string name="archive_note">Archive note</string>
     <string name="make_a_copy">Make a copy</string>
     <string name="unarchive_note">Unarchive note</string>
-    <string name="reminder_set">Reminder set: %1$s</string>
+    <string name="reminder_set">Reminder set:\n%1$s</string>
     <string name="change_password">Change password</string>
     <string name="change_password_summary">Change the password used to encrypt your data in the cloud.</string>
     <string name="enable_encrypted_sync">Enable encrypted sync</string>
