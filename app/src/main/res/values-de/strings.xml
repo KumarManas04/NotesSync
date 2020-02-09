@@ -51,7 +51,16 @@
     <string name="toast_old_pins_incorrect">Alte PIN falsch. Bitte noch einmal versuchen</string>
     <string name="toast_login_successful">Login erfolgreich</string>
     <string name="toast_passwords_dont_match">Die Passwörter stimmen nicht überein oder sind leer</string>
+    <string name="toast_password_changed">Passwort geändert</string>
+    <string name="toast_password_invalid">Das Passwort ist falsch!</string>
+    <string name="toast_old_password_invalid">Das alte Passwort ist falsch!</string>
     <string name="toast_enter_password">Bitte ein Passwort eingeben</string>
+    <string name="toast_no_browser">Kein Browser gefunden!</string>
+    <string name="toast_no_camera_app">Keine Kamera-App gefunden!</string>
+    <string name="toast_moved_to_trash">In den Papierkorb verschoben</string>
+    <string name="toast_success">Erfolgreich</string>
+    <string name="toast_error">Fehler aufgetreten</string>
+    <string name="toast_network_error">Netzwerkfehler</string>
     <string name="enter_pin">PIN zum Entsperren eingeben</string>
     <string name="toast_pin_incorrect">PIN falsch. Bitte noch einmal versuchen</string>
     <string name="other">Weiteres</string>

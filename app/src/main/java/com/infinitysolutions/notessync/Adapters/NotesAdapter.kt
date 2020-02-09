@@ -132,7 +132,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                                 changeNoteType(position, NOTE_TRASH)
                             }
                         }
-                        Toast.makeText(context, "Moved to trash", LENGTH_SHORT).show()
+                        Toast.makeText(context, this.context.getString(R.string.toast_moved_to_trash), LENGTH_SHORT).show()
                         true
                     }
                     if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == LIST_DEFAULT || items[position].noteType == IMAGE_DEFAULT || items[position].noteType == IMAGE_LIST_DEFAULT) {

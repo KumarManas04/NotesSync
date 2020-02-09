@@ -181,7 +181,7 @@ class MainActivity : AppCompatActivity() {
                     if (browserIntent.resolveActivity(packageManager) != null)
                         startActivity(browserIntent)
                     else
-                        Toast.makeText(this, "No browser found!", LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.toast_no_browser), LENGTH_SHORT).show()
                 }
                 R.id.about -> {
                     Navigation.findNavController(this, R.id.nav_host_fragment)
@@ -198,7 +198,7 @@ class MainActivity : AppCompatActivity() {
         if (browserIntent.resolveActivity(packageManager) != null)
             startActivity(browserIntent)
         else
-            Toast.makeText(this, "No browser found!", LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_no_browser), LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {

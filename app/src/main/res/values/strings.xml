@@ -107,6 +107,15 @@
     <string name="toast_login_successful">Login successful</string>
     <string name="toast_passwords_dont_match">Passwords do not match</string>
     <string name="toast_enter_password">Please enter a password</string>
+    <string name="toast_password_changed">Password changed</string>
+    <string name="toast_password_invalid">Incorrect password</string>
+    <string name="toast_old_password_invalid">Old password is invalid!</string>
+    <string name="toast_no_browser">No browser found!</string>
+    <string name="toast_no_camera_app">No camera app found!</string>
+    <string name="toast_moved_to_trash">Moved to trash</string>
+    <string name="toast_success">Success</string>
+    <string name="toast_error">Error occurred</string>
+    <string name="toast_network_error">Network error</string>
     <string name="enter_pin">Enter PIN to unlock</string>
     <string name="close">Close</string>
     <string name="skip">Skip</string>

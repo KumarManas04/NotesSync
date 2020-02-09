@@ -77,6 +77,6 @@ class AboutFragment : Fragment() {
         if (browserIntent.resolveActivity(activity!!.packageManager) != null)
             startActivity(browserIntent)
         else
-            Toast.makeText(activity, "No browser found!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, getString(com.infinitysolutions.notessync.R.string.toast_no_browser), Toast.LENGTH_SHORT).show()
     }
 }

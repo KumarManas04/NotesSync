@@ -321,7 +321,7 @@ class MainFragment : Fragment() {
                         Toast.LENGTH_SHORT
                     ).show()
             } else {
-                Toast.makeText(context, "No camera app found!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.toast_no_camera_app), Toast.LENGTH_SHORT).show()
             }
             true
         }

@@ -223,7 +223,7 @@ class PasswordFragment : Fragment() {
                 if (result != null) {
                     when (result) {
                         PASSWORD_VERIFY_INVALID -> {
-                            Toast.makeText(activity, "Incorrect password", LENGTH_SHORT).show()
+                            Toast.makeText(activity, getString(R.string.toast_password_invalid), LENGTH_SHORT).show()
                             rootView.loading_panel.visibility = GONE
                             rootView.input_bar.visibility = VISIBLE
                         }
@@ -234,7 +234,7 @@ class PasswordFragment : Fragment() {
                         )
 
                         PASSWORD_VERIFY_ERROR -> {
-                            Toast.makeText(activity, "Error occurred", LENGTH_SHORT).show()
+                            Toast.makeText(activity, getString(R.string.toast_error), LENGTH_SHORT).show()
                             rootView.loading_panel.visibility = GONE
                             rootView.input_bar.visibility = VISIBLE
                         }
@@ -247,10 +247,10 @@ class PasswordFragment : Fragment() {
                 val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
                 mainViewModel.setExitBlocked(false)
                 if (result) {
-                    Toast.makeText(activity, "Success", LENGTH_SHORT).show()
+                    Toast.makeText(activity, getString(R.string.toast_success), LENGTH_SHORT).show()
                     finishLogin(rootView.password_edit_text.text.toString(), userId, cloudType)
                 } else {
-                    Toast.makeText(activity, "Error occurred", LENGTH_SHORT).show()
+                    Toast.makeText(activity, getString(R.string.toast_error), LENGTH_SHORT).show()
                     rootView.loading_panel.visibility = GONE
                     rootView.input_bar.visibility = VISIBLE
                 }
@@ -262,11 +262,11 @@ class PasswordFragment : Fragment() {
                 if (result != null) {
                     when (result) {
                         PASSWORD_CHANGE_OLD_INVALID -> {
-                            Toast.makeText(activity, "Old password is invalid!", LENGTH_SHORT)
+                            Toast.makeText(activity, getString(R.string.toast_old_password_invalid), LENGTH_SHORT)
                                 .show()
                         }
                         PASSWORD_CHANGE_SUCCESS -> {
-                            Toast.makeText(activity, "Password changed", LENGTH_SHORT).show()
+                            Toast.makeText(activity, getString(R.string.toast_password_changed), LENGTH_SHORT).show()
                             finishLogin(
                                 rootView.again_password_edit_text.text.toString(),
                                 userId,
@@ -274,7 +274,7 @@ class PasswordFragment : Fragment() {
                             )
                         }
                         PASSWORD_CHANGE_NETWORK_ERROR -> {
-                            Toast.makeText(activity, "Network error", LENGTH_SHORT).show()
+                            Toast.makeText(activity, getString(R.string.toast_network_error), LENGTH_SHORT).show()
                         }
                     }
                 }
