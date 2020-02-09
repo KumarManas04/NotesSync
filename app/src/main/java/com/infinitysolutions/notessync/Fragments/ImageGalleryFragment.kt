@@ -60,21 +60,21 @@ class ImageGalleryFragment : Fragment() {
                         AlertDialog.Builder(context)
                             .setTitle("Delete")
                             .setMessage("Are you sure you want to delete this image?")
-                            .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                            .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                                 galleryAdapter.deleteImage(viewPager.currentItem)
                             }
-                            .setNegativeButton("No", null)
+                            .setNegativeButton(getString(R.string.no), null)
                             .setCancelable(true)
                             .show()
                     }else{
                         AlertDialog.Builder(context)
                             .setTitle("Delete")
                             .setMessage("Are you sure you want to delete this image?")
-                            .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                            .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                                 galleryAdapter.deleteImage(viewPager.currentItem)
                                 findNavController(this).navigateUp()
                             }
-                            .setNegativeButton("No", null)
+                            .setNegativeButton(getString(R.string.no), null)
                             .setCancelable(true)
                             .show()
                     }

@@ -1,13 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Notes Sync</string>
     <string name="title">Title</string>
-    <string name="write_something">Write something...</string>
+    <string name="write_something">Write something&#8230;</string>
     <string name="sync">Sync notes</string>
     <string name="app_key" translatable="false">YOUR_APP_KEY_HERE</string>
     <string name="archive">Archive</string>
     <string name="share">Share</string>
     <string name="set_reminder">Set reminder</string>
-    <string name="cancel_reminder">Cancel reminder button</string>
+    <string name="cancel_reminder_button">Cancel reminder button</string>
     <string name="app_version">App version</string>
     <string name="rate">Rate</string>
     <string name="rate_pref_summary">Leave a positive rating on Google Play if you liked Notes Sync</string>
@@ -24,21 +25,19 @@
     <string name="google_drive">Google Drive</string>
     <string name="dropbox">Dropbox</string>
     <string name="login_success">Login successful</string>
-    <string name="new_note">Take a note...</string>
+    <string name="new_note">Take a note&#8230;</string>
     <string name="new_list">New List</string>
     <string name="search_button">Search button</string>
     <string name="more_options">More options</string>
     <string name="resources_used">List of resources used in Notes Sync</string>
-    <string name="search_notes">Search your notes...</string>
+    <string name="search_notes">Search your notes&#8230;</string>
     <string name="no_match_found">No match found</string>
     <string name="preferences">Preferences</string>
     <string name="app_theme">App Theme</string>
-    <string name="app_theme_prefs_summary">Select a theme for the entire app</string>
     <string name="logout">Logout</string>
     <string name="logout_prefs_summary">Logout from your cloud storage account</string>
     <string name="auto_sync">Auto sync</string>
     <string name="auto_sync_pref_summary">Automatically sync your notes to your preferred cloud storage</string>
-    <string name="off_text">Off</string>
     <string name="other">Other</string>
     <string name="about">About</string>
     <string name="about_pref_summary">Get details about the app</string>
@@ -51,21 +50,19 @@
     <string name="login">Login</string>
     <string name="login_pref_summary">Login to your preferred cloud storage</string>
     <string name="last_modified_indicator">Last modified indicator</string>
-    <string name="check_encryption_loading_text">Checking...</string>
+    <string name="check_encryption_loading_text">Checking&#8230;</string>
     <string name="enter_password_to_decrypt_message">Encryption found. Please enter your password to decrypt your data</string>
     <string name="will_user_encrypt_message">Would you like to encrypt your data?</string>
     <string name="enter_new_pin">Enter new PIN</string>
     <string name="enter_old_pin">Enter old PIN</string>
     <string name="re_enter_pin">Re-enter PIN</string>
-    <string name="notes_empty_message">Notes appear here</string>
-    <string name="todo_empty_message">To-do lists appear here</string>
     <string name="archived_empty_message">Archived notes appear here</string>
     <string name="trash_empty_message">Deleted notes appear here for 30 days</string>
     <string name="edited_time_stamp">Edited %1$s</string>
     <string name="archive_note">Archive note</string>
     <string name="make_a_copy">Make a copy</string>
     <string name="unarchive_note">Unarchive note</string>
-    <string name="reminder_set">Reminder set:\n%1$s</string>
+    <string name="reminder_set">Reminder set: %1$s</string>
     <string name="change_password">Change password</string>
     <string name="change_password_summary">Change the password used to encrypt your data in the cloud.</string>
     <string name="enable_encrypted_sync">Enable encrypted sync</string>
@@ -105,6 +102,8 @@
     <string name="toast_please_login_first">Please login first</string>
     <string name="enter_pin">Enter PIN to unlock</string>
     <string name="close">Close</string>
+    <string name="cancel_reminder">Cancel reminder</string>
+    <string name="cancel_reminder_question">Are you sure you want to cancel the reminder?</string>
     <string name="changelog_details"><![CDATA[<html><b>VERSION 2.0 JANUARY 20, 2020</b><li>Add images to any note</li><li>Added compact view mode</li><li>Added make a copy option</li><li>Share images to and from Notes Sync</li><li>Added option to empty trash</li><li>Changed app icon</li><li>Fixed syncing error\n -</li><li>Auto-Sync now works instantly</li><li>Fixed a lot of bugs</li><li>Performance improvements</li>
 <b>VERSION 1.7 SEPTEMBER 6, 2019</b><li>Fixed issue with title not shown in some notes in widget</li>
 <b>VERSION 1.6 SEPTEMBER 4, 2019</b><li>Added AMOLED Theme</li><li>Fixed bugs</li><li>Added colored notes to widget</li><li>Improved widget performance</li><li>Added drag and drop in Todo list</li><li>Checked items move to the bottom</li>

@@ -139,7 +139,7 @@
             android:layout_width="26dp"
             android:layout_height="26dp"
             android:layout_gravity="center_vertical"
-            android:contentDescription="@string/cancel_reminder"
+            android:contentDescription="@string/cancel_reminder_button"
             android:src="@drawable/cancel_reminder"
             android:visibility="gone" />
 

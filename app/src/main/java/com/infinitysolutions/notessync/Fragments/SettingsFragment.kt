@@ -107,14 +107,14 @@ class SettingsFragment : Fragment() {
                     AlertDialog.Builder(context)
                         .setTitle("Logout")
                         .setMessage("Are you sure you want to logout from your Dropbox account?")
-                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                        .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             val editor = prefs.edit()
                             editor.putString(PREF_ACCESS_TOKEN, null)
                             editor.remove(PREF_CLOUD_TYPE)
                             editor.commit()
                             resetLoginButton(rootView)
                         }
-                        .setNegativeButton("No", null)
+                        .setNegativeButton(getString(R.string.no), null)
                         .show()
                 }
             } else {
@@ -123,13 +123,13 @@ class SettingsFragment : Fragment() {
                     AlertDialog.Builder(context)
                         .setTitle("Logout")
                         .setMessage("Are you sure you want to logout from your Google Drive account?")
-                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                        .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
                             val googleSignInClient = GoogleSignIn.getClient(activity!!, gso)
                             googleSignInClient.signOut()
                             resetLoginButton(rootView)
                         }
-                        .setNegativeButton("No", null)
+                        .setNegativeButton(getString(R.string.no), null)
                         .show()
                 }
             }

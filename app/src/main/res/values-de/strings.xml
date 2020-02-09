@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Notes Sync</string>
     <string name="menu_archive">Archiv</string>
@@ -7,10 +8,10 @@
     <string name="menu_rate_app">App bewerten</string>
     <string name="menu_share_app">App teilen</string>
     <string name="menu_support_development">Unterstützung</string>
-    <string name="new_note">Notiz hinzufügen...</string>
+    <string name="new_note">Notiz hinzufügen&#8230;</string>
     <string name="all_empty_message">Noch keine Notizen vorhanden</string>
     <string name="title">Titel</string>
-    <string name="write_something">Notiz schreiben...</string>
+    <string name="write_something">Notiz schreiben&#8230;</string>
     <string name="archive_note">Notiz archivieren</string>
     <string name="make_a_copy">Kopie erstellen</string>
     <string name="share">Teilen</string>
@@ -24,7 +25,7 @@
     <string name="pick_image">Bild auswählen</string>
     <string name="take_photo">Neues Foto</string>
     <string name="add_item">Neuer Eintrag</string>
-    <string name="search_notes">Notizen durchsuchen...</string>
+    <string name="search_notes">Notizen durchsuchen&#8230;</string>
     <string name="unarchive_note">Notiz dearchivieren</string>
     <string name="archived_empty_message">Archivierte Notizen erscheinen hier</string>
     <string name="trash_empty_message">Gelöschte Notizen verbleiben hier für 30 Tage</string>
@@ -90,9 +91,18 @@
     <string name="select_cloud_storage">Wähle Deinen bevorzugten Cloud-Speicher</string>
     <string name="change_password">Passwort ändern</string>
     <string name="change_password_summary">Das Passwort zur Verschlüsselung der Daten in der Cloud ändern.</string>
-    <string name="check_encryption_loading_text">Teste...</string>
+    <string name="check_encryption_loading_text">Teste&#8230;</string>
     <string name="toast_please_login_first">Bitte zuerst einloggen</string>
     <string name="enable_encrypted_sync">Verschlüsselte Synchronisation</string>
     <string name="encrypted_sync_summary">Ein Passwort zur Verschlüsselung der Daten in der Cloud zum Datenschutz einstellen.</string>
     <string name="sync">Notizen synchronisieren</string>
+    <string name="no_match_found">Keine Übereinstimmung gefunden</string>
+    <string name="auto_sync">Automatische Synchronisation</string>
+    <string name="auto_sync_pref_summary">Notizen automatisch mit Deinem bevorzugten Cloud-Speicher synchronisieren</string>
+    <string name="cancel_reminder">Erinnerung abbrechen</string>
+    <string name="search_button">Such-Button</string>
+    <string name="more_options">Mehr Optionen</string>
+    <string name="reminder_set">Erinnerung: %1$s</string>
+    <string name="cancel_reminder_button">Button zum Erinnerungsabbruch</string>
+    <string name="cancel_reminder_question">Die aktivierte Erinnerung wirklich abbrechen?</string>
 </resources>

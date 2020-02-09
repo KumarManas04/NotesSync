@@ -322,14 +322,14 @@ class NoteEditFragment : Fragment() {
                 )
                 dialogView.cancel_reminder_button.setOnClickListener {
                     AlertDialog.Builder(context)
-                        .setTitle("Cancel reminder")
-                        .setMessage("Are you sure you want to cancel the reminder?")
-                        .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
+                        .setTitle(getString(R.string.cancel_reminder))
+                        .setMessage(getString(R.string.cancel_reminder_question))
+                        .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId, context!!)
                             mainViewModel.reminderTime = -1L
                             dialog.hide()
                         }
-                        .setNegativeButton("No", null)
+                        .setNegativeButton(getString(R.string.no), null)
                         .show()
                 }
                 dialogView.cancel_reminder_button.setColorFilter(
