@@ -93,6 +93,6 @@
     <string name="check_encryption_loading_text">Teste...</string>
     <string name="toast_please_login_first">Bitte zuerst einloggen</string>
     <string name="enable_encrypted_sync">Verschlüsselte Synchronisation</string>
-    <string name="encrypted_sync_summary">"Ein Passwort zur Verschlüsselung der Daten in der Cloud zum Datenschutz einstellen. "</string>
+    <string name="encrypted_sync_summary">Ein Passwort zur Verschlüsselung der Daten in der Cloud zum Datenschutz einstellen.</string>
     <string name="sync">Notizen synchronisieren</string>
 </resources>
