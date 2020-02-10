@@ -12,6 +12,8 @@
     <string name="action_delete_forever">Delete forever</string>
     <string name="question_delete_forever">Are you sure you want to delete this note forever?</string>
     <string name="action_restore">Restore</string>
+    <string name="view_compact">Compact view</string>
+    <string name="view_simple">Simple view</string>
     <string name="share">Share</string>
     <string name="set_reminder">Set reminder</string>
     <string name="cancel_reminder_button">Cancel reminder button</string>
@@ -92,6 +94,7 @@
     <string name="delete_note">Delete note</string>
     <string name="delete_question">Are you sure you want to delete this note?</string>
     <string name="take_photo">Take a photo</string>
+    <string name="add_image">Add Image</string>
     <string name="new_image">New Image</string>
     <string name="new_image_note">New image note</string>
     <string name="pick_image">Pick an image</string>

@@ -22,6 +22,7 @@
     <string name="delete_question">Diese Notiz wirklich löschen?</string>
     <string name="no">Nein</string>
     <string name="yes">Ja</string>
+    <string name="add_image">Bild hinzufügen</string>
     <string name="new_image">Neues Bild</string>
     <string name="new_image_note">Neue Bildnotiz</string>
     <string name="pick_image">Bild auswählen</string>
@@ -114,6 +115,8 @@
     <string name="action_delete_forever">Dauerhaft löschen</string>
     <string name="question_delete_forever">Soll diese Notiz wirklich dauerhaft gelöscht werden?</string>
     <string name="action_restore">Wiederherstellen</string>
+    <string name="view_compact">Kompaktansicht</string>
+    <string name="view_simple">Einfache Ansicht</string>
     <string name="developer">Entwickler</string>
     <string name="developer_summary">Kumar Manas</string>
     <string name="dropbox">Dropbox</string>

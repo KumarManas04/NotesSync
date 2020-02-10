@@ -12,7 +12,7 @@
     <item
         android:id="@+id/add_image_menu_item"
         android:icon="@drawable/add_image_menu_icon_tinted"
-        android:title="Add Image"
+        android:title="@string/add_image"
         android:orderInCategory="1"
         app:showAsAction="always"/>
 </menu>

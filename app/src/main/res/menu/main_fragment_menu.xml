@@ -13,14 +13,14 @@
         android:id="@+id/compact_view_menu_item"
         android:icon="@drawable/compact_view_tinted"
         android:orderInCategory="3"
-        android:title="Compact view"
+        android:title="@string/view_compact"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/simple_view_menu_item"
         android:icon="@drawable/simple_view_tinted"
         android:orderInCategory="2"
-        android:title="Simple view"
+        android:title="@string/view_simple"
         app:showAsAction="always" />
 
     <item
