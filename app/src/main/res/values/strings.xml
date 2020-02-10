@@ -6,6 +6,12 @@
     <string name="sync">Sync notes</string>
     <string name="app_key" translatable="false">YOUR_APP_KEY_HERE</string>
     <string name="archive">Archive</string>
+    <string name="action_archive">Archive</string>
+    <string name="action_unarchive">Unarchive</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_delete_forever">Delete forever</string>
+    <string name="question_delete_forever">Are you sure you want to delete this note forever?</string>
+    <string name="action_restore">Restore</string>
     <string name="share">Share</string>
     <string name="set_reminder">Set reminder</string>
     <string name="cancel_reminder_button">Cancel reminder button</string>

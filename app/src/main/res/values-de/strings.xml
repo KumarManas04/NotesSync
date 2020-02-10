@@ -108,6 +108,12 @@
     <string name="changelog">Änderungsprotokoll</string>
     <string name="changelog_pref_summary">Betrachte das Änderungsprotokoll von Notes Sync</string>
     <string name="archive">Archiv</string>
+    <string name="action_archive">Archivieren</string>
+    <string name="action_unarchive">Dearchivieren</string>
+    <string name="action_delete">Löschen</string>
+    <string name="action_delete_forever">Dauerhaft löschen</string>
+    <string name="question_delete_forever">Soll diese Notiz wirklich dauerhaft gelöscht werden?</string>
+    <string name="action_restore">Wiederherstellen</string>
     <string name="developer">Entwickler</string>
     <string name="developer_summary">Kumar Manas</string>
     <string name="dropbox">Dropbox</string>

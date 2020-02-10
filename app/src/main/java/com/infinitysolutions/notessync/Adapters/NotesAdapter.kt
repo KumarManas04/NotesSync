@@ -117,7 +117,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         holder.itemContainer.setOnLongClickListener {
             holder.itemContainer.setOnCreateContextMenuListener { menu, _, _ ->
                 if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH && items[position].noteType != IMAGE_TRASH && items[position].noteType != IMAGE_LIST_TRASH) {
-                    menu.add("Delete").setOnMenuItemClickListener {
+                    menu.add(this.context.getString(R.string.action_delete)).setOnMenuItemClickListener {
                         when(items[position].noteType){
                             IMAGE_DEFAULT, IMAGE_ARCHIVED ->{
                                 changeNoteType(position, IMAGE_TRASH)
@@ -136,7 +136,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                         true
                     }
                     if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == LIST_DEFAULT || items[position].noteType == IMAGE_DEFAULT || items[position].noteType == IMAGE_LIST_DEFAULT) {
-                        menu.add("Archive").setOnMenuItemClickListener {
+                        menu.add(this.context.getString(R.string.action_archive)).setOnMenuItemClickListener {
                             when (items[position].noteType) {
                                 IMAGE_DEFAULT -> changeNoteType(position, IMAGE_ARCHIVED)
                                 LIST_DEFAULT -> changeNoteType(position, LIST_ARCHIVED)
@@ -146,7 +146,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                             true
                         }
                     } else {
-                        menu.add("Unarchive").setOnMenuItemClickListener {
+                        menu.add(this.context.getString(R.string.action_unarchive)).setOnMenuItemClickListener {
                             when (items[position].noteType) {
                                 IMAGE_ARCHIVED -> changeNoteType(position, IMAGE_DEFAULT)
                                 LIST_ARCHIVED -> changeNoteType(position, LIST_DEFAULT)
@@ -157,7 +157,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                         }
                     }
                 } else {
-                    menu.add("Restore").setOnMenuItemClickListener {
+                    menu.add(this.context.getString(R.string.action_restore)).setOnMenuItemClickListener {
                         when (items[position].noteType) {
                             IMAGE_TRASH -> changeNoteType(position, IMAGE_DEFAULT)
                             LIST_TRASH -> changeNoteType(position, LIST_DEFAULT)
@@ -166,10 +166,10 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                         }
                         true
                     }
-                    menu.add("Delete forever").setOnMenuItemClickListener {
+                    menu.add(this.context.getString(R.string.action_delete_forever)).setOnMenuItemClickListener {
                         AlertDialog.Builder(context)
-                            .setTitle("Delete forever")
-                            .setMessage("Are you sure you want to delete this note forever?")
+                            .setTitle(this.context.getString(R.string.action_delete_forever))
+                            .setMessage(this.context.getString(R.string.question_delete_forever))
                             .setPositiveButton(this.context.getString(R.string.yes)) { _: DialogInterface, _: Int ->
                                 databaseViewModel.deleteNote(items[position])
                             }
