@@ -181,7 +181,7 @@ class MainActivity : AppCompatActivity() {
                     if (browserIntent.resolveActivity(packageManager) != null)
                         startActivity(browserIntent)
                     else
-                        Toast.makeText(this, "No browser found!", LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.toast_no_browser), LENGTH_SHORT).show()
                 }
                 R.id.about -> {
                     Navigation.findNavController(this, R.id.nav_host_fragment)
@@ -198,7 +198,7 @@ class MainActivity : AppCompatActivity() {
         if (browserIntent.resolveActivity(packageManager) != null)
             startActivity(browserIntent)
         else
-            Toast.makeText(this, "No browser found!", LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_no_browser), LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {
@@ -210,8 +210,8 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if(isExitBlocked){
             AlertDialog.Builder(this)
-                .setTitle("Warning!")
-                .setMessage("Encryption process should not be interrupted. It may cause loss of data. Exit anyway?")
+                .setTitle(getString(R.string.warning))
+                .setMessage(getString(R.string.encryption_warning_exit))
                 .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                     isExitBlocked = false
                     super.onBackPressed()

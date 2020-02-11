@@ -58,8 +58,8 @@ class ImageGalleryFragment : Fragment() {
                 R.id.delete_image_menu_item->{
                     if(galleryAdapter.itemCount > 1) {
                         AlertDialog.Builder(context)
-                            .setTitle("Delete")
-                            .setMessage("Are you sure you want to delete this image?")
+                            .setTitle(getString(R.string.delete_image))
+                            .setMessage(getString(R.string.delete_image_question))
                             .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                                 galleryAdapter.deleteImage(viewPager.currentItem)
                             }
@@ -68,8 +68,8 @@ class ImageGalleryFragment : Fragment() {
                             .show()
                     }else{
                         AlertDialog.Builder(context)
-                            .setTitle("Delete")
-                            .setMessage("Are you sure you want to delete this image?")
+                            .setTitle(getString(R.string.delete_image))
+                            .setMessage(getString(R.string.delete_image_question))
                             .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                                 galleryAdapter.deleteImage(viewPager.currentItem)
                                 findNavController(this).navigateUp()

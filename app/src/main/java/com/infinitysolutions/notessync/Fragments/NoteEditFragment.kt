@@ -630,7 +630,7 @@ class NoteEditFragment : Fragment() {
                         LENGTH_SHORT
                     ).show()
             } else {
-                Toast.makeText(context, "No camera app found!", LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.toast_no_camera_app), LENGTH_SHORT).show()
             }
             true
         }

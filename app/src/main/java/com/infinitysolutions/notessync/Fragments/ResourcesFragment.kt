@@ -22,7 +22,7 @@ class ResourcesFragment : Fragment() {
 
     private fun setupView(rootView: View) {
         val toolbar = rootView.toolbar
-        toolbar.title = "Open Source"
+        toolbar.title = getString(R.string.open_source)
         toolbar.setNavigationOnClickListener {
             activity?.onBackPressed()
         }
@@ -101,6 +101,6 @@ class ResourcesFragment : Fragment() {
         if (browserIntent.resolveActivity(activity!!.packageManager) != null)
             startActivity(browserIntent)
         else
-            Toast.makeText(activity, "No browser found!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, getString(R.string.toast_no_browser), Toast.LENGTH_SHORT).show()
     }
 }
