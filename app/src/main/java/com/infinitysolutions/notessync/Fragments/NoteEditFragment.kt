@@ -188,12 +188,7 @@ class NoteEditFragment : Fragment() {
                     checklistView.visibility = VISIBLE
                     noteContent.visibility = GONE
                     imageRecyclerView.visibility = GONE
-                    var content = selectedNote.noteContent
-                    if (content != null) {
-                        if (content.contains("[ ]") || content.contains("[x]"))
-                            content = ChecklistConverter.convertList(content)
-                        checklistView.setList(content)
-                    }
+                    setChecklistContent(selectedNote.noteContent)
                 }
                 IMAGE_DEFAULT ,IMAGE_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED ->{
                     imageRecyclerView.visibility = VISIBLE
@@ -207,12 +202,7 @@ class NoteEditFragment : Fragment() {
 
                     val imageData = Gson().fromJson(selectedNote.noteContent, ImageNoteContent::class.java)
                     if(noteType == IMAGE_LIST_DEFAULT || noteType == IMAGE_LIST_ARCHIVED) {
-                        var content = imageData.noteContent
-                        if (content != null) {
-                            if (content.contains("[ ]") || content.contains("[x]"))
-                                content = ChecklistConverter.convertList(content)
-                            checklistView.setList(content)
-                        }
+                        setChecklistContent(imageData.noteContent)
                     }else{
                         noteContent.setText(imageData.noteContent)
                     }
@@ -234,37 +224,21 @@ class NoteEditFragment : Fragment() {
                                 when (noteType) {
                                     IMAGE_DEFAULT -> mainViewModel.noteType = NOTE_DEFAULT
                                     IMAGE_ARCHIVED -> mainViewModel.noteType = NOTE_ARCHIVED
-                                    IMAGE_LIST_DEFAULT -> {
-                                        mainViewModel.noteType = LIST_DEFAULT
-                                        mainViewModel.setSelectedNote(Note(
-                                            selectedNote.nId,
-                                            selectedNote.noteTitle,
-                                            imageData.noteContent,
-                                            selectedNote.dateCreated,
-                                            selectedNote.dateModified,
-                                            selectedNote.gDriveId,
-                                            selectedNote.noteType,
-                                            selectedNote.synced,
-                                            selectedNote.noteColor,
-                                            selectedNote.reminderTime
-                                        ))
-                                    }
-                                    IMAGE_LIST_ARCHIVED -> {
-                                        mainViewModel.noteType = LIST_ARCHIVED
-                                        mainViewModel.setSelectedNote(Note(
-                                            selectedNote.nId,
-                                            selectedNote.noteTitle,
-                                            imageData.noteContent,
-                                            selectedNote.dateCreated,
-                                            selectedNote.dateModified,
-                                            selectedNote.gDriveId,
-                                            selectedNote.noteType,
-                                            selectedNote.synced,
-                                            selectedNote.noteColor,
-                                            selectedNote.reminderTime
-                                        ))
-                                    }
+                                    IMAGE_LIST_DEFAULT -> mainViewModel.noteType = LIST_DEFAULT
+                                    IMAGE_LIST_ARCHIVED -> mainViewModel.noteType = LIST_ARCHIVED
                                 }
+                                mainViewModel.setSelectedNote(Note(
+                                    selectedNote.nId,
+                                    selectedNote.noteTitle,
+                                    imageData.noteContent,
+                                    selectedNote.dateCreated,
+                                    selectedNote.dateModified,
+                                    selectedNote.gDriveId,
+                                    selectedNote.noteType,
+                                    selectedNote.synced,
+                                    selectedNote.noteColor,
+                                    selectedNote.reminderTime
+                                ))
                             } else {
                                 imageRecyclerView.adapter = ImageListAdapter(context!!, list, mainViewModel)
                                 imageRecyclerView.isNestedScrollingEnabled = false
@@ -291,6 +265,16 @@ class NoteEditFragment : Fragment() {
                     imm.showSoftInput(noteContent, 0)
                 }, 50)
             }
+        }
+    }
+
+    private fun setChecklistContent(content: String?){
+        if (content != null) {
+            val newContent = if (content.contains("[ ]") || content.contains("[x]"))
+                ChecklistConverter.convertList(content)
+            else
+                content
+            checklistView.setList(newContent)
         }
     }
 
@@ -358,6 +342,22 @@ class NoteEditFragment : Fragment() {
             }
         }
 
+        dialogView.discard_changes_button.setOnClickListener {
+            val note: Note? = mainViewModel.getSelectedNote()
+            if(note != null) {
+                AlertDialog.Builder(activity)
+                    .setTitle("Discard changes")
+                    .setMessage("Discard all changes to the note? Deleted images won't be restored.")
+                    .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
+                        discardChanges(note)
+                        dialog.hide()
+                    }
+                    .setNegativeButton(getString(R.string.no), null)
+                    .setCancelable(true)
+                    .show()
+            }
+        }
+
         dialogView.archive_button.setOnClickListener {
             archiveNote()
             dialog.hide()
@@ -374,6 +374,79 @@ class NoteEditFragment : Fragment() {
         dialogView.color_picker.adapter = ColorPickerAdapter(this@NoteEditFragment.context!!, mainViewModel)
         dialog.setContentView(dialogView)
         dialog.show()
+    }
+
+    private fun discardChanges(note: Note){
+        noteTitle.setText(note.noteTitle)
+        // Getting the content from original note
+        val contentText = when(mainViewModel.noteType){
+            IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED ->{
+                val imageData = Gson().fromJson(note.noteContent, ImageNoteContent::class.java)
+                imageData.noteContent
+            }
+            else -> note.noteContent
+        }
+
+        mainViewModel.setSelectedColor(note.noteColor)
+        // Changing the views according to original note
+        when(note.noteType){
+            LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED ->{
+                checklistView.visibility = VISIBLE
+                noteContent.visibility = GONE
+            }
+            else ->{
+                checklistView.visibility = GONE
+                noteContent.visibility = VISIBLE
+            }
+        }
+
+        // Converting current note type according to original note type
+        when(note.noteType){
+            LIST_DEFAULT, IMAGE_LIST_DEFAULT->{
+                if(isImageType(mainViewModel.noteType!!))
+                    mainViewModel.noteType = IMAGE_LIST_DEFAULT
+                else
+                    mainViewModel.noteType = LIST_DEFAULT
+            }
+            LIST_ARCHIVED, IMAGE_LIST_ARCHIVED ->{
+                if(isImageType(mainViewModel.noteType!!))
+                    mainViewModel.noteType = IMAGE_LIST_ARCHIVED
+                else
+                    mainViewModel.noteType = LIST_ARCHIVED
+            }
+            NOTE_DEFAULT, IMAGE_DEFAULT ->{
+                if(isImageType(mainViewModel.noteType!!))
+                    mainViewModel.noteType = IMAGE_DEFAULT
+                else
+                    mainViewModel.noteType = NOTE_DEFAULT
+            }
+            NOTE_ARCHIVED, IMAGE_ARCHIVED ->{
+                if(isImageType(mainViewModel.noteType!!))
+                    mainViewModel.noteType = IMAGE_ARCHIVED
+                else
+                    mainViewModel.noteType = NOTE_ARCHIVED
+            }
+        }
+
+        // Setting the original note details
+        when(mainViewModel.noteType){
+            LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED ->{
+                setChecklistContent(contentText)
+            }
+            else -> noteContent.setText(contentText)
+        }
+    }
+
+    private fun isImageType(noteType: Int): Boolean {
+        return when (noteType) {
+            IMAGE_DEFAULT -> true
+            IMAGE_ARCHIVED -> true
+            IMAGE_TRASH -> true
+            IMAGE_LIST_DEFAULT -> true
+            IMAGE_LIST_ARCHIVED -> true
+            IMAGE_LIST_TRASH -> true
+            else -> false
+        }
     }
 
     private fun shareNote(){
@@ -714,29 +787,26 @@ class NoteEditFragment : Fragment() {
 
                         val selectedNote = mainViewModel.getSelectedNote()
                         if(selectedNote != null) {
-                            var noteText: String? = selectedNote.noteContent
                             when (mainViewModel.noteType) {
                                 NOTE_DEFAULT -> {
                                     mainViewModel.noteType = IMAGE_DEFAULT
                                     imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                                    noteText = Gson().toJson(ImageNoteContent(noteContent.toString(), arrayListOf(imageData.imageId!!)))
                                 }
                                 LIST_DEFAULT -> {
                                     mainViewModel.noteType = IMAGE_LIST_DEFAULT
                                     imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                                    noteText = Gson().toJson(ImageNoteContent(checklistView.toString(), arrayListOf(imageData.imageId!!)))
                                 }
                                 NOTE_ARCHIVED -> {
                                     mainViewModel.noteType = IMAGE_ARCHIVED
                                     imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                                    noteText = Gson().toJson(ImageNoteContent(noteContent.toString(), arrayListOf(imageData.imageId!!)))
                                 }
                                 LIST_ARCHIVED -> {
                                     mainViewModel.noteType = IMAGE_LIST_ARCHIVED
                                     imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                                    noteText = Gson().toJson(ImageNoteContent(checklistView.toString(), arrayListOf(imageData.imageId!!)))
                                 }
                             }
+
+                            val noteText = Gson().toJson(ImageNoteContent(selectedNote.noteContent, arrayListOf(imageData.imageId!!)))
                             mainViewModel.setSelectedNote(
                                 Note(
                                     selectedNote.nId,

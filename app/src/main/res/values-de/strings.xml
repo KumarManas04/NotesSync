@@ -134,11 +134,7 @@
     <string name="login">Login</string>
     <string name="login_pref_summary">Login zu Deinem bevorzugten Cloud-Speicher</string>
     <string name="logout">Logout</string>
-    <string name="enter_password_to_decrypt_message">Verschlüsselung gefunden. Bitte geben Sie Ihr Passwort ein, um Ihre Daten zu entschlüsseln</string>
-    <string name="will_user_encrypt_message">Möchten Sie Ihre Daten verschlüsseln?</string>
     <string name="logout_prefs_summary">Melden Sie sich von Ihrem Cloud-Speicherkonto ab</string>
-    <string name="dropbox_logout_text">Melden Sie sich von Ihrem Dropbox-Konto ab</string>
-    <string name="gdrive_logout_text">Melden Sie sich von Ihrem Google Drive-Konto ab</string>
     <string name="select_cloud_storage">Wähle Deinen bevorzugten Cloud-Speicher</string>
     <string name="enter_password">Passwort eingeben</string>
     <string name="enter_new_password">Neues Passwort eingeben</string>
