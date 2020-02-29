@@ -364,7 +364,38 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun convertChecklist(){
-
+        when(mainViewModel.noteType){
+            LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED ->{
+                // Convert to note
+                val listContent = checklistView.toString()
+                val str = listContent.replace("□ ", "")
+                val newNoteContent = str.replace("✓ ", "")
+                mainViewModel.noteType = when(mainViewModel.noteType){
+                    LIST_ARCHIVED -> NOTE_ARCHIVED
+                    IMAGE_LIST_DEFAULT -> IMAGE_DEFAULT
+                    IMAGE_LIST_ARCHIVED -> IMAGE_ARCHIVED
+                    else -> NOTE_DEFAULT
+                }
+                checklistView.visibility = GONE
+                noteContent.visibility = VISIBLE
+                noteContent.setText(newNoteContent)
+            }
+            else ->{
+                // Convert to list
+                val noteText = noteContent.text.toString()
+                val str = "□ $noteText"
+                val newNoteContent = str.replace("\n", "\n□ ")
+                mainViewModel.noteType = when(mainViewModel.noteType){
+                    NOTE_ARCHIVED -> LIST_ARCHIVED
+                    IMAGE_DEFAULT -> IMAGE_LIST_DEFAULT
+                    IMAGE_ARCHIVED -> IMAGE_LIST_ARCHIVED
+                    else -> LIST_DEFAULT
+                }
+                checklistView.visibility = VISIBLE
+                noteContent.visibility = GONE
+                checklistView.setList(newNoteContent)
+            }
+        }
     }
 
     private fun startBottomSheetDialog(container: ViewGroup?) {
