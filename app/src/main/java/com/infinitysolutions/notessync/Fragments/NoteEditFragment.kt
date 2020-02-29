@@ -159,12 +159,12 @@ class NoteEditFragment : Fragment() {
     private fun prepareNoteView(rootView: View) {
         val selectedNote = mainViewModel.getSelectedNote()
         if (selectedNote != null) {
-            val noteType: Int = if(mainViewModel.noteType != null)
-                mainViewModel.noteType!!
-            else {
-                mainViewModel.noteType = selectedNote.noteType
-                selectedNote.noteType
-            }
+            val noteType: Int = if (mainViewModel.noteType != null)
+                    mainViewModel.noteType!!
+                else {
+                    mainViewModel.noteType = selectedNote.noteType
+                    selectedNote.noteType
+                }
 
             when(mainViewModel.noteType){
                 NOTE_ARCHIVED, IMAGE_ARCHIVED, LIST_ARCHIVED, IMAGE_LIST_ARCHIVED ->{
@@ -226,12 +226,13 @@ class NoteEditFragment : Fragment() {
                         withContext(Dispatchers.Main) {
                             if (list.isEmpty()) {
                                 imageRecyclerView.visibility = GONE
-                                when (noteType) {
-                                    IMAGE_DEFAULT -> mainViewModel.noteType = NOTE_DEFAULT
-                                    IMAGE_ARCHIVED -> mainViewModel.noteType = NOTE_ARCHIVED
-                                    IMAGE_LIST_DEFAULT -> mainViewModel.noteType = LIST_DEFAULT
-                                    IMAGE_LIST_ARCHIVED -> mainViewModel.noteType = LIST_ARCHIVED
+                                mainViewModel.noteType = when (noteType) {
+                                    IMAGE_ARCHIVED -> NOTE_ARCHIVED
+                                    IMAGE_LIST_DEFAULT -> LIST_DEFAULT
+                                    IMAGE_LIST_ARCHIVED -> LIST_ARCHIVED
+                                    else -> NOTE_DEFAULT
                                 }
+
                                 mainViewModel.setSelectedNote(Note(
                                     selectedNote.nId,
                                     selectedNote.noteTitle,
@@ -330,8 +331,8 @@ class NoteEditFragment : Fragment() {
             }
 
             dialogView.reminder_button.setOnClickListener {
-                pickReminderTime(selectedNote.nId)
                 dialog.hide()
+                pickReminderTime(selectedNote.nId)
             }
 
             when(mainViewModel.noteType){
@@ -355,8 +356,8 @@ class NoteEditFragment : Fragment() {
         }
 
         dialogView.checklist_button.setOnClickListener {
-            convertChecklist()
             dialog.hide()
+            convertChecklist()
         }
 
         dialog.setContentView(dialogView)
@@ -403,10 +404,12 @@ class NoteEditFragment : Fragment() {
         val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
 
         dialogView.share_button.setOnClickListener {
+            dialog.hide()
             shareNote()
         }
 
         dialogView.delete_button.setOnClickListener {
+            dialog.hide()
             deleteNote()
         }
 
@@ -625,7 +628,7 @@ class NoteEditFragment : Fragment() {
                     Note(
                         selectedNote.nId,
                         noteTitle.text.toString(),
-                        noteContent.text.toString(),
+                        getNoteText(),
                         selectedNote.dateCreated,
                         Calendar.getInstance().timeInMillis,
                         selectedNote.gDriveId,
@@ -636,6 +639,9 @@ class NoteEditFragment : Fragment() {
                     )
                 )
             }
+            mainViewModel.setSelectedNote(null)
+            mainViewModel.setImagesList(null)
+            mainViewModel.noteType = null
             activity?.onBackPressed()
         }
     }
@@ -843,6 +849,10 @@ class NoteEditFragment : Fragment() {
 
                         val selectedNote = mainViewModel.getSelectedNote()
                         if(selectedNote != null) {
+                            val selectedNoteContent = if(mainViewModel.noteType != null && isImageType(mainViewModel.noteType!!))                                Gson().fromJson(selectedNote.noteContent, ImageNoteContent::class.java).noteContent
+                            else
+                                selectedNote.noteContent
+
                             when (mainViewModel.noteType) {
                                 NOTE_DEFAULT -> {
                                     mainViewModel.noteType = IMAGE_DEFAULT
@@ -862,7 +872,7 @@ class NoteEditFragment : Fragment() {
                                 }
                             }
 
-                            val noteText = Gson().toJson(ImageNoteContent(selectedNote.noteContent, arrayListOf(imageData.imageId!!)))
+                            val noteText = Gson().toJson(ImageNoteContent(selectedNoteContent, arrayListOf(imageData.imageId!!)))
                             mainViewModel.setSelectedNote(
                                 Note(
                                     selectedNote.nId,
