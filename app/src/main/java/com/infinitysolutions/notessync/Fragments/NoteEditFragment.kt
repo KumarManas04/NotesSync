@@ -17,7 +17,6 @@ import android.provider.MediaStore
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -62,6 +61,7 @@ import com.infinitysolutions.notessync.Util.ColorsUtil
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
+import kotlinx.android.synthetic.main.add_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_note_edit.view.*
 import kotlinx.coroutines.Dispatchers
@@ -90,9 +90,11 @@ class NoteEditFragment : Fragment() {
         initDataBinding(rootView)
 
         //Setting up bottom menu
-        val menuButton = rootView.open_bottom_menu
-        menuButton.setOnClickListener {
+        rootView.open_bottom_menu.setOnClickListener {
             startBottomSheetDialog(container)
+        }
+        rootView.open_add_bottom_menu.setOnClickListener {
+            startAddBottomDialog(container)
         }
         return rootView
     }
@@ -129,15 +131,7 @@ class NoteEditFragment : Fragment() {
 
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.delete_menu_item -> {
-                    deleteNote()
-                }
-                R.id.add_image_menu_item -> {
-                    rootView.setOnCreateContextMenuListener { menu, _, _ ->
-                        openNewImageMenu(menu)
-                    }
-                    rootView.showContextMenu()
-                }
+                R.id.archive_menu_item, R.id.unarchive_menu_item -> archiveNote()
             }
             true
         }
@@ -170,6 +164,17 @@ class NoteEditFragment : Fragment() {
             else {
                 mainViewModel.noteType = selectedNote.noteType
                 selectedNote.noteType
+            }
+
+            when(mainViewModel.noteType){
+                NOTE_ARCHIVED, IMAGE_ARCHIVED, LIST_ARCHIVED, IMAGE_LIST_ARCHIVED ->{
+                    rootView.toolbar.menu.findItem(R.id.archive_menu_item).isVisible = false
+                    rootView.toolbar.menu.findItem(R.id.unarchive_menu_item).isVisible = true
+                }
+                else ->{
+                    rootView.toolbar.menu.findItem(R.id.archive_menu_item).isVisible = true
+                    rootView.toolbar.menu.findItem(R.id.unarchive_menu_item).isVisible = false
+                }
             }
 
             if (selectedNote.nId != -1L) {
@@ -278,20 +283,12 @@ class NoteEditFragment : Fragment() {
         }
     }
 
-    private fun startBottomSheetDialog(container: ViewGroup?) {
-        val dialogView = layoutInflater.inflate(R.layout.bottom_sheet, container, false)
+    private fun startAddBottomDialog(container: ViewGroup?){
+        val dialogView = layoutInflater.inflate(R.layout.add_bottom_sheet, container, false)
         val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
-
         val selectedNote = mainViewModel.getSelectedNote()
-        if (selectedNote != null) {
-            if (mainViewModel.noteType == NOTE_DEFAULT || mainViewModel.noteType == LIST_DEFAULT || mainViewModel.noteType == IMAGE_DEFAULT || mainViewModel.noteType == IMAGE_LIST_DEFAULT) {
-                dialogView.archive_button_icon.setImageResource(R.drawable.archive_drawer_item)
-                dialogView.archive_button_text.text = getString(R.string.archive_note)
-            } else {
-                dialogView.archive_button_icon.setImageResource(R.drawable.unarchive_menu_item)
-                dialogView.archive_button_text.text = getString(R.string.unarchive_note)
-            }
 
+        if (selectedNote != null) {
             if (mainViewModel.reminderTime != -1L) {
                 dialogView.cancel_reminder_button.visibility = VISIBLE
                 val formatter = SimpleDateFormat("h:mm a MMM d, YYYY", Locale.ENGLISH)
@@ -337,9 +334,49 @@ class NoteEditFragment : Fragment() {
                 dialog.hide()
             }
 
-            dialogView.share_button.setOnClickListener {
-                shareNote()
+            when(mainViewModel.noteType){
+                LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED ->{
+                    dialogView.checklist_button_text.text = "Convert to note"
+                }
+                else ->{
+                    dialogView.checklist_button_text.text = "Convert to checklist"
+                }
             }
+        }
+
+        dialogView.camera_button.setOnClickListener {
+            dialog.hide()
+            openCamera()
+        }
+
+        dialogView.pick_image_button.setOnClickListener {
+            dialog.hide()
+            openPickImage()
+        }
+
+        dialogView.checklist_button.setOnClickListener {
+            convertChecklist()
+            dialog.hide()
+        }
+
+        dialog.setContentView(dialogView)
+        dialog.show()
+    }
+
+    private fun convertChecklist(){
+
+    }
+
+    private fun startBottomSheetDialog(container: ViewGroup?) {
+        val dialogView = layoutInflater.inflate(R.layout.bottom_sheet, container, false)
+        val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
+
+        dialogView.share_button.setOnClickListener {
+            shareNote()
+        }
+
+        dialogView.delete_button.setOnClickListener {
+            deleteNote()
         }
 
         dialogView.discard_changes_button.setOnClickListener {
@@ -356,11 +393,6 @@ class NoteEditFragment : Fragment() {
                     .setCancelable(true)
                     .show()
             }
-        }
-
-        dialogView.archive_button.setOnClickListener {
-            archiveNote()
-            dialog.hide()
         }
 
         dialogView.make_copy_button.setOnClickListener {
@@ -677,42 +709,35 @@ class NoteEditFragment : Fragment() {
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 
-    private fun openNewImageMenu(menu: Menu) {
-        menu.add(getString(R.string.take_photo)).setOnMenuItemClickListener {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            if (intent.resolveActivity(activity!!.packageManager) != null) {
-                val photoFile: File? = try {
-                    createImageFile()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                    null
-                }
-                if (photoFile != null) {
-                    mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
-                    val photoUri = FileProvider.getUriForFile(
-                        context!!,
-                        "com.infinitysolutions.notessync.fileprovider",
-                        photoFile
-                    )
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                    startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
-                } else
-                    Toast.makeText(
-                        context,
-                        "Couldn't access file system",
-                        LENGTH_SHORT
-                    ).show()
-            } else {
-                Toast.makeText(context, getString(R.string.toast_no_camera_app), LENGTH_SHORT).show()
+    private fun openCamera(){
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (intent.resolveActivity(activity!!.packageManager) != null) {
+            val photoFile: File? = try {
+                createImageFile()
+            } catch (e: IOException) {
+                e.printStackTrace()
+                null
             }
-            true
+            if (photoFile != null) {
+                mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
+                val photoUri = FileProvider.getUriForFile(
+                    context!!,
+                    "com.infinitysolutions.notessync.fileprovider",
+                    photoFile
+                )
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
+            } else
+                Toast.makeText(context, "Couldn't access file system", LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, getString(R.string.toast_no_camera_app), LENGTH_SHORT).show()
         }
-        menu.add(getString(R.string.pick_image)).setOnMenuItemClickListener {
-            val i = Intent(Intent.ACTION_PICK)
-            i.type = "image/*"
-            startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)
-            true
-        }
+    }
+
+    private fun openPickImage(){
+        val i = Intent(Intent.ACTION_PICK)
+        i.type = "image/*"
+        startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)
     }
 
     private fun getNoteText(): String {

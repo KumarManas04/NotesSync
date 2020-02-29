@@ -7,7 +7,7 @@
     android:paddingTop="10dp">
 
     <LinearLayout
-        android:id="@+id/delete_button"
+        android:id="@+id/camera_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
@@ -22,8 +22,8 @@
         <ImageView
             android:layout_width="26dp"
             android:layout_height="26dp"
-            android:contentDescription="@string/delete_note"
-            android:src="@drawable/delete_menu_icon"
+            android:contentDescription="@string/take_photo"
+            android:src="@drawable/add_image_menu_icon"
             android:tint="?attr/iconsTint" />
 
         <TextView
@@ -31,14 +31,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="30dp"
-            android:text="@string/delete_note"
+            android:text="@string/take_photo"
             android:textColor="?attr/mainTextColor"
             android:textSize="16sp" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/discard_changes_button"
+        android:id="@+id/pick_image_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
@@ -53,8 +53,8 @@
         <ImageView
             android:layout_width="26dp"
             android:layout_height="26dp"
-            android:contentDescription="Discard changes"
-            android:src="@drawable/discard_changes_icon"
+            android:contentDescription="@string/pick_image"
+            android:src="@drawable/new_image_note"
             android:tint="?attr/iconsTint" />
 
         <TextView
@@ -62,14 +62,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="30dp"
-            android:text="Discard changes"
+            android:text="@string/pick_image"
             android:textColor="?attr/mainTextColor"
             android:textSize="16sp" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/make_copy_button"
+        android:id="@+id/checklist_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
@@ -84,23 +84,24 @@
         <ImageView
             android:layout_width="26dp"
             android:layout_height="26dp"
-            android:contentDescription="@string/share"
-            android:src="@drawable/make_copy_icon"
+            android:contentDescription="Convert to checklist"
+            android:src="@drawable/convert_checklist_icon"
             android:tint="?attr/iconsTint" />
 
         <TextView
+            android:id="@+id/checklist_button_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="30dp"
-            android:text="@string/make_a_copy"
+            android:text="Convert to checklist"
             android:textColor="?attr/mainTextColor"
             android:textSize="16sp" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/share_button"
+        android:id="@+id/reminder_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
@@ -110,31 +111,36 @@
         android:paddingStart="10dp"
         android:paddingTop="8dp"
         android:paddingEnd="10dp"
-        android:paddingBottom="8dp">
+        android:paddingBottom="12dp">
 
         <ImageView
             android:layout_width="26dp"
             android:layout_height="26dp"
-            android:contentDescription="@string/share"
-            android:src="@drawable/share_menu_item"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/set_reminder"
+            android:src="@drawable/reminder_icon"
             android:tint="?attr/iconsTint" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/reminder_text"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="30dp"
-            android:text="@string/share"
+            android:layout_weight="1"
+            android:maxLines="2"
+            android:text="@string/set_reminder"
             android:textColor="?attr/mainTextColor"
             android:textSize="16sp" />
 
+        <ImageView
+            android:id="@+id/cancel_reminder_button"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/cancel_reminder_button"
+            android:src="@drawable/cancel_reminder"
+            android:visibility="gone" />
+
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/color_picker"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp" />
-
 </LinearLayout>

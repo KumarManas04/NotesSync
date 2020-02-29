@@ -81,13 +81,26 @@
         android:elevation="8dp"
         android:orientation="horizontal">
 
+        <ImageView
+            android:id="@+id/open_add_bottom_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/overlay_simple_ripple"
+            android:clickable="true"
+            android:contentDescription="Add"
+            android:focusable="true"
+            android:padding="10dp"
+            android:src="@drawable/add_menu_item"
+            android:tint="?attr/iconsTint" />
+
         <TextView
             android:id="@+id/last_edited_text"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center"
+            android:textAlignment="center"
             android:layout_weight="1"
-            android:padding="10dp"
             android:textColor="#424242" />
 
         <ImageView
