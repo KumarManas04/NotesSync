@@ -1,14 +1,17 @@
 package com.infinitysolutions.notessync.Fragments
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
@@ -20,6 +23,9 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -27,15 +33,14 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
-import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_PROVIDER_AUTHORITY
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_CAPTURE_REQUEST_CODE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_PICKER_REQUEST_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
@@ -48,6 +53,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_BUTTO
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_IMAGE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_LIST
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_NOTE
+import com.infinitysolutions.notessync.Model.ImageData
 import com.infinitysolutions.notessync.Model.ImageNoteContent
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
@@ -59,8 +65,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 
 class MainFragment : Fragment() {
@@ -255,12 +261,7 @@ class MainFragment : Fragment() {
                     }
                 }else if(intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true){
                     (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {uri->
-                        GlobalScope.launch(Dispatchers.IO) {
-                            val bitmap = getBitmapFromUri(uri)
-                            withContext(Dispatchers.Main) {
-                                createNewNoteWithBitmap(bitmap)
-                            }
-                        }
+                        insertImageInDatabase(uri, null)
                     }
                 }else if (intent.hasExtra(WIDGET_BUTTON_EXTRA)) {
                     val text = intent.getStringExtra(WIDGET_BUTTON_EXTRA)
@@ -300,46 +301,46 @@ class MainFragment : Fragment() {
     }
 
     private fun openNewImageMenu(menu: Menu) {
-        menu.add(getString(R.string.take_photo)).setOnMenuItemClickListener {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            if (intent.resolveActivity(activity!!.packageManager) != null) {
-                val photoFile: File? = try {
-                    createImageFile()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                    null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ){
+            Toast.makeText(context, "Storage permission required", LENGTH_SHORT).show()
+            ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1010)
+            return
+        }else{
+            menu.add(getString(R.string.take_photo)).setOnMenuItemClickListener {
+                val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                if (intent.resolveActivity(activity!!.packageManager) != null) {
+                    val photoFile: File? = try {
+                        createImageFile()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        null
+                    }
+                    if (photoFile != null) {
+                        mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
+                        val photoUri = FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, photoFile)
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                        startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
+                    } else
+                        Toast.makeText(
+                            context,
+                            "Couldn't access file system",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                } else {
+                    Toast.makeText(context, getString(R.string.toast_no_camera_app), Toast.LENGTH_SHORT).show()
                 }
-                if (photoFile != null) {
-                    mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
-                    val photoUri = FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, photoFile)
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                    startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
-                } else
-                    Toast.makeText(
-                        context,
-                        "Couldn't access file system",
-                        Toast.LENGTH_SHORT
-                    ).show()
-            } else {
-                Toast.makeText(context, getString(R.string.toast_no_camera_app), Toast.LENGTH_SHORT).show()
+                true
             }
-            true
-        }
 
-        menu.add(getString(R.string.pick_image)).setOnMenuItemClickListener {
-            val i = Intent(Intent.ACTION_PICK)
-            i.type = "image/*"
-            startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)
-            true
+            menu.add(getString(R.string.pick_image)).setOnMenuItemClickListener {
+                val i = Intent(Intent.ACTION_PICK)
+                i.type = "image/*"
+                startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)
+                true
+            }
         }
-    }
-
-    @Throws(IOException::class)
-    private fun createImageFile(): File {
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val storageDir: File? = activity?.filesDir
-        Log.d("MainActivity", "extDir: $storageDir")
-        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 
     private fun syncFiles() {
@@ -348,93 +349,6 @@ class MainFragment : Fragment() {
             CLOUD_GOOGLE_DRIVE -> mainViewModel.setSyncNotes(CLOUD_GOOGLE_DRIVE)
             CLOUD_DROPBOX -> mainViewModel.setSyncNotes(CLOUD_DROPBOX)
             else -> findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
-                val uri: Uri? = data?.data
-                GlobalScope.launch(Dispatchers.IO) {
-                    val bitmap = getBitmapFromUri(uri)
-                    withContext(Dispatchers.Main){
-                        createNewNoteWithBitmap(bitmap)
-                    }
-                }
-            } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
-                val photoFile = File(mainViewModel.getCurrentPhotoPath())
-                val photoUri = FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, photoFile)
-                GlobalScope.launch(Dispatchers.IO) {
-                    val bitmap = getBitmapFromUri(photoUri)
-                    withContext(Dispatchers.Main) {
-                        if (mainViewModel.getCurrentPhotoPath() != null) {
-                            val file = File(mainViewModel.getCurrentPhotoPath())
-                            if (file.exists())
-                                file.delete()
-                        }
-                        createNewNoteWithBitmap(bitmap)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun createNewNoteWithBitmap(bitmap: Bitmap?) {
-        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
-        if (bitmap != null) {
-            val builder = AlertDialog.Builder(context)
-            builder.setCancelable(false)
-            builder.setView(R.layout.loading_dialog_layout)
-            val dialog = builder.create()
-            dialog.show()
-            GlobalScope.launch(Dispatchers.IO) {
-                val imageData = databaseViewModel.insertImage(bitmap)
-                val id: Long = imageData.imageId!!
-                bitmap.recycle()
-
-                withContext(Dispatchers.Main) {
-                    dialog.dismiss()
-                    mainViewModel.setImagesList(arrayListOf(imageData))
-                    mainViewModel.setShouldOpenEditor(true)
-                    val imageContent = ImageNoteContent("", arrayListOf(id))
-                    val content = Gson().toJson(imageContent)
-                    mainViewModel.setSelectedNote(
-                        Note(
-                            -1L, "", content, 0, 0,
-                            "-1", Contract.IMAGE_DEFAULT, false, null, -1L
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    private fun getBitmapFromUri(uri: Uri?): Bitmap? {
-        return if (uri != null) {
-            val imageStream = activity!!.contentResolver.openInputStream(uri)
-            val options = BitmapFactory.Options()
-            options.inJustDecodeBounds = true
-            BitmapFactory.decodeStream(imageStream, null, options)
-            val width = options.outWidth
-            val height = options.outHeight
-            if(width > 1000 || height > 1000) {
-                val ratio = (maxOf(width, height)).toFloat() / 1000.0f
-                val newWidth = (width * ratio).toInt()
-                val newHeight = (height * ratio).toInt()
-                Glide.with(context!!)
-                    .asBitmap()
-                    .load(uri)
-                    .submit(newWidth, newHeight)
-                    .get()
-            }else {
-                Glide.with(context!!)
-                    .asBitmap()
-                    .load(uri)
-                    .submit(width, height)
-                    .get()
-            }
-        } else {
-            null
         }
     }
 
@@ -449,5 +363,122 @@ class MainFragment : Fragment() {
             }
         }
         return -1
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File? {
+        val path = activity!!.filesDir.toString()
+        val time = Calendar.getInstance().timeInMillis
+        return File(path, "$time.jpg")
+    }
+
+    private fun saveBitmap(imageBitmap: Bitmap, filePath: String){
+        val file = File(filePath)
+        try {
+            val fos = FileOutputStream(file)
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+            fos.flush()
+            fos.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        imageBitmap.recycle()
+    }
+
+    private fun loadBitmap(uri: Uri?, filePath: String?, destinationPath: String) {
+        Log.d(TAG, "Load bitmap called.")
+        val options = BitmapFactory.Options()
+        options.inJustDecodeBounds = true
+        if(uri != null) {
+            val imageStream = activity!!.contentResolver.openInputStream(uri)
+            BitmapFactory.decodeStream(imageStream, null, options)
+        }else if(filePath != null){
+            BitmapFactory.decodeFile(filePath, options)
+        }
+
+        var width = options.outWidth
+        var height = options.outHeight
+
+        var inSampleSize = 1
+        if(width > 1000 || height > 1000) {
+            height /= 2
+            width /= 2
+            while(height / inSampleSize >= 1000 && width / inSampleSize >= 1000)
+                inSampleSize *= 2
+        }
+
+        Log.d(TAG, "Measuring done")
+        options.inSampleSize = inSampleSize
+        options.inJustDecodeBounds = false
+        val imageBitmap: Bitmap?
+        if(uri != null) {
+            // Retrieving the bitmap from given uri
+            val inputStream = activity!!.contentResolver.openInputStream(uri)
+            imageBitmap = BitmapFactory.decodeStream(inputStream, null, options)
+        }else{
+            // Retrieving the bitmap from given file path
+            imageBitmap = BitmapFactory.decodeFile(filePath, options)
+            if(filePath != null) {
+                val file = File(filePath)
+                if (file.exists())
+                    file.delete()
+            }
+        }
+
+        Log.d(TAG, "Saving...")
+        // Saving the bitmap to given path
+        if(imageBitmap != null)
+            saveBitmap(imageBitmap, destinationPath)
+    }
+
+    private fun createNewNote(imageData: ImageData) {
+        val id: Long = imageData.imageId!!
+        mainViewModel.setImagesList(arrayListOf(imageData))
+        mainViewModel.setShouldOpenEditor(true)
+        val imageContent = ImageNoteContent("", arrayListOf(id))
+        val content = Gson().toJson(imageContent)
+        mainViewModel.setSelectedNote(
+            Note(-1L, "", content, 0, 0,
+                "-1", IMAGE_DEFAULT, false, null, -1L
+            )
+        )
+    }
+
+    private fun insertImageInDatabase(photoUri: Uri?, filePath: String?){
+        Log.d(TAG, "Insert image in database")
+        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
+        val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        GlobalScope.launch(Dispatchers.IO) {
+            val imageData = databaseViewModel.insertImage()
+            withContext(Dispatchers.Main){
+                createNewNote(imageData)
+            }
+            loadBitmap(photoUri, filePath, imageData.imagePath)
+            withContext(Dispatchers.Main){
+                // Notify the changes to the view
+                mainViewModel.setRefreshImagesList(true)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
+                Log.d(TAG, "Image picker")
+                val photoUri: Uri? = data?.data
+                if(photoUri != null)
+                    insertImageInDatabase(photoUri, null)
+                else
+                    Toast.makeText(context, "Can't access storage", Toast.LENGTH_SHORT).show()
+            } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
+                if (mainViewModel.getCurrentPhotoPath() != null) {
+                    val photoFile = File(mainViewModel.getCurrentPhotoPath()!!)
+                    if (photoFile.exists())
+                        insertImageInDatabase(null, photoFile.absolutePath)
+                    else
+                        Toast.makeText(context, "Error in retrieving image", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 }

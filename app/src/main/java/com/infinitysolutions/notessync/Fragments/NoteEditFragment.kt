@@ -1,17 +1,17 @@
 package com.infinitysolutions.notessync.Fragments
 
 
-import android.app.Activity
-import android.app.AlertDialog
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
+import android.Manifest
+import android.app.*
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -25,6 +25,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -53,6 +55,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
+import com.infinitysolutions.notessync.Model.ImageData
 import com.infinitysolutions.notessync.Model.ImageNoteContent
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
@@ -112,7 +115,7 @@ class NoteEditFragment : Fragment() {
         mainViewModel.getSelectedColor().observe(this, androidx.lifecycle.Observer { selectedColor ->
                 noteTitle.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
                 rootView.last_edited_text.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
-            })
+        })
 
         mainViewModel.getOpenImageView().observe(this, androidx.lifecycle.Observer {
             it.getContentIfNotHandled()?.let { imagePosition ->
@@ -121,6 +124,14 @@ class NoteEditFragment : Fragment() {
             }
         })
 
+        mainViewModel.getRefreshImagesList().observe(this, androidx.lifecycle.Observer {
+            it.getContentIfNotHandled()?.let {
+                if(it){
+                    val adapter: ImageListAdapter? = (imageRecyclerView.adapter as ImageListAdapter)
+                    adapter?.notifyDataSetChanged()
+                }
+            }
+        })
         val toolbar = rootView.toolbar
         toolbar.title = ""
         toolbar.inflateMenu(R.menu.note_editor_menu)
@@ -738,43 +749,61 @@ class NoteEditFragment : Fragment() {
     }
 
     @Throws(IOException::class)
-    private fun createImageFile(): File {
-        val timeStamp: String =
-            SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val storageDir: File? = activity?.filesDir
-        Log.d("MainActivity", "extDir: $storageDir")
-        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+    private fun createImageFile(): File? {
+        val path = activity!!.filesDir.toString()
+        val time = Calendar.getInstance().timeInMillis
+        return File(path, "$time.jpg")
     }
 
     private fun openCamera(){
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (intent.resolveActivity(activity!!.packageManager) != null) {
-            val photoFile: File? = try {
-                createImageFile()
-            } catch (e: IOException) {
-                e.printStackTrace()
-                null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            ContextCompat.checkSelfPermission(
+                context!!,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ){
+            Toast.makeText(context, "Storage permission required", LENGTH_SHORT).show()
+            ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1010)
+        }else{
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            if (intent.resolveActivity(activity!!.packageManager) != null) {
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    null
+                }
+                if (photoFile != null) {
+                    mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
+                    val photoUri = FileProvider.getUriForFile(
+                        context!!,
+                        "com.infinitysolutions.notessync.fileprovider",
+                        photoFile
+                    )
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                    startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
+                } else
+                    Toast.makeText(context, "Couldn't access file system", LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, getString(R.string.toast_no_camera_app), LENGTH_SHORT).show()
             }
-            if (photoFile != null) {
-                mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
-                val photoUri = FileProvider.getUriForFile(
-                    context!!,
-                    "com.infinitysolutions.notessync.fileprovider",
-                    photoFile
-                )
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
-            } else
-                Toast.makeText(context, "Couldn't access file system", LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, getString(R.string.toast_no_camera_app), LENGTH_SHORT).show()
         }
     }
 
     private fun openPickImage(){
-        val i = Intent(Intent.ACTION_PICK)
-        i.type = "image/*"
-        startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            ContextCompat.checkSelfPermission(
+                context!!,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ){
+            Toast.makeText(context, "Storage permission required", LENGTH_SHORT).show()
+            ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1010)
+        }else{
+            val i = Intent(Intent.ACTION_PICK)
+            i.type = "image/*"
+            startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)
+        }
     }
 
     private fun getNoteText(): String {
@@ -816,84 +845,150 @@ class NoteEditFragment : Fragment() {
         super.onDestroy()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
-            val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
-            var bitmap: Bitmap? = null
-            if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
-                val uri: Uri? = data?.data
-                if (uri != null) {
-                    val imageStream = activity!!.contentResolver.openInputStream(uri)
-                    bitmap = BitmapFactory.decodeStream(imageStream)
+    private fun loadImage(imageData: ImageData){
+        Log.d(TAG, "Load image called")
+        imageRecyclerView.visibility = VISIBLE
+
+        val selectedNote = mainViewModel.getSelectedNote()
+        if(selectedNote != null) {
+            val selectedNoteContent = if(mainViewModel.noteType != null && isImageType(mainViewModel.noteType!!))
+                Gson().fromJson(selectedNote.noteContent, ImageNoteContent::class.java).noteContent
+            else
+                selectedNote.noteContent
+
+            when (mainViewModel.noteType) {
+                NOTE_DEFAULT -> {
+                    mainViewModel.noteType = IMAGE_DEFAULT
+                    imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
                 }
-            } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
-                bitmap = BitmapFactory.decodeFile(mainViewModel.getCurrentPhotoPath())
-                if (mainViewModel.getCurrentPhotoPath() != null) {
-                    val file = File(mainViewModel.getCurrentPhotoPath()!!)
-                    if (file.exists())
-                        file.delete()
+                LIST_DEFAULT -> {
+                    mainViewModel.noteType = IMAGE_LIST_DEFAULT
+                    imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
+                }
+                NOTE_ARCHIVED -> {
+                    mainViewModel.noteType = IMAGE_ARCHIVED
+                    imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
+                }
+                LIST_ARCHIVED -> {
+                    mainViewModel.noteType = IMAGE_LIST_ARCHIVED
+                    imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
                 }
             }
-            if (bitmap != null) {
-                val builder = AlertDialog.Builder(context)
-                builder.setCancelable(false)
-                builder.setView(R.layout.loading_dialog_layout)
-                val dialog = builder.create()
-                dialog.show()
-                GlobalScope.launch(Dispatchers.IO) {
-                    val imageData = databaseViewModel.insertImage(bitmap)
-                    bitmap.recycle()
 
-                    withContext(Dispatchers.Main) {
-                        imageRecyclerView.visibility = VISIBLE
+            val noteText = Gson().toJson(ImageNoteContent(selectedNoteContent, arrayListOf(imageData.imageId!!)))
+            mainViewModel.setSelectedNote(
+                Note(
+                    selectedNote.nId,
+                    selectedNote.noteTitle,
+                    noteText,
+                    selectedNote.dateCreated,
+                    selectedNote.dateModified,
+                    selectedNote.gDriveId,
+                    selectedNote.noteType,
+                    selectedNote.synced,
+                    selectedNote.noteColor,
+                    selectedNote.reminderTime
+                )
+            )
+        }
 
-                        val selectedNote = mainViewModel.getSelectedNote()
-                        if(selectedNote != null) {
-                            val selectedNoteContent = if(mainViewModel.noteType != null && isImageType(mainViewModel.noteType!!))                                Gson().fromJson(selectedNote.noteContent, ImageNoteContent::class.java).noteContent
-                            else
-                                selectedNote.noteContent
+        imageRecyclerView.isNestedScrollingEnabled = false
+        (imageRecyclerView.adapter as ImageListAdapter).addImage(imageData)
+        mainViewModel.addImageToImageList(imageData)
+    }
 
-                            when (mainViewModel.noteType) {
-                                NOTE_DEFAULT -> {
-                                    mainViewModel.noteType = IMAGE_DEFAULT
-                                    imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                                }
-                                LIST_DEFAULT -> {
-                                    mainViewModel.noteType = IMAGE_LIST_DEFAULT
-                                    imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                                }
-                                NOTE_ARCHIVED -> {
-                                    mainViewModel.noteType = IMAGE_ARCHIVED
-                                    imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                                }
-                                LIST_ARCHIVED -> {
-                                    mainViewModel.noteType = IMAGE_LIST_ARCHIVED
-                                    imageRecyclerView.adapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                                }
-                            }
+    private fun saveBitmap(imageBitmap: Bitmap, filePath: String){
+        val file = File(filePath)
+        try {
+            val fos = FileOutputStream(file)
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+            fos.flush()
+            fos.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        imageBitmap.recycle()
+    }
 
-                            val noteText = Gson().toJson(ImageNoteContent(selectedNoteContent, arrayListOf(imageData.imageId!!)))
-                            mainViewModel.setSelectedNote(
-                                Note(
-                                    selectedNote.nId,
-                                    selectedNote.noteTitle,
-                                    noteText,
-                                    selectedNote.dateCreated,
-                                    selectedNote.dateModified,
-                                    selectedNote.gDriveId,
-                                    selectedNote.noteType,
-                                    selectedNote.synced,
-                                    selectedNote.noteColor,
-                                    selectedNote.reminderTime
-                                )
-                            )
-                        }
+    private fun loadBitmap(uri: Uri?, filePath: String?, destinationPath: String) {
+        Log.d(TAG, "Load bitmap called.")
+        val options = BitmapFactory.Options()
+        options.inJustDecodeBounds = true
+        if(uri != null) {
+            val imageStream = activity!!.contentResolver.openInputStream(uri)
+            BitmapFactory.decodeStream(imageStream, null, options)
+        }else if(filePath != null){
+            BitmapFactory.decodeFile(filePath, options)
+        }
 
-                        imageRecyclerView.isNestedScrollingEnabled = false
-                        (imageRecyclerView.adapter as ImageListAdapter).addImage(imageData)
-                        mainViewModel.addImageToImageList(imageData)
-                        dialog.dismiss()
-                    }
+        var width = options.outWidth
+        var height = options.outHeight
+
+        var inSampleSize = 1
+        if(width > 1000 || height > 1000) {
+            height /= 2
+            width /= 2
+            while(height / inSampleSize >= 1000 && width / inSampleSize >= 1000)
+                inSampleSize *= 2
+        }
+
+        Log.d(TAG, "Measuring done")
+        options.inSampleSize = inSampleSize
+        options.inJustDecodeBounds = false
+        val imageBitmap: Bitmap?
+        if(uri != null) {
+            // Retrieving the bitmap from given uri
+            val inputStream = activity!!.contentResolver.openInputStream(uri)
+            imageBitmap = BitmapFactory.decodeStream(inputStream, null, options)
+        }else{
+            // Retrieving the bitmap from given file path
+            imageBitmap = BitmapFactory.decodeFile(filePath, options)
+            if(filePath != null) {
+                val file = File(filePath)
+                if (file.exists())
+                    file.delete()
+            }
+        }
+
+        Log.d(TAG, "Saving...")
+        // Saving the bitmap to given path
+        if(imageBitmap != null)
+            saveBitmap(imageBitmap, destinationPath)
+    }
+
+    private fun insertImageInDatabase(photoUri: Uri?, filePath: String?){
+        Log.d(TAG, "Insert image in database")
+        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
+        val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        GlobalScope.launch(Dispatchers.IO) {
+            val imageData = databaseViewModel.insertImage()
+            withContext(Dispatchers.Main){
+                loadImage(imageData)
+            }
+            loadBitmap(photoUri, filePath, imageData.imagePath)
+            withContext(Dispatchers.Main){
+                // Notify the changes to the view
+                mainViewModel.setRefreshImagesList(true)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
+                Log.d(TAG, "Image picker")
+                val photoUri: Uri? = data?.data
+                if(photoUri != null)
+                    insertImageInDatabase(photoUri, null)
+                else
+                    Toast.makeText(context, "Can't access storage", LENGTH_SHORT).show()
+            } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
+                if (mainViewModel.getCurrentPhotoPath() != null) {
+                    val photoFile = File(mainViewModel.getCurrentPhotoPath()!!)
+                    if (photoFile.exists())
+                        insertImageInDatabase(null, photoFile.absolutePath)
+                    else
+                        Toast.makeText(context, "Error in retrieving image", LENGTH_SHORT).show()
                 }
             }
         }

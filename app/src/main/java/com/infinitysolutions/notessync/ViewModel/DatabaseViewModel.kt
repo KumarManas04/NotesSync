@@ -6,10 +6,14 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.lifecycle.*
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.gson.Gson
+import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_DELETED
@@ -27,6 +31,7 @@ import com.infinitysolutions.notessync.Model.*
 import com.infinitysolutions.notessync.Repository.NotesRepository
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -144,6 +149,17 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun insertImage(): ImageData{
+        Log.d("DBVM", "Insert Image called")
+        val path = getApplication<Application>().applicationContext.filesDir.toString()
+
+        val time = Calendar.getInstance().timeInMillis
+        val file = File(path, "$time.jpg")
+        val imageData = ImageData(null, file.absolutePath, time, time, null)
+        imageData.imageId = imagesDao.insert(imageData)
+        return imageData
+    }
+
     fun insertImage(imageBitmap: Bitmap): ImageData {
         val path = getApplication<Application>().applicationContext.filesDir.toString()
 
@@ -188,12 +204,21 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun deleteNote(note: Note) {
-        if (note.noteType == IMAGE_TRASH || note.noteType == IMAGE_LIST_TRASH) {
+        val prefs = getApplication<Application>().applicationContext.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        val isLoggedIn = prefs != null && prefs.contains(Contract.PREF_CLOUD_TYPE)
+        val noteType = if (note.noteType == IMAGE_TRASH || note.noteType == IMAGE_LIST_TRASH) {
             val imageNoteContent = Gson().fromJson(note.noteContent, ImageNoteContent::class.java)
             deleteImagesByIds(imageNoteContent.idList)
-            changeNoteType(note, IMAGE_DELETED)
-        } else if (note.noteType == NOTE_TRASH || note.noteType == LIST_TRASH) {
-            changeNoteType(note, NOTE_DELETED)
+            IMAGE_DELETED
+        } else {
+            NOTE_DELETED
+        }
+        if(isLoggedIn)
+            changeNoteType(note, noteType)
+        else {
+            viewModelScope.launch(Dispatchers.IO) {
+                notesDao.deleteNoteById(note.nId!!)
+            }
         }
     }
 

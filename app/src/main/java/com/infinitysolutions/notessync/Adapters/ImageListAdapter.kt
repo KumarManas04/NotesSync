@@ -1,6 +1,7 @@
 package com.infinitysolutions.notessync.Adapters
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,10 +22,17 @@ class ImageListAdapter(val context: Context, val list: ArrayList<ImageData>, pri
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        Glide.with(context).load(File(list[position].imagePath)).into(holder.imageView)
-        holder.imageView.setOnClickListener {
-            mainViewModel.setImagesList(list)
-            mainViewModel.setOpenImageView(position)
+        val file = File(list[position].imagePath)
+        if(file.exists()) {
+            Log.d("", "File exists")
+            Glide.with(context).load(file).into(holder.imageView)
+            holder.imageView.setOnClickListener {
+                mainViewModel.setImagesList(list)
+                mainViewModel.setOpenImageView(position)
+            }
+        }else{
+            Log.d("", "File doesn't exists")
+            Glide.with(context).load(R.drawable.image_placeholder).into(holder.imageView)
         }
     }
 
