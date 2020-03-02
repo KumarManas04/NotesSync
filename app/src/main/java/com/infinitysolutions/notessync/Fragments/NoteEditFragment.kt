@@ -335,7 +335,7 @@ class NoteEditFragment : Fragment() {
                         .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                             WorkSchedulerHelper().cancelReminderByNoteId(selectedNote.nId, context!!)
                             mainViewModel.reminderTime = -1L
-                            dialog.hide()
+                            dialog.dismiss()
                         }
                         .setNegativeButton(getString(R.string.no), null)
                         .show()
@@ -357,7 +357,7 @@ class NoteEditFragment : Fragment() {
             }
 
             dialogView.reminder_button.setOnClickListener {
-                dialog.hide()
+                dialog.dismiss()
                 pickReminderTime(selectedNote.nId)
             }
 
@@ -372,17 +372,17 @@ class NoteEditFragment : Fragment() {
         }
 
         dialogView.camera_button.setOnClickListener {
-            dialog.hide()
+            dialog.dismiss()
             openCamera()
         }
 
         dialogView.pick_image_button.setOnClickListener {
-            dialog.hide()
+            dialog.dismiss()
             openPickImage()
         }
 
         dialogView.checklist_button.setOnClickListener {
-            dialog.hide()
+            dialog.dismiss()
             convertChecklist()
         }
 
@@ -430,12 +430,12 @@ class NoteEditFragment : Fragment() {
         val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
 
         dialogView.share_button.setOnClickListener {
-            dialog.hide()
+            dialog.dismiss()
             shareNote()
         }
 
         dialogView.delete_button.setOnClickListener {
-            dialog.hide()
+            dialog.dismiss()
             deleteNote()
         }
 
@@ -447,7 +447,7 @@ class NoteEditFragment : Fragment() {
                     .setMessage("Discard all changes to the note? Deleted images won't be restored.")
                     .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
                         discardChanges(note)
-                        dialog.hide()
+                        dialog.dismiss()
                     }
                     .setNegativeButton(getString(R.string.no), null)
                     .setCancelable(true)
@@ -457,7 +457,7 @@ class NoteEditFragment : Fragment() {
 
         dialogView.make_copy_button.setOnClickListener {
             databaseViewModel.makeCopy(mainViewModel.getSelectedNote(), mainViewModel.noteType, noteTitle.text.toString(), getNoteText())
-            dialog.hide()
+            dialog.dismiss()
             Toast.makeText(context, getString(R.string.toast_copy_done), LENGTH_SHORT).show()
         }
 

@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import com.infinitysolutions.notessync.BuildConfig
 import kotlinx.android.synthetic.main.fragment_about.view.*
@@ -18,7 +19,7 @@ import kotlinx.android.synthetic.main.fragment_settings.view.toolbar
 
 class AboutFragment : Fragment() {
 
-    override fun onCreateView(
+    override fun onCreateView   (
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,7 +39,7 @@ class AboutFragment : Fragment() {
         toolbar.setNavigationOnClickListener {
             activity?.onBackPressed()
         }
-        rootView.app_version.text = BuildConfig.VERSION_NAME+" ("+BuildConfig.VERSION_CODE+")"
+        rootView.app_version.text = "${BuildConfig.VERSION_NAME}"
         rootView.rate_button.setOnClickListener {
             openLink("https://play.google.com/store/apps/details?id=com.infinitysolutions.notessync")
         }
@@ -64,8 +65,8 @@ class AboutFragment : Fragment() {
         rootView.changelog_button.setOnClickListener {
             AlertDialog.Builder(context)
                 .setTitle(getString(com.infinitysolutions.notessync.R.string.changelog))
-                .setMessage(Html.fromHtml(getString(com.infinitysolutions.notessync.R.string.changelog_details)
-                , Html.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM))
+                .setMessage(HtmlCompat.fromHtml(getString(com.infinitysolutions.notessync.R.string.changelog_details)
+                , HtmlCompat.FROM_HTML_MODE_LEGACY))
                 .setPositiveButton( getString(com.infinitysolutions.notessync.R.string.close), null)
                 .show()
         }

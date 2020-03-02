@@ -155,12 +155,15 @@
     <string name="encryption_warning_exit">Encryption process should not be interrupted. It may cause loss of data. Exit anyway?</string>
     <string name="cancel_reminder">Cancel reminder</string>
     <string name="cancel_reminder_question">Are you sure you want to cancel the reminder?</string>
-    <string name="changelog_details"><![CDATA[<html><b>VERSION 2.0 JANUARY 20, 2020</b><li>Add images to any note</li><li>Added compact view mode</li><li>Added make a copy option</li><li>Share images to and from Notes Sync</li><li>Added option to empty trash</li><li>Changed app icon</li><li>Fixed syncing error\n -</li><li>Auto-Sync now works instantly</li><li>Fixed a lot of bugs</li><li>Performance improvements</li>
+    <string name="changelog_details"><![CDATA[<html>
+<b>VERSION 2.1 MARCH 3, 2020</b><li>Added option to discard changes</li><li>Added option to convert note to checklist and vice-versa</li><li>UI improvements</li><li>Fix problem with adding image</li><li>Now images load instantly</li><li>Option to select no. of lines in note preview</li><li>Option to move checked item to bottom</li><li>Fixed widget view</li><li>Performance improvements</li>
+<b>VERSION 2.0 JANUARY 20, 2020</b><li>Add images to any note</li><li>Added compact view mode</li><li>Added make a copy option</li><li>Share images to and from Notes Sync</li><li>Added option to empty trash</li><li>Changed app icon</li><li>Fixed syncing error\n</li><li>Auto-Sync now works instantly</li><li>Fixed a lot of bugs</li><li>Performance improvements</li>
 <b>VERSION 1.7 SEPTEMBER 6, 2019</b><li>Fixed issue with title not shown in some notes in widget</li>
 <b>VERSION 1.6 SEPTEMBER 4, 2019</b><li>Added AMOLED Theme</li><li>Fixed bugs</li><li>Added colored notes to widget</li><li>Improved widget performance</li><li>Added drag and drop in Todo list</li><li>Checked items move to the bottom</li>
 <b>VERSION 1.5 AUGUST 4, 2019</b><li>Added encrypted sync</li><li>Added app lock</li><li>More efficient auto sync</li>
 <b>VERSION 1.3 JULY 25, 2019</b><li>Reduced size</li>
 <b>VERSION 1.2 JULY 25,2019</b><li>Improved Performance</li>
 <b>VERSION 1.1 JULY 24,2019</b><li>Added widget</li>
-<b>VERSION 1.0  JULY 23,2019</b><li>Initial release</li></html>]]></string>
+<b>VERSION 1.0  JULY 23,2019</b><li>Initial release</li>
+</html>]]></string>
 </resources>
