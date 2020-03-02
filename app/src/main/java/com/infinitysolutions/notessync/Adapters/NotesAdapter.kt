@@ -2,6 +2,7 @@ package com.infinitysolutions.notessync.Adapters
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -36,6 +37,8 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_MAX_PREVIEW_LINES
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Model.ImageNoteContent
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
@@ -55,6 +58,12 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
     private val colorsUtil = ColorsUtil()
     private val pathsMap = SparseArray<String>()
     private val TAG = "NotesAdapter"
+    private val maxLinesCount: Int
+
+    init {
+        val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        maxLinesCount = prefs.getInt(PREF_MAX_PREVIEW_LINES, Integer.MAX_VALUE)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(context).inflate(R.layout.notes_list_item, parent, false)
@@ -62,6 +71,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.contentTextView.maxLines = maxLinesCount
         holder.titleTextView.visibility = if (items[position].noteTitle!!.isEmpty())
             GONE
         else

@@ -2,6 +2,7 @@ package com.infinitysolutions.notessync.Fragments
 
 
 import android.app.AlertDialog
+import android.app.Dialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context.MODE_PRIVATE
@@ -30,6 +31,8 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_APP_LOCK_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_MAX_PREVIEW_LINES
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_MOVE_CHECKED_TO_BOTTOM
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.STATE_CHANGE_PIN
@@ -99,6 +102,10 @@ class SettingsFragment : Fragment() {
             openLink("https://github.com/KumarManas04/NotesSync")
         }
 
+        configureMaxLinesButton(rootView, prefs)
+
+        configureChecklistMoveButton(rootView, prefs)
+
         val loginStatus = getLoginStatus(prefs)
         if (loginStatus != -1) {
             if (loginStatus == CLOUD_DROPBOX) {
@@ -136,6 +143,49 @@ class SettingsFragment : Fragment() {
             configureChangePassButton(rootView)
         } else {
             resetLoginButton(rootView)
+        }
+    }
+
+    private fun configureMaxLinesButton(rootView: View, prefs: SharedPreferences){
+        val linesCount = prefs.getInt(PREF_MAX_PREVIEW_LINES, -1)
+        if(linesCount == -1)
+            rootView.preview_lines_count_text.text = "MAX Lines"
+        else
+            rootView.preview_lines_count_text.text = "$linesCount Lines"
+
+        rootView.preview_lines_count_button.setOnClickListener {
+            val content = arrayOf("2 Lines", "3 Lines", "4 Lines", "5 Lines", "MAX Lines")
+            val optionsDialog = AlertDialog.Builder(activity)
+            optionsDialog.setTitle("Pick number of lines")
+            optionsDialog.setItems(content) { _, which ->
+                val editor = prefs.edit()
+                when(which){
+                    0 -> editor.putInt(PREF_MAX_PREVIEW_LINES, 2)
+                    1 -> editor.putInt(PREF_MAX_PREVIEW_LINES, 3)
+                    2 -> editor.putInt(PREF_MAX_PREVIEW_LINES, 4)
+                    3 -> editor.putInt(PREF_MAX_PREVIEW_LINES, 5)
+                    4 -> editor.putInt(PREF_MAX_PREVIEW_LINES, Integer.MAX_VALUE)
+                }
+                editor.apply()
+                rootView.preview_lines_count_text.text = content[which]
+            }
+            optionsDialog.show()
+        }
+    }
+
+    private fun configureChecklistMoveButton(rootView: View, prefs: SharedPreferences){
+        rootView.move_bottom_toggle.isChecked = prefs.getBoolean(PREF_MOVE_CHECKED_TO_BOTTOM, true)
+
+        rootView.move_bottom_button.setOnClickListener {
+            rootView.move_bottom_toggle.toggle()
+        }
+
+        rootView.move_bottom_toggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked){
+                prefs.edit().putBoolean(PREF_MOVE_CHECKED_TO_BOTTOM, true).apply()
+            }else{
+                prefs.edit().putBoolean(PREF_MOVE_CHECKED_TO_BOTTOM, false).apply()
+            }
         }
     }
 

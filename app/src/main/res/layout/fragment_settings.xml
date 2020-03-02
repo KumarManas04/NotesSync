@@ -101,6 +101,68 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/preview_lines_count_button"
+                style="@style/prefsContainer">
+
+                <ImageView
+                    android:src="@drawable/lines_count_icon"
+                    style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                        android:text="Number of lines in preview"
+                        style="@style/prefsMain"/>
+
+                    <TextView
+                        android:text="Number of lines in the preview of a note's content"
+                        style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/preview_lines_count_text"
+                    android:layout_margin="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+            <TextView
+                android:text="Checklist"
+                style="@style/prefsCategoryTitle"/>
+
+            <LinearLayout
+                android:id="@+id/move_bottom_button"
+                style="@style/prefsContainer">
+
+                <ImageView
+                    android:src="@drawable/move_checked_bottom_icon"
+                    style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                        android:text="Move checked to the bottom"
+                        style="@style/prefsMain"/>
+
+                    <TextView
+                        android:text="Move checked item in the checklist to the bottom of the list"
+                        style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/move_bottom_toggle"
+                    android:layout_margin="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
             <TextView
                     android:text="@string/app_lock"
                     style="@style/prefsCategoryTitle"/>

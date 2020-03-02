@@ -65,5 +65,7 @@ class Contract{
         const val TYPE_IMAGE = 0
         const val PREF_FILESYSTEM_STASH = "sharedPrefs.filesystemStash"
         const val PREF_IMAGE_FILESYSTEM_STASH = "sharedPrefs.imageFilesystemStash"
+        const val PREF_MOVE_CHECKED_TO_BOTTOM = "sharedPrefs.moveCheckedToBottom"
+        const val PREF_MAX_PREVIEW_LINES = "sharedPrefs.maxPreviewLines"
     }
 }

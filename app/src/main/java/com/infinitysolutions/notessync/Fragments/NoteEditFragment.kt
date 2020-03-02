@@ -4,6 +4,7 @@ package com.infinitysolutions.notessync.Fragments
 import android.Manifest
 import android.app.*
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -55,6 +56,8 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_MOVE_CHECKED_TO_BOTTOM
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Model.ImageData
 import com.infinitysolutions.notessync.Model.ImageNoteContent
 import com.infinitysolutions.notessync.Model.Note
@@ -108,7 +111,12 @@ class NoteEditFragment : Fragment() {
 
         noteTitle = rootView.note_title
         noteContent = rootView.note_content
+
         checklistView = rootView.checklist_view
+        val prefs = context!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        val shouldMoveToBottom = prefs.getBoolean(PREF_MOVE_CHECKED_TO_BOTTOM, true)
+        checklistView.moveCheckedToBottom(shouldMoveToBottom)
+
         imageRecyclerView = rootView.images_recycler_view
         imageRecyclerView.layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
 
@@ -125,8 +133,8 @@ class NoteEditFragment : Fragment() {
         })
 
         mainViewModel.getRefreshImagesList().observe(this, androidx.lifecycle.Observer {
-            it.getContentIfNotHandled()?.let {
-                if(it){
+            it.getContentIfNotHandled()?.let { shouldRefresh ->
+                if(shouldRefresh){
                     val adapter: ImageListAdapter? = (imageRecyclerView.adapter as ImageListAdapter)
                     adapter?.notifyDataSetChanged()
                 }
