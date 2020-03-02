@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.infinitysolutions.notessync.BuildConfig
-import kotlinx.android.synthetic.main.fragment_about.*
 import kotlinx.android.synthetic.main.fragment_about.view.*
 import kotlinx.android.synthetic.main.fragment_settings.view.toolbar
 
@@ -39,7 +38,7 @@ class AboutFragment : Fragment() {
         toolbar.setNavigationOnClickListener {
             activity?.onBackPressed()
         }
-        rootView.app_version.setText(BuildConfig.VERSION_NAME+" ("+BuildConfig.VERSION_CODE+")")
+        rootView.app_version.text = BuildConfig.VERSION_NAME+" ("+BuildConfig.VERSION_CODE+")"
         rootView.rate_button.setOnClickListener {
             openLink("https://play.google.com/store/apps/details?id=com.infinitysolutions.notessync")
         }

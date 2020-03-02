@@ -44,7 +44,7 @@ class AppLockFragment : Fragment() {
             initEntryPin(rootView)
         }
 
-        passCode.observe(this, Observer { code ->
+        passCode.observe(viewLifecycleOwner, Observer { code ->
             when (code.length) {
                 0 -> {
                     rootView.indicator_1.setImageResource(R.drawable.circle_stroke)

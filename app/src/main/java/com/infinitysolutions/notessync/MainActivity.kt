@@ -6,7 +6,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -16,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SYNC_QUEUE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
@@ -51,7 +50,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initDataBinding() {
-        val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        val mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
         mainViewModel.getSyncNotes().observe(this, Observer {
             it.getContentIfNotHandled()?.let {
@@ -110,7 +109,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepareNavDrawer() {
-        val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        val mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         val index = mainViewModel.getViewMode().value
         if (index != null)
             navigation_view.menu[index - 1].isChecked = true
@@ -203,7 +202,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        val mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         mainViewModel.intent = null
         super.onDestroy()
     }

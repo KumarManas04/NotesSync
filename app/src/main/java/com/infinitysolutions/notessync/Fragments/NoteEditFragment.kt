@@ -33,7 +33,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
@@ -82,6 +82,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class NoteEditFragment : Fragment() {
@@ -109,8 +110,8 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun initDataBinding(rootView: View) {
-        databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
-        mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        databaseViewModel = ViewModelProvider(activity!!).get(DatabaseViewModel::class.java)
+        mainViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
 
         noteTitle = rootView.note_title
         noteContent = rootView.note_content
@@ -123,19 +124,19 @@ class NoteEditFragment : Fragment() {
         imageRecyclerView = rootView.images_recycler_view
         imageRecyclerView.layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
 
-        mainViewModel.getSelectedColor().observe(this, androidx.lifecycle.Observer { selectedColor ->
+        mainViewModel.getSelectedColor().observe(viewLifecycleOwner, androidx.lifecycle.Observer { selectedColor ->
                 noteTitle.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
                 rootView.last_edited_text.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
         })
 
-        mainViewModel.getOpenImageView().observe(this, androidx.lifecycle.Observer {
+        mainViewModel.getOpenImageView().observe(viewLifecycleOwner, androidx.lifecycle.Observer {
             it.getContentIfNotHandled()?.let { imagePosition ->
                 val bundle = bundleOf("currentPosition" to imagePosition)
                 findNavController(this).navigate(R.id.action_noteEditFragment_to_imageGalleryFragment, bundle)
             }
         })
 
-        mainViewModel.getRefreshImagesList().observe(this, androidx.lifecycle.Observer {
+        mainViewModel.getRefreshImagesList().observe(viewLifecycleOwner, androidx.lifecycle.Observer {
             it.getContentIfNotHandled()?.let { shouldRefresh ->
                 if(shouldRefresh){
                     val adapter: ImageListAdapter? = (imageRecyclerView.adapter as ImageListAdapter)
@@ -690,20 +691,24 @@ class NoteEditFragment : Fragment() {
                     )
                 }
             } else {
-                databaseViewModel.insert(
-                    Note(
-                        selectedNote.nId,
-                        noteTitle.text.toString(),
-                        content,
-                        selectedNote.dateCreated,
-                        timeModified,
-                        selectedNote.gDriveId,
-                        mainViewModel.noteType!!,
-                        selectedNote.synced,
-                        mainViewModel.getSelectedColor().value,
-                        mainViewModel.reminderTime
+                if(content.isEmpty() && noteTitle.text.isEmpty()){
+                    databaseViewModel.deleteNote(selectedNote)
+                }else {
+                    databaseViewModel.insert(
+                        Note(
+                            selectedNote.nId,
+                            noteTitle.text.toString(),
+                            content,
+                            selectedNote.dateCreated,
+                            timeModified,
+                            selectedNote.gDriveId,
+                            mainViewModel.noteType!!,
+                            selectedNote.synced,
+                            mainViewModel.getSelectedColor().value,
+                            mainViewModel.reminderTime
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -716,6 +721,13 @@ class NoteEditFragment : Fragment() {
                 val selectedNote = mainViewModel.getSelectedNote()
                 if (selectedNote?.nId == -1L) {
                     mainViewModel.setSelectedNote(null)
+                    if(isImageType(selectedNote.noteType)){
+                        val idsList = ArrayList<Long>()
+                        for(imageData in mainViewModel.getImagesList())
+                            idsList.add(imageData.imageId!!)
+                        databaseViewModel.deleteImagesByIds(idsList)
+                        mainViewModel.setImagesList(null)
+                    }
                 } else {
                     if (selectedNote != null) {
                         val noteType = when(mainViewModel.noteType){
@@ -1004,8 +1016,8 @@ class NoteEditFragment : Fragment() {
 
     private fun insertImageInDatabase(photoUri: Uri?, filePath: String?){
         Log.d(TAG, "Insert image in database")
-        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
-        val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        val databaseViewModel = ViewModelProvider(activity!!).get(DatabaseViewModel::class.java)
+        val mainViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
         GlobalScope.launch(Dispatchers.IO) {
             val imageData = databaseViewModel.insertImage()
             withContext(Dispatchers.Main){

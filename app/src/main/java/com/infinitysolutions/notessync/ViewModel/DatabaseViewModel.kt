@@ -6,12 +6,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.lifecycle.*
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_ARCHIVED
@@ -21,9 +19,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_A
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SYNC_QUEUE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Fragments.NotesWidget
@@ -31,12 +27,10 @@ import com.infinitysolutions.notessync.Model.*
 import com.infinitysolutions.notessync.Repository.NotesRepository
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -160,7 +154,7 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         return imageData
     }
 
-    fun insertImage(imageBitmap: Bitmap): ImageData {
+    private fun insertImage(imageBitmap: Bitmap): ImageData {
         val path = getApplication<Application>().applicationContext.filesDir.toString()
 
         val time = Calendar.getInstance().timeInMillis
@@ -187,15 +181,13 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun deleteImage(id: Long, path: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val file = File(path)
-            if (file.exists())
-                file.delete()
-            imagesDao.deleteImageById(id)
-        }
+        val file = File(path)
+        if (file.exists())
+            file.delete()
+        imagesDao.deleteImageById(id)
     }
 
-    private fun deleteImagesByIds(idList: ArrayList<Long>) {
+    fun deleteImagesByIds(idList: ArrayList<Long>) {
         viewModelScope.launch(Dispatchers.IO) {
             val images = getImagesByIds(idList)
             for (image in images)
