@@ -12,7 +12,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -40,8 +40,8 @@ class SearchFragment : Fragment() {
     }
 
     private fun initDataBinding(rootView: View){
-        val databaseViewModel = ViewModelProvider(activity!!).get(DatabaseViewModel::class.java)
-        val mainViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
+        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
+        val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
         rootView.search_edit_text.addTextChangedListener {
             databaseViewModel.setSearchQuery("%${it.toString()}%")
@@ -53,7 +53,7 @@ class SearchFragment : Fragment() {
             imm.showSoftInput(rootView.search_edit_text, 0)
         }, 50)
 
-        databaseViewModel.searchResultList.observe(viewLifecycleOwner, Observer {resultList->
+        databaseViewModel.searchResultList.observe(this, Observer {resultList->
             if(resultList != null && resultList.isNotEmpty()){
                 searchRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE
@@ -64,7 +64,7 @@ class SearchFragment : Fragment() {
             }
         })
 
-        mainViewModel.getShouldOpenEditor().observe(viewLifecycleOwner, Observer {should ->
+        mainViewModel.getShouldOpenEditor().observe(this, Observer {should ->
             if(should){
                 // If we don't put the navigation statement in try-catch block then app crashes due to unable to
                 // find navController. This is an issue in the Navigation components in Jetpack

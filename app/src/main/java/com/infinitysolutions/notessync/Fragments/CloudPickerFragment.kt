@@ -10,7 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.dropbox.core.android.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -37,7 +37,7 @@ class CloudPickerFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_cloud_picker, container, false)
 
-        mainViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
         rootView.g_drive.setOnClickListener {
             val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)

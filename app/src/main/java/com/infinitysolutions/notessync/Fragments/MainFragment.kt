@@ -31,7 +31,7 @@ import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -87,8 +87,8 @@ class MainFragment : Fragment() {
     }
 
     private fun initDataBinding(rootView: View) {
-        val databaseViewModel = ViewModelProvider(activity!!).get(DatabaseViewModel::class.java)
-        mainViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
+        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
         val toolbar = rootView.toolbar
         toolbar.title = "All"
@@ -198,7 +198,7 @@ class MainFragment : Fragment() {
             )
         }
 
-        mainViewModel.getViewMode().observe(viewLifecycleOwner, Observer { mode ->
+        mainViewModel.getViewMode().observe(this, Observer { mode ->
             if (mode != null) {
                 when (mode) {
                     1 -> {
@@ -226,7 +226,7 @@ class MainFragment : Fragment() {
             }
         })
 
-        databaseViewModel.viewList.observe(viewLifecycleOwner, Observer { viewList ->
+        databaseViewModel.viewList.observe(this, Observer { viewList ->
             if (viewList != null && viewList.isNotEmpty()) {
                 notesRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE
@@ -238,7 +238,7 @@ class MainFragment : Fragment() {
             }
         })
 
-        mainViewModel.getShouldOpenEditor().observe(viewLifecycleOwner, Observer { should ->
+        mainViewModel.getShouldOpenEditor().observe(this, Observer { should ->
             if (should != null) {
                 if (should) {
                     // If we don't put the navigation statement in try-catch block then app crashes due to unable to
@@ -485,8 +485,8 @@ class MainFragment : Fragment() {
 
     private fun insertImageInDatabase(photoUri: Uri?, filePath: String?){
         Log.d(TAG, "Insert image in database")
-        val databaseViewModel = ViewModelProvider(activity!!).get(DatabaseViewModel::class.java)
-        val mainViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
+        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
+        val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
         GlobalScope.launch(Dispatchers.IO) {
             val imageData = databaseViewModel.insertImage()
             withContext(Dispatchers.Main){

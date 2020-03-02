@@ -12,7 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
@@ -37,8 +37,8 @@ class ImageGalleryFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_image_gallery, container, false)
-        val mainViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
-        val databaseViewModel = ViewModelProvider(activity!!).get(DatabaseViewModel::class.java)
+        val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
 
         viewPager = rootView.view_pager
         val galleryAdapter = GalleryAdapter(

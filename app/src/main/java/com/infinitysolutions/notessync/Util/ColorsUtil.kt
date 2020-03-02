@@ -9,11 +9,12 @@ class ColorsUtil {
         "#607D8B",// 4
         "#009688",// 5
         "#E91E63",// 6
-        "#795548" // 7
+        "#795548",// 7
+        "#263238" //8
     )
 
     fun getColor(position: Int?): String {
-        if (position == null || position > 7)
+        if (position == null || position > 8)
             return colorsList[0]
         return colorsList[position]
     }

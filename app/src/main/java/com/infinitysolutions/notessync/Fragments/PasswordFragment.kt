@@ -15,7 +15,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.http.OkHttp3Requestor
 import com.dropbox.core.v2.DbxClientV2
@@ -119,7 +119,7 @@ class PasswordFragment : Fragment() {
                         .setTitle(getString(R.string.warning))
                         .setMessage(getString(R.string.encryption_warning))
                         .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
-                            val mainViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
+                            val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
                             mainViewModel.setExitBlocked(true)
                             loginViewModel.secureCloudData(
                                 userId,
@@ -139,13 +139,13 @@ class PasswordFragment : Fragment() {
     }
 
     private fun initDataBinding(rootView: View, cloudType: Int, userId: String, passwordMode: Int) {
-        loginViewModel = ViewModelProvider(activity!!).get(LoginViewModel::class.java)
+        loginViewModel = ViewModelProviders.of(activity!!).get(LoginViewModel::class.java)
         loginViewModel.setLocalStoragePath(context!!.filesDir.toString())
         if (!loginViewModel.isLoginInitialized)
             initializeLogin(cloudType)
 
         loginViewModel.getLoadingMessage()
-            .observe(viewLifecycleOwner, androidx.lifecycle.Observer { loadingMessage ->
+            .observe(this, androidx.lifecycle.Observer { loadingMessage ->
                 if (loadingMessage != null) {
                     rootView.loading_panel.visibility = VISIBLE
                     rootView.input_bar.visibility = GONE
@@ -158,7 +158,7 @@ class PasswordFragment : Fragment() {
             })
 
         loginViewModel.getEncryptionCheckLoading()
-            .observe(viewLifecycleOwner, androidx.lifecycle.Observer { showLoading ->
+            .observe(this, androidx.lifecycle.Observer { showLoading ->
                 if (showLoading != null) {
                     if (showLoading) {
                         rootView.loading_panel.visibility = VISIBLE
@@ -175,7 +175,7 @@ class PasswordFragment : Fragment() {
             })
 
         loginViewModel.getEncryptionCheckResult()
-            .observe(viewLifecycleOwner, androidx.lifecycle.Observer { encryptionResult ->
+            .observe(this, androidx.lifecycle.Observer { encryptionResult ->
                 if (encryptionResult != null) {
                     when (encryptionResult) {
                         ENCRYPTED_NO -> {
@@ -219,7 +219,7 @@ class PasswordFragment : Fragment() {
             })
 
         loginViewModel.getVerifyPasswordResult()
-            .observe(viewLifecycleOwner, androidx.lifecycle.Observer { result ->
+            .observe(this, androidx.lifecycle.Observer { result ->
                 if (result != null) {
                     when (result) {
                         PASSWORD_VERIFY_INVALID -> {
@@ -242,9 +242,9 @@ class PasswordFragment : Fragment() {
                 }
             })
 
-        loginViewModel.getSecureDataResult().observe(viewLifecycleOwner, androidx.lifecycle.Observer { result ->
+        loginViewModel.getSecureDataResult().observe(this, androidx.lifecycle.Observer { result ->
             if (result != null) {
-                val mainViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
+                val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
                 mainViewModel.setExitBlocked(false)
                 if (result) {
                     Toast.makeText(activity, getString(R.string.toast_success), LENGTH_SHORT).show()
@@ -258,7 +258,7 @@ class PasswordFragment : Fragment() {
         })
 
         loginViewModel.getChangePasswordResult()
-            .observe(viewLifecycleOwner, androidx.lifecycle.Observer { result ->
+            .observe(this, androidx.lifecycle.Observer { result ->
                 if (result != null) {
                     when (result) {
                         PASSWORD_CHANGE_OLD_INVALID -> {
