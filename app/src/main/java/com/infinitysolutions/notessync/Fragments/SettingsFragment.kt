@@ -2,7 +2,6 @@ package com.infinitysolutions.notessync.Fragments
 
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context.MODE_PRIVATE

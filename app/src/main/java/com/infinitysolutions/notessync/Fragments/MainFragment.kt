@@ -10,6 +10,8 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -33,6 +35,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
@@ -326,10 +329,10 @@ class MainFragment : Fragment() {
                         Toast.makeText(
                             context,
                             "Couldn't access file system",
-                            Toast.LENGTH_SHORT
+                            LENGTH_SHORT
                         ).show()
                 } else {
-                    Toast.makeText(context, getString(R.string.toast_no_camera_app), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.toast_no_camera_app), LENGTH_SHORT).show()
                 }
                 true
             }
@@ -385,6 +388,37 @@ class MainFragment : Fragment() {
         imageBitmap.recycle()
     }
 
+    private fun exifRotateBitmap(filePath: String?, bitmap: Bitmap): Bitmap{
+        val exif = ExifInterface(filePath!!)
+        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
+        Log.d(TAG, "Orientation = $orientation")
+        val matrix = Matrix()
+
+        when(orientation){
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1F, 1F)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180F)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> {
+                matrix.setRotate(180F)
+                matrix.postScale(-1F, 1F)
+            }
+            ExifInterface.ORIENTATION_TRANSPOSE -> {
+                matrix.setRotate(90F)
+                matrix.postScale(-1F, 1F)
+            }
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90F)
+            ExifInterface.ORIENTATION_TRANSVERSE -> {
+                matrix.setRotate(-90F)
+                matrix.postScale(-1F, 1F)
+            }
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(-90F)
+            else -> return bitmap
+        }
+
+        val result = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        bitmap.recycle()
+        return result
+    }
+
     private fun loadBitmap(uri: Uri?, filePath: String?, destinationPath: String) {
         Log.d(TAG, "Load bitmap called.")
         val options = BitmapFactory.Options()
@@ -398,6 +432,7 @@ class MainFragment : Fragment() {
 
         var width = options.outWidth
         var height = options.outHeight
+        Log.d(TAG, "width = $width , height = $height")
 
         var inSampleSize = 1
         if(width > 1000 || height > 1000) {
@@ -410,14 +445,18 @@ class MainFragment : Fragment() {
         Log.d(TAG, "Measuring done")
         options.inSampleSize = inSampleSize
         options.inJustDecodeBounds = false
-        val imageBitmap: Bitmap?
+        var imageBitmap: Bitmap?
         if(uri != null) {
             // Retrieving the bitmap from given uri
-            val inputStream = activity!!.contentResolver.openInputStream(uri)
-            imageBitmap = BitmapFactory.decodeStream(inputStream, null, options)
+            imageBitmap = Glide.with(context!!)
+                .asBitmap()
+                .load(uri)
+                .submit(width, height)
+                .get()
         }else{
             // Retrieving the bitmap from given file path
             imageBitmap = BitmapFactory.decodeFile(filePath, options)
+            imageBitmap = exifRotateBitmap(filePath, imageBitmap)
             if(filePath != null) {
                 val file = File(filePath)
                 if (file.exists())
@@ -469,14 +508,14 @@ class MainFragment : Fragment() {
                 if(photoUri != null)
                     insertImageInDatabase(photoUri, null)
                 else
-                    Toast.makeText(context, "Can't access storage", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Can't access storage", LENGTH_SHORT).show()
             } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
                 if (mainViewModel.getCurrentPhotoPath() != null) {
                     val photoFile = File(mainViewModel.getCurrentPhotoPath()!!)
                     if (photoFile.exists())
                         insertImageInDatabase(null, photoFile.absolutePath)
                     else
-                        Toast.makeText(context, "Error in retrieving image", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Error in retrieving image", LENGTH_SHORT).show()
                 }
             }
         }

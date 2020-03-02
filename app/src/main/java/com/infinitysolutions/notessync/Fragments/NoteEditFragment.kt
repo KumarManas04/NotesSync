@@ -11,6 +11,8 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -36,6 +38,7 @@ import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.infinitysolutions.checklistview.ChecklistView
@@ -918,6 +921,37 @@ class NoteEditFragment : Fragment() {
         imageBitmap.recycle()
     }
 
+    private fun exifRotateBitmap(filePath: String?, bitmap: Bitmap): Bitmap{
+        val exif = ExifInterface(filePath!!)
+        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
+        Log.d(TAG, "Orientation = $orientation")
+        val matrix = Matrix()
+
+        when(orientation){
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1F, 1F)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180F)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> {
+                matrix.setRotate(180F)
+                matrix.postScale(-1F, 1F)
+            }
+            ExifInterface.ORIENTATION_TRANSPOSE -> {
+                matrix.setRotate(90F)
+                matrix.postScale(-1F, 1F)
+            }
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90F)
+            ExifInterface.ORIENTATION_TRANSVERSE -> {
+                matrix.setRotate(-90F)
+                matrix.postScale(-1F, 1F)
+            }
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(-90F)
+            else -> return bitmap
+        }
+
+        val result = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        bitmap.recycle()
+        return result
+    }
+
     private fun loadBitmap(uri: Uri?, filePath: String?, destinationPath: String) {
         Log.d(TAG, "Load bitmap called.")
         val options = BitmapFactory.Options()
@@ -943,14 +977,18 @@ class NoteEditFragment : Fragment() {
         Log.d(TAG, "Measuring done")
         options.inSampleSize = inSampleSize
         options.inJustDecodeBounds = false
-        val imageBitmap: Bitmap?
+        var imageBitmap: Bitmap?
         if(uri != null) {
             // Retrieving the bitmap from given uri
-            val inputStream = activity!!.contentResolver.openInputStream(uri)
-            imageBitmap = BitmapFactory.decodeStream(inputStream, null, options)
+            imageBitmap = Glide.with(context!!)
+                .asBitmap()
+                .load(uri)
+                .submit(width, height)
+                .get()
         }else{
             // Retrieving the bitmap from given file path
             imageBitmap = BitmapFactory.decodeFile(filePath, options)
+            imageBitmap = exifRotateBitmap(filePath, imageBitmap)
             if(filePath != null) {
                 val file = File(filePath)
                 if (file.exists())
