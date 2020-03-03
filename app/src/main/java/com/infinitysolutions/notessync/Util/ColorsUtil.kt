@@ -10,11 +10,14 @@ class ColorsUtil {
         "#009688",// 5
         "#E91E63",// 6
         "#795548",// 7
-        "#263238" //8
+        "#263238",//8
+        "#3DDC84",//9
+        "#00bcd4",//10
+        "#f44336" //11
     )
 
     fun getColor(position: Int?): String {
-        if (position == null || position > 8)
+        if (position == null || position > getSize())
             return colorsList[0]
         return colorsList[position]
     }

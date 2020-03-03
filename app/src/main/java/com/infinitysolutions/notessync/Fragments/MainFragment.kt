@@ -391,7 +391,6 @@ class MainFragment : Fragment() {
     private fun exifRotateBitmap(filePath: String?, bitmap: Bitmap): Bitmap{
         val exif = ExifInterface(filePath!!)
         val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
-        Log.d(TAG, "Orientation = $orientation")
         val matrix = Matrix()
 
         when(orientation){
@@ -420,7 +419,6 @@ class MainFragment : Fragment() {
     }
 
     private fun loadBitmap(uri: Uri?, filePath: String?, destinationPath: String) {
-        Log.d(TAG, "Load bitmap called.")
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
         if(uri != null) {
@@ -432,7 +430,6 @@ class MainFragment : Fragment() {
 
         var width = options.outWidth
         var height = options.outHeight
-        Log.d(TAG, "width = $width , height = $height")
 
         var inSampleSize = 1
         if(width > 1000 || height > 1000) {
@@ -442,7 +439,6 @@ class MainFragment : Fragment() {
                 inSampleSize *= 2
         }
 
-        Log.d(TAG, "Measuring done")
         options.inSampleSize = inSampleSize
         options.inJustDecodeBounds = false
         var imageBitmap: Bitmap?
@@ -464,7 +460,6 @@ class MainFragment : Fragment() {
             }
         }
 
-        Log.d(TAG, "Saving...")
         // Saving the bitmap to given path
         if(imageBitmap != null)
             saveBitmap(imageBitmap, destinationPath)
@@ -484,7 +479,6 @@ class MainFragment : Fragment() {
     }
 
     private fun insertImageInDatabase(photoUri: Uri?, filePath: String?){
-        Log.d(TAG, "Insert image in database")
         val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
         val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
         GlobalScope.launch(Dispatchers.IO) {
@@ -503,7 +497,6 @@ class MainFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
-                Log.d(TAG, "Image picker")
                 val photoUri: Uri? = data?.data
                 if(photoUri != null)
                     insertImageInDatabase(photoUri, null)
