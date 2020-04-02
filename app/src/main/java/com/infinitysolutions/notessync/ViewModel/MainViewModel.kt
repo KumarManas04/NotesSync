@@ -11,12 +11,13 @@ import com.infinitysolutions.notessync.Util.Event
 
 class MainViewModel: ViewModel(){
     private var selectedNote: Note? = null
+    private val multiSelectCount = MutableLiveData<Int>()
     private val selectedColor = MutableLiveData<Int>()
     private val shouldOpenEditor = MutableLiveData<Boolean>()
     private val syncNotes = MutableLiveData<Event<Int>>()
     private val imagesList = ArrayList<ImageData>()
     private val openImageView = MutableLiveData<Event<Int>>()
-    private val mToolbar = MutableLiveData<Toolbar>()
+    private val mToolbar = MutableLiveData<Toolbar?>()
     private val viewMode = MutableLiveData<Int>()
     private val isExitBlocked = MutableLiveData<Boolean>()
     private val refreshImagesList = MutableLiveData<Event<Boolean>>()
@@ -29,24 +30,16 @@ class MainViewModel: ViewModel(){
         viewMode.value = 1
     }
 
+    fun setMultiSelectCount(value: Int){
+        multiSelectCount.value = value
+    }
+
     fun setRefreshImagesList(value: Boolean){
         refreshImagesList.value = Event(value)
     }
 
-    fun getRefreshImagesList(): LiveData<Event<Boolean>>{
-        return refreshImagesList
-    }
-
     fun setExitBlocked(isBlocked: Boolean){
         isExitBlocked.value = isBlocked
-    }
-
-    fun getIsExitBlocked(): LiveData<Boolean>{
-        return isExitBlocked
-    }
-
-    fun getCurrentPhotoPath(): String?{
-        return currentPhotoPath
     }
 
     fun setCurrentPhotoPath(photoPath: String){
@@ -57,24 +50,12 @@ class MainViewModel: ViewModel(){
         viewMode.value = mode
     }
 
-    fun getViewMode(): LiveData<Int>{
-        return viewMode
-    }
-
-    fun setToolbar(toolbar: Toolbar){
+    fun setToolbar(toolbar: Toolbar?){
         mToolbar.value = toolbar
-    }
-
-    fun getToolbar(): LiveData<Toolbar>{
-        return mToolbar
     }
 
     fun setSelectedNote(note: Note?){
         selectedNote = note
-    }
-
-    fun getSelectedNote(): Note?{
-        return selectedNote
     }
 
     fun setSelectedColor(color: Int?){
@@ -94,16 +75,8 @@ class MainViewModel: ViewModel(){
         shouldOpenEditor.value = shouldOpen
     }
 
-    fun getShouldOpenEditor(): LiveData<Boolean>{
-        return shouldOpenEditor
-    }
-
     fun setSyncNotes(noteType: Int){
         syncNotes.value = Event(noteType)
-    }
-
-    fun getSyncNotes(): LiveData<Event<Int>>{
-        return syncNotes
     }
 
     fun setImagesList(list: ArrayList<ImageData>?){
@@ -117,15 +90,20 @@ class MainViewModel: ViewModel(){
         imagesList.add(image)
     }
 
-    fun getImagesList(): ArrayList<ImageData>{
-        return imagesList
-    }
-
     fun setOpenImageView(imageId: Int){
         openImageView.value = Event(imageId)
     }
 
-    fun getOpenImageView(): LiveData<Event<Int>>{
-        return openImageView
-    }
+    fun getMultiSelectCount(): LiveData<Int> = multiSelectCount
+    fun getRefreshImagesList(): LiveData<Event<Boolean>> = refreshImagesList
+    fun getIsExitBlocked(): LiveData<Boolean> = isExitBlocked
+    fun getCurrentPhotoPath(): String? = currentPhotoPath
+    fun getViewMode(): LiveData<Int> = viewMode
+    fun getToolbar(): LiveData<Toolbar?> = mToolbar
+    fun getSelectedNote(): Note? = selectedNote
+    fun getShouldOpenEditor(): LiveData<Boolean> = shouldOpenEditor
+    fun getSyncNotes(): LiveData<Event<Int>> = syncNotes
+    fun getImagesList(): ArrayList<ImageData> = imagesList
+    fun getOpenImageView(): LiveData<Event<Int>> = openImageView
+
 }

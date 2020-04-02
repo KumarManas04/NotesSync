@@ -86,10 +86,6 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun getNoteById(nId: Long): Note {
-        return notesDao.getNoteById(nId)
-    }
-
     fun makeCopy(note: Note?, noteType: Int?, noteTitle: String, noteContent: String) {
         if(noteType != null && note != null) {
             viewModelScope.launch(Dispatchers.IO) {
@@ -172,14 +168,6 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         return imageData
     }
 
-    fun getImagesByIds(idList: ArrayList<Long>): ArrayList<ImageData> {
-        return ArrayList(imagesDao.getImagesByIds(idList))
-    }
-
-    fun getImagePathById(id: Long): String {
-        return imagesDao.getImagePathById(id)
-    }
-
     fun deleteImage(id: Long, path: String) {
         val file = File(path)
         if (file.exists())
@@ -239,4 +227,8 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
         context.sendBroadcast(intent)
     }
+
+    fun getNoteById(nId: Long): Note = notesDao.getNoteById(nId)
+    fun getImagesByIds(idList: ArrayList<Long>): ArrayList<ImageData> = ArrayList(imagesDao.getImagesByIds(idList))
+    fun getImagePathById(id: Long): String = imagesDao.getImagePathById(id)
 }

@@ -57,30 +57,6 @@ class LoginViewModel : ViewModel() {
         localStoragePath = path
     }
 
-    fun getEncryptionCheckLoading(): LiveData<Boolean> {
-        return encryptionCheckLoading
-    }
-
-    fun getEncryptionCheckResult(): LiveData<Int> {
-        return encryptionCheckResult
-    }
-
-    fun getVerifyPasswordResult(): LiveData<Int> {
-        return verifyPasswordResult
-    }
-
-    fun getSecureDataResult(): LiveData<Boolean> {
-        return secureDataResult
-    }
-
-    fun getLoadingMessage(): LiveData<String> {
-        return loadingMessage
-    }
-
-    fun getChangePasswordResult(): LiveData<Int> {
-        return changePasswordResult
-    }
-
     fun changePassword(userId: String, cloudType: Int, oldPassword: String, newPassword: String) {
         loadingMessage.value = "Updating password..."
         viewModelScope.launch(Dispatchers.IO) {
@@ -411,4 +387,11 @@ class LoginViewModel : ViewModel() {
         encryptionDetected = false
         isLoginSuccess = false
     }
+
+    fun getEncryptionCheckResult(): LiveData<Int> = encryptionCheckResult
+    fun getEncryptionCheckLoading(): LiveData<Boolean> = encryptionCheckLoading
+    fun getVerifyPasswordResult(): LiveData<Int> = verifyPasswordResult
+    fun getSecureDataResult(): LiveData<Boolean> = secureDataResult
+    fun getLoadingMessage(): LiveData<String> = loadingMessage
+    fun getChangePasswordResult(): LiveData<Int> = changePasswordResult
 }

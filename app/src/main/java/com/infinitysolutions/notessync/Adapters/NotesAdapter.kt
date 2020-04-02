@@ -8,6 +8,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.SparseArray
+import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -18,6 +19,8 @@ import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.util.containsKey
+import androidx.core.util.forEach
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -59,6 +62,8 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
     private val pathsMap = SparseArray<String>()
     private val TAG = "NotesAdapter"
     private val maxLinesCount: Int
+    private val selectedPositions = HashSet<Int>()
+    private var isMultiSelectEnabled = false
 
     init {
         val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
@@ -78,8 +83,6 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
             VISIBLE
 
         holder.titleTextView.text = items[position].noteTitle
-        holder.parentView.backgroundTintList =
-            ColorStateList.valueOf(Color.parseColor(colorsUtil.getColor(items[position].noteColor)))
 
         var noteContent = items[position].noteContent
         when(items[position].noteType) {
@@ -117,82 +120,121 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
             VISIBLE
         }
 
-        if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH && items[position].noteType != IMAGE_TRASH && items[position].noteType != IMAGE_LIST_TRASH) {
-            holder.itemContainer.setOnClickListener {
-                mainViewModel.setSelectedNote(items[position])
-                mainViewModel.setShouldOpenEditor(true)
+        if(!selectedPositions.contains(position)){
+            holder.parentView.setBackgroundResource(R.drawable.notes_item_round)
+            holder.parentView.backgroundTintList =
+                ColorStateList.valueOf(Color.parseColor(colorsUtil.getColor(items[position].noteColor)))
+        }else{
+            holder.parentView.setBackgroundResource(R.drawable.notes_selected_bg)
+            holder.parentView.backgroundTintList = null
+        }
+
+        holder.itemContainer.setOnClickListener {
+            if(!isMultiSelectEnabled){
+                // Normal operations
+                if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH && items[position].noteType != IMAGE_TRASH && items[position].noteType != IMAGE_LIST_TRASH) {
+                    mainViewModel.setSelectedNote(items[position])
+                    mainViewModel.setShouldOpenEditor(true)
+                }
+            }else{
+                if (selectedPositions.contains(position)) {
+                    selectedPositions.remove(position)
+                    if(selectedPositions.size <= 0) {
+                        isMultiSelectEnabled = false
+                    }
+                }else
+                    selectedPositions.add(position)
+                mainViewModel.setMultiSelectCount(selectedPositions.size)
+                notifyItemChanged(position)
             }
         }
 
         holder.itemContainer.setOnLongClickListener {
-            holder.itemContainer.setOnCreateContextMenuListener { menu, _, _ ->
-                if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH && items[position].noteType != IMAGE_TRASH && items[position].noteType != IMAGE_LIST_TRASH) {
-                    menu.add(this.context.getString(R.string.action_delete)).setOnMenuItemClickListener {
-                        when(items[position].noteType){
-                            IMAGE_DEFAULT, IMAGE_ARCHIVED ->{
-                                changeNoteType(position, IMAGE_TRASH)
-                            }
-                            LIST_DEFAULT, LIST_ARCHIVED ->{
-                                changeNoteType(position, LIST_TRASH)
-                            }
-                            IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED ->{
-                                changeNoteType(position, IMAGE_LIST_TRASH)
-                            }
-                            else ->{
-                                changeNoteType(position, NOTE_TRASH)
-                            }
-                        }
-                        Toast.makeText(context, this.context.getString(R.string.toast_moved_to_trash), LENGTH_SHORT).show()
-                        true
-                    }
-                    if (items[position].noteType == NOTE_DEFAULT || items[position].noteType == LIST_DEFAULT || items[position].noteType == IMAGE_DEFAULT || items[position].noteType == IMAGE_LIST_DEFAULT) {
-                        menu.add(this.context.getString(R.string.action_archive)).setOnMenuItemClickListener {
-                            when (items[position].noteType) {
-                                IMAGE_DEFAULT -> changeNoteType(position, IMAGE_ARCHIVED)
-                                LIST_DEFAULT -> changeNoteType(position, LIST_ARCHIVED)
-                                IMAGE_LIST_DEFAULT -> changeNoteType(position, IMAGE_LIST_ARCHIVED)
-                                else -> changeNoteType(position, NOTE_ARCHIVED)
-                            }
-                            true
-                        }
-                    } else {
-                        menu.add(this.context.getString(R.string.action_unarchive)).setOnMenuItemClickListener {
-                            when (items[position].noteType) {
-                                IMAGE_ARCHIVED -> changeNoteType(position, IMAGE_DEFAULT)
-                                LIST_ARCHIVED -> changeNoteType(position, LIST_DEFAULT)
-                                IMAGE_LIST_ARCHIVED -> changeNoteType(position, IMAGE_LIST_DEFAULT)
-                                else -> changeNoteType(position, NOTE_DEFAULT)
-                            }
-                            true
-                        }
-                    }
-                } else {
-                    menu.add(this.context.getString(R.string.action_restore)).setOnMenuItemClickListener {
-                        when (items[position].noteType) {
-                            IMAGE_TRASH -> changeNoteType(position, IMAGE_DEFAULT)
-                            LIST_TRASH -> changeNoteType(position, LIST_DEFAULT)
-                            IMAGE_LIST_TRASH -> changeNoteType(position, IMAGE_LIST_DEFAULT)
-                            else -> changeNoteType(position, NOTE_DEFAULT)
-                        }
-                        true
-                    }
-                    menu.add(this.context.getString(R.string.action_delete_forever)).setOnMenuItemClickListener {
-                        AlertDialog.Builder(context)
-                            .setTitle(this.context.getString(R.string.action_delete_forever))
-                            .setMessage(this.context.getString(R.string.question_delete_forever))
-                            .setPositiveButton(this.context.getString(R.string.yes)) { _: DialogInterface, _: Int ->
-                                databaseViewModel.deleteNote(items[position])
-                            }
-                            .setNegativeButton(this.context.getString(R.string.no), null)
-                            .setCancelable(false)
-                            .show()
-                        true
-                    }
-                }
-            }
-            holder.itemContainer.showContextMenu()
-            true
+            if(!isMultiSelectEnabled) {
+                mainViewModel.setMultiSelectCount(1)
+                selectedPositions.add(position)
+                isMultiSelectEnabled = true
+                notifyItemChanged(position)
+                true
+            }else
+                false
         }
+    }
+
+    fun restoreSelectedNotes(){
+        for(position in selectedPositions){
+            when (items[position].noteType) {
+                IMAGE_TRASH -> changeNoteType(position, IMAGE_DEFAULT)
+                LIST_TRASH -> changeNoteType(position, LIST_DEFAULT)
+                IMAGE_LIST_TRASH -> changeNoteType(position, IMAGE_LIST_DEFAULT)
+                else -> changeNoteType(position, NOTE_DEFAULT)
+            }
+        }
+    }
+
+    fun archiveSelectedNotes(){
+        for(position in selectedPositions){
+            when (items[position].noteType) {
+                IMAGE_DEFAULT -> changeNoteType(position, IMAGE_ARCHIVED)
+                LIST_DEFAULT -> changeNoteType(position, LIST_ARCHIVED)
+                IMAGE_LIST_DEFAULT -> changeNoteType(position, IMAGE_LIST_ARCHIVED)
+                else -> changeNoteType(position, NOTE_ARCHIVED)
+            }
+        }
+    }
+
+    fun unarchiveSelectedNotes(){
+        for(position in selectedPositions){
+            when (items[position].noteType) {
+                IMAGE_ARCHIVED -> changeNoteType(position, IMAGE_DEFAULT)
+                LIST_ARCHIVED -> changeNoteType(position, LIST_DEFAULT)
+                IMAGE_LIST_ARCHIVED -> changeNoteType(position, IMAGE_LIST_DEFAULT)
+                else -> changeNoteType(position, NOTE_DEFAULT)
+            }
+        }
+    }
+
+    fun deleteSelectedNotes(){
+        for(position in selectedPositions){
+            when (items[position].noteType) {
+                IMAGE_DEFAULT, IMAGE_ARCHIVED -> changeNoteType(position, IMAGE_TRASH)
+                LIST_DEFAULT, LIST_ARCHIVED -> changeNoteType(position, LIST_TRASH)
+                IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> changeNoteType(
+                    position,
+                    IMAGE_LIST_TRASH
+                )
+                else -> changeNoteType(position, NOTE_TRASH)
+            }
+        }
+
+        Toast.makeText(context, this.context.getString(R.string.toast_moved_to_trash), LENGTH_SHORT).show()
+    }
+
+    fun deleteForeverSelectedNotes(){
+        AlertDialog.Builder(context)
+            .setTitle(this.context.getString(R.string.action_delete_forever))
+            .setMessage(this.context.getString(R.string.question_delete_forever))
+            .setPositiveButton(this.context.getString(R.string.yes)) { _: DialogInterface, _: Int ->
+                for(position in selectedPositions)
+                    databaseViewModel.deleteNote(items[position])
+            }
+            .setNegativeButton(this.context.getString(R.string.no), null)
+            .setCancelable(false)
+            .show()
+    }
+
+    fun selectAll(){
+        for(position in items.indices)
+            selectedPositions.add(position)
+        mainViewModel.setMultiSelectCount(selectedPositions.size)
+        notifyDataSetChanged()
+    }
+
+    fun clearAll(){
+        selectedPositions.clear()
+        mainViewModel.setMultiSelectCount(0)
+        isMultiSelectEnabled = false
+        notifyDataSetChanged()
     }
 
     private fun setImage(path: String?, imageView: ImageView){

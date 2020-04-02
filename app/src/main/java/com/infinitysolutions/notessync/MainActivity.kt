@@ -12,6 +12,7 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
@@ -77,6 +78,7 @@ class MainActivity : AppCompatActivity() {
                 )
                 drawer_layout.addDrawerListener(toggle)
                 toggle.isDrawerIndicatorEnabled = true
+                drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 toggle.syncState()
                 prepareNavDrawer()
             }

@@ -24,9 +24,49 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/empty_trash_menu_item"
+        android:id="@+id/delete_forever_menu_item"
         android:icon="@drawable/empty_trash_icon_tinted"
+        android:visible="false"
         android:orderInCategory="1"
-        android:title="@string/empty_trash"
-        app:showAsAction="ifRoom" />
+        android:title="Delete forever"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/archive_menu_item"
+        android:icon="@drawable/archive_menu_icon_tinted"
+        android:visible="false"
+        android:orderInCategory="2"
+        android:title="Archive"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/unarchive_menu_item"
+        android:icon="@drawable/unarchive_menu_icon_tinted"
+        android:orderInCategory="2"
+        android:visible="false"
+        android:title="Unarchive"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/restore_menu_item"
+        android:icon="@drawable/restore_menu_icon_tinted"
+        android:orderInCategory="2"
+        android:visible="false"
+        android:title="Restore notes"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/delete_menu_item"
+        android:icon="@drawable/delete_menu_icon_tinted"
+        android:visible="false"
+        android:orderInCategory="1"
+        android:title="Delete"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/select_all_menu_item"
+        android:icon="@drawable/restore_menu_icon"
+        android:title="Select all"
+        android:visible="false"
+        app:showAsAction="never"/>
 </menu>

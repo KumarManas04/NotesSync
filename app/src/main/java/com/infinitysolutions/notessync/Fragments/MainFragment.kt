@@ -2,9 +2,7 @@ package com.infinitysolutions.notessync.Fragments
 
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context.MODE_PRIVATE
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -26,6 +24,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.content.FileProvider
@@ -95,6 +94,7 @@ class MainFragment : Fragment() {
         toolbar.inflateMenu(R.menu.main_fragment_menu)
 
         val notesRecyclerView = rootView.notes_recycler_view
+        var recyclerAdapter: NotesAdapter? = null
         val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && !prefs.getBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)) {
             notesRecyclerView.layoutManager = LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
@@ -109,15 +109,13 @@ class MainFragment : Fragment() {
 
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.sync_menu_item -> {
-                    syncFiles()
-                }
+                R.id.sync_menu_item -> syncFiles()
                 R.id.compact_view_menu_item -> {
                     val editor = prefs.edit()
                     val columnCount = resources.getInteger(R.integer.columns_count)
                     notesRecyclerView.layoutManager = StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
                     editor.putBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)
-                    notesRecyclerView.adapter?.notifyDataSetChanged()
+                    recyclerAdapter?.notifyDataSetChanged()
                     toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
                     toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = false
                     editor.apply()
@@ -127,34 +125,46 @@ class MainFragment : Fragment() {
                     notesRecyclerView.layoutManager =
                         LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
                     editor.putBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, false)
-                    notesRecyclerView.adapter?.notifyDataSetChanged()
+                    recyclerAdapter?.notifyDataSetChanged()
                     toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
                     toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
                     editor.apply()
                 }
-                R.id.empty_trash_menu_item -> {
-                    val adapter = notesRecyclerView.adapter as NotesAdapter
-                    if (adapter.itemCount > 0) {
-                        AlertDialog.Builder(context)
-                            .setTitle(getString(R.string.empty_trash))
-                            .setMessage(getString(R.string.empty_trash_question))
-                            .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
-                                val list = adapter.getList()
-                                if (list.isNotEmpty()) {
-                                    for (note in list)
-                                        databaseViewModel.deleteNote(note)
-                                }
-                            }
-                            .setNegativeButton(getString(R.string.no), null)
-                            .setCancelable(false)
-                            .show()
-                    }
+                R.id.delete_forever_menu_item -> {
+                    recyclerAdapter?.deleteForeverSelectedNotes()
+                    disableMultiSelect(prefs, toolbar)
                 }
+                R.id.archive_menu_item -> {
+                    recyclerAdapter?.archiveSelectedNotes()
+                    disableMultiSelect(prefs, toolbar)
+                }
+                R.id.unarchive_menu_item -> {
+                    recyclerAdapter?.unarchiveSelectedNotes()
+                    disableMultiSelect(prefs, toolbar)
+                }
+                R.id.delete_menu_item -> {
+                    recyclerAdapter?.deleteSelectedNotes()
+                    disableMultiSelect(prefs, toolbar)
+                }
+                R.id.restore_menu_item -> {
+                    recyclerAdapter?.restoreSelectedNotes()
+                    disableMultiSelect(prefs, toolbar)
+                }
+                R.id.select_all_menu_item -> recyclerAdapter?.selectAll()
             }
             true
         }
         mainViewModel.setToolbar(toolbar)
 
+        mainViewModel.getMultiSelectCount().observe(this, Observer{ count ->
+            if(count != null && count > 0){
+                toolbar.title = "$count selected"
+                if(count == 1)
+                    enableMultiSelect(toolbar, recyclerAdapter)
+            }else{
+                disableMultiSelect(prefs, toolbar)
+            }
+        })
         rootView.new_note_button.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
             mainViewModel.setSelectedNote(
@@ -203,21 +213,18 @@ class MainFragment : Fragment() {
                 when (mode) {
                     1 -> {
                         toolbar.title = getString(R.string.menu_notes)
-                        toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = false
                         databaseViewModel.setViewMode(1)
                         rootView.empty_image.setImageResource(R.drawable.all_empty)
                         rootView.empty_text.text = getString(R.string.all_empty_message)
                     }
                     2 -> {
                         toolbar.title = getString(R.string.menu_archive)
-                        toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = false
                         databaseViewModel.setViewMode(2)
                         rootView.empty_image.setImageResource(R.drawable.archive_empty)
                         rootView.empty_text.text = getString(R.string.archived_empty_message)
                     }
                     3 -> {
                         toolbar.title = getString(R.string.menu_trash)
-                        toolbar.menu.findItem(R.id.empty_trash_menu_item).isVisible = true
                         databaseViewModel.setViewMode(3)
                         rootView.empty_image.setImageResource(R.drawable.trash_empty)
                         rootView.empty_text.text = getString(R.string.trash_empty_message)
@@ -230,8 +237,8 @@ class MainFragment : Fragment() {
             if (viewList != null && viewList.isNotEmpty()) {
                 notesRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE
-                notesRecyclerView.adapter =
-                    NotesAdapter(mainViewModel, databaseViewModel, viewList, context!!)
+                recyclerAdapter = NotesAdapter(mainViewModel, databaseViewModel, viewList, context!!)
+                notesRecyclerView.adapter = recyclerAdapter
             } else {
                 notesRecyclerView.visibility = GONE
                 rootView.empty_items.visibility = VISIBLE
@@ -299,6 +306,59 @@ class MainFragment : Fragment() {
                         findNavController(this).navigate(R.id.noteEditFragment, bundle)
                     }
                 }
+            }
+        }
+    }
+
+    private fun disableMultiSelect(prefs: SharedPreferences, toolbar: Toolbar){
+        //TODO: Disable multi-select mode
+        toolbar.navigationIcon = null
+        toolbar.setNavigationOnClickListener {}
+        mainViewModel.setToolbar(toolbar)
+        when(mainViewModel.getViewMode().value){
+            1 -> toolbar.title = "Notes"
+            2 -> toolbar.title = "Archive"
+            3 -> toolbar.title = "Trash"
+        }
+        toolbar.menu.findItem(R.id.delete_menu_item).isVisible = false
+        toolbar.menu.findItem(R.id.delete_forever_menu_item).isVisible = false
+        toolbar.menu.findItem(R.id.archive_menu_item).isVisible = false
+        toolbar.menu.findItem(R.id.unarchive_menu_item).isVisible = false
+        toolbar.menu.findItem(R.id.restore_menu_item).isVisible = false
+        toolbar.menu.findItem(R.id.select_all_menu_item).isVisible = false
+        toolbar.menu.findItem(R.id.sync_menu_item).isVisible = true
+        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && !prefs.getBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true))
+            toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
+        else
+            toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
+    }
+
+    private fun enableMultiSelect(toolbar: Toolbar, recyclerAdapter: NotesAdapter?){
+        //TODO: Enable multi-select mode
+        toolbar.setNavigationIcon(R.drawable.cancel_reminder)
+        toolbar.setNavigationOnClickListener {
+            // Clear all trigger
+            recyclerAdapter?.clearAll()
+        }
+        toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = false
+        toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
+        toolbar.menu.findItem(R.id.sync_menu_item).isVisible = false
+        toolbar.menu.findItem(R.id.select_all_menu_item).isVisible = true
+        when(mainViewModel.getViewMode().value){
+            1 -> {
+                // Notes
+                toolbar.menu.findItem(R.id.archive_menu_item).isVisible = true
+                toolbar.menu.findItem(R.id.delete_menu_item).isVisible = true
+            }
+            2 -> {
+                // Archive
+                toolbar.menu.findItem(R.id.unarchive_menu_item).isVisible = true
+                toolbar.menu.findItem(R.id.delete_menu_item).isVisible = true
+            }
+            3 -> {
+                // Trash
+                toolbar.menu.findItem(R.id.restore_menu_item).isVisible = true
+                toolbar.menu.findItem(R.id.delete_forever_menu_item).isVisible = true
             }
         }
     }
