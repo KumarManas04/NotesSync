@@ -8,6 +8,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
@@ -16,6 +17,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -311,7 +313,6 @@ class MainFragment : Fragment() {
     }
 
     private fun disableMultiSelect(prefs: SharedPreferences, toolbar: Toolbar){
-        //TODO: Disable multi-select mode
         toolbar.navigationIcon = null
         toolbar.setNavigationOnClickListener {}
         mainViewModel.setToolbar(toolbar)
@@ -334,8 +335,8 @@ class MainFragment : Fragment() {
     }
 
     private fun enableMultiSelect(toolbar: Toolbar, recyclerAdapter: NotesAdapter?){
-        //TODO: Enable multi-select mode
-        toolbar.setNavigationIcon(R.drawable.cancel_reminder)
+        mainViewModel.setToolbar(null)
+        toolbar.setNavigationIcon(R.drawable.clear_all_menu_icon_tinted)
         toolbar.setNavigationOnClickListener {
             // Clear all trigger
             recyclerAdapter?.clearAll()

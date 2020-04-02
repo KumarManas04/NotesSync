@@ -81,6 +81,8 @@ class MainActivity : AppCompatActivity() {
                 drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 toggle.syncState()
                 prepareNavDrawer()
+            }else{
+                drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
             }
         })
 
