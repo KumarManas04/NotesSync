@@ -11,7 +11,7 @@ import com.infinitysolutions.notessync.Util.Event
 
 class MainViewModel: ViewModel(){
     private var selectedNote: Note? = null
-    private val multiSelectCount = MutableLiveData<Int>()
+    private val multiSelectCount = MutableLiveData<Event<Int>>()
     private val selectedColor = MutableLiveData<Int>()
     private val shouldOpenEditor = MutableLiveData<Boolean>()
     private val syncNotes = MutableLiveData<Event<Int>>()
@@ -31,7 +31,7 @@ class MainViewModel: ViewModel(){
     }
 
     fun setMultiSelectCount(value: Int){
-        multiSelectCount.value = value
+        multiSelectCount.value = Event(value)
     }
 
     fun setRefreshImagesList(value: Boolean){
@@ -94,7 +94,7 @@ class MainViewModel: ViewModel(){
         openImageView.value = Event(imageId)
     }
 
-    fun getMultiSelectCount(): LiveData<Int> = multiSelectCount
+    fun getMultiSelectCount(): LiveData<Event<Int>> = multiSelectCount
     fun getRefreshImagesList(): LiveData<Event<Boolean>> = refreshImagesList
     fun getIsExitBlocked(): LiveData<Boolean> = isExitBlocked
     fun getCurrentPhotoPath(): String? = currentPhotoPath

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/archive_menu_item"
+        android:icon="@drawable/archive_menu_icon_tinted"
+        android:orderInCategory="2"
+        android:title="Archive"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/delete_menu_item"
+        android:icon="@drawable/delete_menu_icon_tinted"
+        android:orderInCategory="1"
+        android:title="Delete"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/select_all_menu_item"
+        android:icon="@drawable/restore_menu_icon"
+        android:title="Select all"
+        app:showAsAction="never"/>
+</menu>

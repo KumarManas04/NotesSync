@@ -1,81 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:background="?attr/mainBackground"
-              tools:context=".Fragments.SearchFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/mainBackground"
+    android:orientation="vertical"
+    tools:context=".Fragments.SearchFragment">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/mainBackground"
+        android:visibility="gone"
+        app:titleTextColor="?attr/toolbarTextColor" />
 
     <LinearLayout
-            android:orientation="horizontal"
-            android:background="?attr/mainBackground"
-            android:elevation="4dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:id="@+id/search_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/mainBackground"
+        android:elevation="4dp"
+        android:orientation="horizontal">
 
         <ImageView
-                android:id="@+id/back_button"
-                android:padding="14dp"
-                android:background="@drawable/overlay_simple_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:src="@drawable/back_arrow"
-                android:tint="?attr/iconsTint"
-                android:layout_width="?attr/actionBarSize"
-                android:layout_height="?attr/actionBarSize"/>
+            android:id="@+id/back_button"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@drawable/overlay_simple_ripple"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="14dp"
+            android:src="@drawable/back_arrow"
+            android:tint="?attr/iconsTint" />
 
         <EditText
-                android:id="@+id/search_edit_text"
-                android:maxLines="1"
-                android:hint="@string/search_notes"
-                android:textColorHint="#757575"
-                android:textColor="?attr/mainTextColor"
-                android:inputType="textCapSentences"
-                android:background="?attr/overlayBackground"
-                android:padding="14dp"
-                android:textSize="16sp"
-                android:textCursorDrawable="@null"
-                android:fontFamily="sans-serif"
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"/>
+            android:id="@+id/search_edit_text"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/overlayBackground"
+            android:fontFamily="sans-serif"
+            android:hint="@string/search_notes"
+            android:inputType="textCapSentences"
+            android:maxLines="1"
+            android:padding="14dp"
+            android:textColor="?attr/mainTextColor"
+            android:textColorHint="#757575"
+            android:textCursorDrawable="@null"
+            android:textSize="16sp" />
 
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/result_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+        android:id="@+id/result_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <LinearLayout
-            android:id="@+id/empty_items"
-            android:visibility="gone"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+        android:id="@+id/empty_items"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <ImageView
-                android:id="@+id/empty_image"
-                android:src="@drawable/search_empty"
-                android:layout_gravity="center_horizontal"
-                android:layout_width="100dp"
-                android:layout_height="100dp"/>
+            android:id="@+id/empty_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/search_empty" />
 
         <TextView
-                android:id="@+id/empty_text"
-                android:text="@string/no_match_found"
-                android:fontFamily="sans-serif-condensed"
-                android:textSize="20sp"
-                android:layout_marginTop="20dp"
-                android:layout_gravity="center_horizontal"
-                android:textColor="?attr/mainTextColor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+            android:id="@+id/empty_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:fontFamily="sans-serif-condensed"
+            android:text="@string/no_match_found"
+            android:textColor="?attr/mainTextColor"
+            android:textSize="20sp" />
 
     </LinearLayout>
 

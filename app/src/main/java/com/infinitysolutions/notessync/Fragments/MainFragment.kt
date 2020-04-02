@@ -24,6 +24,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.widget.Toolbar
@@ -134,23 +135,23 @@ class MainFragment : Fragment() {
                 }
                 R.id.delete_forever_menu_item -> {
                     recyclerAdapter?.deleteForeverSelectedNotes()
-                    disableMultiSelect(prefs, toolbar)
+                    disableMultiSelect(prefs, toolbar, rootView.bottom_bar)
                 }
                 R.id.archive_menu_item -> {
                     recyclerAdapter?.archiveSelectedNotes()
-                    disableMultiSelect(prefs, toolbar)
+                    disableMultiSelect(prefs, toolbar, rootView.bottom_bar)
                 }
                 R.id.unarchive_menu_item -> {
                     recyclerAdapter?.unarchiveSelectedNotes()
-                    disableMultiSelect(prefs, toolbar)
+                    disableMultiSelect(prefs, toolbar, rootView.bottom_bar)
                 }
                 R.id.delete_menu_item -> {
                     recyclerAdapter?.deleteSelectedNotes()
-                    disableMultiSelect(prefs, toolbar)
+                    disableMultiSelect(prefs, toolbar, rootView.bottom_bar)
                 }
                 R.id.restore_menu_item -> {
                     recyclerAdapter?.restoreSelectedNotes()
-                    disableMultiSelect(prefs, toolbar)
+                    disableMultiSelect(prefs, toolbar, rootView.bottom_bar)
                 }
                 R.id.select_all_menu_item -> recyclerAdapter?.selectAll()
             }
@@ -158,13 +159,15 @@ class MainFragment : Fragment() {
         }
         mainViewModel.setToolbar(toolbar)
 
-        mainViewModel.getMultiSelectCount().observe(this, Observer{ count ->
-            if(count != null && count > 0){
-                toolbar.title = "$count selected"
-                if(count == 1)
-                    enableMultiSelect(toolbar, recyclerAdapter)
-            }else{
-                disableMultiSelect(prefs, toolbar)
+        mainViewModel.getMultiSelectCount().observe(this, Observer{
+            it.getContentIfNotHandled()?.let { count ->
+                if (count > 0) {
+                    toolbar.title = "$count selected"
+                    if (count == 1)
+                        enableMultiSelect(toolbar, recyclerAdapter, rootView.bottom_bar)
+                } else {
+                    disableMultiSelect(prefs, toolbar, rootView.bottom_bar)
+                }
             }
         })
         rootView.new_note_button.setOnClickListener {
@@ -312,8 +315,9 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun disableMultiSelect(prefs: SharedPreferences, toolbar: Toolbar){
+    private fun disableMultiSelect(prefs: SharedPreferences, toolbar: Toolbar, bottomBar: LinearLayout){
         toolbar.navigationIcon = null
+        bottomBar.visibility = VISIBLE
         toolbar.setNavigationOnClickListener {}
         mainViewModel.setToolbar(toolbar)
         when(mainViewModel.getViewMode().value){
@@ -334,8 +338,9 @@ class MainFragment : Fragment() {
             toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
     }
 
-    private fun enableMultiSelect(toolbar: Toolbar, recyclerAdapter: NotesAdapter?){
+    private fun enableMultiSelect(toolbar: Toolbar, recyclerAdapter: NotesAdapter?, bottomBar: LinearLayout){
         mainViewModel.setToolbar(null)
+        bottomBar.visibility = GONE
         toolbar.setNavigationIcon(R.drawable.clear_all_menu_icon_tinted)
         toolbar.setNavigationOnClickListener {
             // Clear all trigger
