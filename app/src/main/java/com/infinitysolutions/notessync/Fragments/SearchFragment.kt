@@ -44,7 +44,7 @@ class SearchFragment : Fragment() {
         val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
         rootView.search_edit_text.addTextChangedListener {
-            databaseViewModel.setSearchQuery("%${it.toString()}%")
+            databaseViewModel.setSearchQuery(it.toString())
         }
 
         rootView.search_edit_text.postDelayed({

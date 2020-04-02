@@ -1,10 +1,8 @@
 package com.infinitysolutions.notessync.Model
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
+import androidx.sqlite.db.SimpleSQLiteQuery
 
 @Dao
 interface NotesDao {
@@ -30,8 +28,11 @@ interface NotesDao {
     @Query("SELECT * FROM notes_table WHERE note_id in (:idList)")
     fun getNotesByIds(idList: List<Long>): List<Note>
 
-    @Query("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13 AND (title LIKE:query OR content LIKE:query)")
-    fun getSearchResult(query: String): LiveData<List<Note>>
+//    @Query("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13 AND (:query)")
+//    fun getSearchResult(query: String): LiveData<List<Note>>
+
+    @RawQuery(observedEntities = [Note::class])
+    fun getSearchResult(query: SimpleSQLiteQuery): LiveData<List<Note>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: Note): Long

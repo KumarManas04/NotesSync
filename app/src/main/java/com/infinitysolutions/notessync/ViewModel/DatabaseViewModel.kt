@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_ARCHIVED
@@ -35,7 +36,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class DatabaseViewModel(application: Application) : AndroidViewModel(application) {
-    private val query = MutableLiveData<String>()
+    private val query = MutableLiveData<SimpleSQLiteQuery>()
     private val viewMode = MutableLiveData<Int>()
     private val notesDao: NotesDao = NotesRoomDatabase.getDatabase(application).notesDao()
     private val imagesDao: ImagesDao = NotesRoomDatabase.getDatabase(application).imagesDao()
@@ -53,12 +54,32 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
     }
 
     init {
-        query.value = "%%"
+        query.value = SimpleSQLiteQuery("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13")
         viewMode.value = 1
     }
 
     fun setSearchQuery(searchQuery: String) {
-        query.value = searchQuery
+        val tempList = searchQuery.split("\\s+".toRegex())
+        val list = ArrayList<String>()
+        for(str in tempList){
+            if(str.trim().isNotEmpty())
+                list.add(str)
+        }
+
+        if(list.isEmpty()) {
+            query.value = SimpleSQLiteQuery("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13")
+            return
+        }
+        val sB = StringBuilder("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13 AND (")
+        list.forEachIndexed { index, str ->
+            if (index != 0)
+                sB.append(" OR ")
+            sB.append("title LIKE '%$str%' OR content LIKE '%$str%'")
+        }
+
+        sB.append(")")
+        val queryItem = SimpleSQLiteQuery(sB.toString())
+        query.value = queryItem
     }
 
     fun setViewMode(mode: Int) {
