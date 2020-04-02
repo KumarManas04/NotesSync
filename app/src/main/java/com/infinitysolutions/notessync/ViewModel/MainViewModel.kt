@@ -1,6 +1,7 @@
 package com.infinitysolutions.notessync.ViewModel
 
 import android.content.Intent
+import android.util.Log
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,7 +12,7 @@ import com.infinitysolutions.notessync.Util.Event
 
 class MainViewModel: ViewModel(){
     private var selectedNote: Note? = null
-    private val multiSelectCount = MutableLiveData<Event<Int>>()
+    private val multiSelectCount = MutableLiveData<Int>()
     private val selectedColor = MutableLiveData<Int>()
     private val shouldOpenEditor = MutableLiveData<Boolean>()
     private val syncNotes = MutableLiveData<Event<Int>>()
@@ -31,7 +32,7 @@ class MainViewModel: ViewModel(){
     }
 
     fun setMultiSelectCount(value: Int){
-        multiSelectCount.value = Event(value)
+        multiSelectCount.value = value
     }
 
     fun setRefreshImagesList(value: Boolean){
@@ -94,7 +95,7 @@ class MainViewModel: ViewModel(){
         openImageView.value = Event(imageId)
     }
 
-    fun getMultiSelectCount(): LiveData<Event<Int>> = multiSelectCount
+    fun getMultiSelectCount(): LiveData<Int> = multiSelectCount
     fun getRefreshImagesList(): LiveData<Event<Boolean>> = refreshImagesList
     fun getIsExitBlocked(): LiveData<Boolean> = isExitBlocked
     fun getCurrentPhotoPath(): String? = currentPhotoPath

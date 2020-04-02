@@ -159,8 +159,7 @@ class MainFragment : Fragment() {
         }
         mainViewModel.setToolbar(toolbar)
 
-        mainViewModel.getMultiSelectCount().observe(this, Observer{
-            it.getContentIfNotHandled()?.let { count ->
+        mainViewModel.getMultiSelectCount().observe(this, Observer{count ->
                 if (count > 0) {
                     toolbar.title = "$count selected"
                     if (count == 1)
@@ -168,8 +167,9 @@ class MainFragment : Fragment() {
                 } else {
                     disableMultiSelect(prefs, toolbar, rootView.bottom_bar)
                 }
-            }
         })
+        mainViewModel.setMultiSelectCount(0)
+
         rootView.new_note_button.setOnClickListener {
             mainViewModel.setShouldOpenEditor(true)
             mainViewModel.setSelectedNote(

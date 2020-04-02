@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -75,8 +76,7 @@ class SearchFragment : Fragment() {
             true
         }
 
-        mainViewModel.getMultiSelectCount().observe(this, Observer{
-            it.getContentIfNotHandled()?.let { count ->
+        mainViewModel.getMultiSelectCount().observe(this, Observer{count ->
                 if (count > 0) {
                     toolbar.title = "$count selected"
                     if (count == 1)
@@ -84,8 +84,8 @@ class SearchFragment : Fragment() {
                 } else {
                     disableMultiSelect(toolbar, rootView.search_bar)
                 }
-            }
         })
+        mainViewModel.setMultiSelectCount(0)
 
         rootView.search_edit_text.addTextChangedListener {
             databaseViewModel.setSearchQuery(it.toString())
