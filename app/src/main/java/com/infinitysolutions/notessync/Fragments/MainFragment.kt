@@ -77,7 +77,11 @@ class MainFragment : Fragment() {
     private val TAG = "MainFragment"
     private lateinit var mainViewModel: MainViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val rootView = inflater.inflate(R.layout.fragment_main, container, false)
         initDataBinding(rootView)
 
@@ -98,13 +102,19 @@ class MainFragment : Fragment() {
         val notesRecyclerView = rootView.notes_recycler_view
         var recyclerAdapter: NotesAdapter? = null
         val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && !prefs.getBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)) {
-            notesRecyclerView.layoutManager = LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
+        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && !prefs.getBoolean(
+                PREF_COMPACT_VIEW_MODE_ENABLED,
+                true
+            )
+        ) {
+            notesRecyclerView.layoutManager =
+                LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
             toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
             toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
         } else {
             val columnCount = resources.getInteger(R.integer.columns_count)
-            notesRecyclerView.layoutManager = StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
+            notesRecyclerView.layoutManager =
+                StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
             toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
             toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = false
         }
@@ -115,7 +125,8 @@ class MainFragment : Fragment() {
                 R.id.compact_view_menu_item -> {
                     val editor = prefs.edit()
                     val columnCount = resources.getInteger(R.integer.columns_count)
-                    notesRecyclerView.layoutManager = StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
+                    notesRecyclerView.layoutManager =
+                        StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
                     editor.putBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)
                     recyclerAdapter?.notifyDataSetChanged()
                     toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
@@ -158,24 +169,24 @@ class MainFragment : Fragment() {
         }
         mainViewModel.setToolbar(toolbar)
 
-        val backCallback = object: OnBackPressedCallback(true){
+        val backCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 recyclerAdapter?.clearAll()
             }
         }
 
-        mainViewModel.getMultiSelectCount().observe(this, Observer{count ->
-                if (count > 0) {
-                    toolbar.title = "$count selected"
-                    if (count == 1) {
-                        activity?.onBackPressedDispatcher?.addCallback(this, backCallback)
-                        enableMultiSelect(toolbar, recyclerAdapter, rootView.bottom_bar)
-                        backCallback.isEnabled = true
-                    }
-                } else {
-                    disableMultiSelect(prefs, toolbar, rootView.bottom_bar)
-                    backCallback.isEnabled = false
+        mainViewModel.getMultiSelectCount().observe(this, Observer { count ->
+            if (count > 0) {
+                toolbar.title = "$count selected"
+                if (count == 1) {
+                    activity?.onBackPressedDispatcher?.addCallback(this, backCallback)
+                    enableMultiSelect(toolbar, recyclerAdapter, rootView.bottom_bar)
+                    backCallback.isEnabled = true
                 }
+            } else {
+                disableMultiSelect(prefs, toolbar, rootView.bottom_bar)
+                backCallback.isEnabled = false
+            }
         })
         mainViewModel.setMultiSelectCount(0)
 
@@ -251,7 +262,8 @@ class MainFragment : Fragment() {
             if (viewList != null && viewList.isNotEmpty()) {
                 notesRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE
-                recyclerAdapter = NotesAdapter(mainViewModel, databaseViewModel, viewList, context!!)
+                recyclerAdapter =
+                    NotesAdapter(mainViewModel, databaseViewModel, viewList, context!!)
                 notesRecyclerView.adapter = recyclerAdapter
             } else {
                 notesRecyclerView.visibility = GONE
@@ -280,24 +292,63 @@ class MainFragment : Fragment() {
                 if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
                     val text = intent.getStringExtra(Intent.EXTRA_TEXT)
                     if (text != null) {
-                        mainViewModel.setSelectedNote(Note(-1L, "", text, 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
+                        mainViewModel.setSelectedNote(
+                            Note(
+                                -1L,
+                                "",
+                                text,
+                                0,
+                                0,
+                                "-1",
+                                NOTE_DEFAULT,
+                                false,
+                                null,
+                                -1L
+                            )
+                        )
                         mainViewModel.setShouldOpenEditor(true)
                     }
-                }else if(intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true){
-                    (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {uri->
+                } else if (intent.action == Intent.ACTION_SEND && intent.type?.startsWith("image/") == true) {
+                    (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
                         insertImageInDatabase(uri, null)
                     }
-                }else if (intent.hasExtra(WIDGET_BUTTON_EXTRA)) {
+                } else if (intent.hasExtra(WIDGET_BUTTON_EXTRA)) {
                     val text = intent.getStringExtra(WIDGET_BUTTON_EXTRA)
                     if (text != null) {
                         Log.d(TAG, "Reached here")
                         when (text) {
                             WIDGET_NEW_NOTE -> {
-                                mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", NOTE_DEFAULT, false, null, -1L))
+                                mainViewModel.setSelectedNote(
+                                    Note(
+                                        -1L,
+                                        "",
+                                        "",
+                                        0,
+                                        0,
+                                        "-1",
+                                        NOTE_DEFAULT,
+                                        false,
+                                        null,
+                                        -1L
+                                    )
+                                )
                                 mainViewModel.setShouldOpenEditor(true)
                             }
                             WIDGET_NEW_LIST -> {
-                                mainViewModel.setSelectedNote(Note(-1L, "", "", 0, 0, "-1", LIST_DEFAULT, false, null, -1L))
+                                mainViewModel.setSelectedNote(
+                                    Note(
+                                        -1L,
+                                        "",
+                                        "",
+                                        0,
+                                        0,
+                                        "-1",
+                                        LIST_DEFAULT,
+                                        false,
+                                        null,
+                                        -1L
+                                    )
+                                )
                                 mainViewModel.setShouldOpenEditor(true)
                             }
                             WIDGET_NEW_IMAGE -> {
@@ -312,7 +363,7 @@ class MainFragment : Fragment() {
                             }
                         }
                     }
-                }else if (intent.hasExtra(NOTE_ID_EXTRA)) {
+                } else if (intent.hasExtra(NOTE_ID_EXTRA)) {
                     val noteId = intent.getLongExtra(NOTE_ID_EXTRA, -1L)
                     if (noteId != -1L) {
                         val bundle = Bundle()
@@ -324,12 +375,16 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun disableMultiSelect(prefs: SharedPreferences, toolbar: Toolbar, bottomBar: LinearLayout){
+    private fun disableMultiSelect(
+        prefs: SharedPreferences,
+        toolbar: Toolbar,
+        bottomBar: LinearLayout
+    ) {
         toolbar.navigationIcon = null
         bottomBar.visibility = VISIBLE
         toolbar.setNavigationOnClickListener {}
         mainViewModel.setToolbar(toolbar)
-        when(mainViewModel.getViewMode().value){
+        when (mainViewModel.getViewMode().value) {
             1 -> toolbar.title = "Notes"
             2 -> toolbar.title = "Archive"
             3 -> toolbar.title = "Trash"
@@ -341,13 +396,21 @@ class MainFragment : Fragment() {
         toolbar.menu.findItem(R.id.restore_menu_item).isVisible = false
         toolbar.menu.findItem(R.id.select_all_menu_item).isVisible = false
         toolbar.menu.findItem(R.id.sync_menu_item).isVisible = true
-        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && !prefs.getBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true))
+        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && !prefs.getBoolean(
+                PREF_COMPACT_VIEW_MODE_ENABLED,
+                true
+            )
+        )
             toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
         else
             toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
     }
 
-    private fun enableMultiSelect(toolbar: Toolbar, recyclerAdapter: NotesAdapter?, bottomBar: LinearLayout){
+    private fun enableMultiSelect(
+        toolbar: Toolbar,
+        recyclerAdapter: NotesAdapter?,
+        bottomBar: LinearLayout
+    ) {
         mainViewModel.setToolbar(null)
         bottomBar.visibility = GONE
         toolbar.setNavigationIcon(R.drawable.clear_all_menu_icon_tinted)
@@ -359,7 +422,7 @@ class MainFragment : Fragment() {
         toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
         toolbar.menu.findItem(R.id.sync_menu_item).isVisible = false
         toolbar.menu.findItem(R.id.select_all_menu_item).isVisible = true
-        when(mainViewModel.getViewMode().value){
+        when (mainViewModel.getViewMode().value) {
             1 -> {
                 // Notes
                 toolbar.menu.findItem(R.id.archive_menu_item).isVisible = true
@@ -380,12 +443,19 @@ class MainFragment : Fragment() {
 
     private fun openNewImageMenu(menu: Menu) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-        ){
+            checkSelfPermission(
+                context!!,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             Toast.makeText(context, "Storage permission required", LENGTH_SHORT).show()
-            ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1010)
+            ActivityCompat.requestPermissions(
+                activity!!,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                1010
+            )
             return
-        }else{
+        } else {
             menu.add(getString(R.string.take_photo)).setOnMenuItemClickListener {
                 val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                 if (intent.resolveActivity(activity!!.packageManager) != null) {
@@ -397,7 +467,11 @@ class MainFragment : Fragment() {
                     }
                     if (photoFile != null) {
                         mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
-                        val photoUri = FileProvider.getUriForFile(context!!, FILE_PROVIDER_AUTHORITY, photoFile)
+                        val photoUri = FileProvider.getUriForFile(
+                            context!!,
+                            FILE_PROVIDER_AUTHORITY,
+                            photoFile
+                        )
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
                         startActivityForResult(intent, IMAGE_CAPTURE_REQUEST_CODE)
                     } else
@@ -407,7 +481,8 @@ class MainFragment : Fragment() {
                             LENGTH_SHORT
                         ).show()
                 } else {
-                    Toast.makeText(context, getString(R.string.toast_no_camera_app), LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.toast_no_camera_app), LENGTH_SHORT)
+                        .show()
                 }
                 true
             }
@@ -423,7 +498,7 @@ class MainFragment : Fragment() {
 
     private fun syncFiles() {
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        when(getLoginStatus(prefs)){
+        when (getLoginStatus(prefs)) {
             CLOUD_GOOGLE_DRIVE -> mainViewModel.setSyncNotes(CLOUD_GOOGLE_DRIVE)
             CLOUD_DROPBOX -> mainViewModel.setSyncNotes(CLOUD_DROPBOX)
             else -> findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
@@ -433,7 +508,11 @@ class MainFragment : Fragment() {
     private fun getLoginStatus(prefs: SharedPreferences?): Int {
         if (prefs != null && prefs.contains(PREF_CLOUD_TYPE)) {
             if (prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE) == CLOUD_DROPBOX) {
-                if (prefs.contains(PREF_ACCESS_TOKEN) && prefs.getString(PREF_ACCESS_TOKEN, null) != null)
+                if (prefs.contains(PREF_ACCESS_TOKEN) && prefs.getString(
+                        PREF_ACCESS_TOKEN,
+                        null
+                    ) != null
+                )
                     return CLOUD_DROPBOX
             } else {
                 if (GoogleSignIn.getLastSignedInAccount(context) != null)
@@ -450,7 +529,7 @@ class MainFragment : Fragment() {
         return File(path, "$time.jpg")
     }
 
-    private fun saveBitmap(imageBitmap: Bitmap, filePath: String){
+    private fun saveBitmap(imageBitmap: Bitmap, filePath: String) {
         val file = File(filePath)
         try {
             val fos = FileOutputStream(file)
@@ -463,12 +542,13 @@ class MainFragment : Fragment() {
         imageBitmap.recycle()
     }
 
-    private fun exifRotateBitmap(filePath: String?, bitmap: Bitmap): Bitmap{
+    private fun exifRotateBitmap(filePath: String?, bitmap: Bitmap): Bitmap {
         val exif = ExifInterface(filePath!!)
-        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
+        val orientation =
+            exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
         val matrix = Matrix()
 
-        when(orientation){
+        when (orientation) {
             ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1F, 1F)
             ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180F)
             ExifInterface.ORIENTATION_FLIP_VERTICAL -> {
@@ -493,42 +573,46 @@ class MainFragment : Fragment() {
         return result
     }
 
-    private fun loadBitmap(uri: Uri?, filePath: String?, destinationPath: String) {
+    private fun loadBitmap(uri: Uri?, filePath: String?, destinationPath: String): Boolean {
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
-        if(uri != null) {
-            val imageStream = activity!!.contentResolver.openInputStream(uri)
-            BitmapFactory.decodeStream(imageStream, null, options)
-        }else if(filePath != null){
-            BitmapFactory.decodeFile(filePath, options)
+        try {
+            if (uri != null) {
+                val imageStream = activity!!.contentResolver.openInputStream(uri)
+                BitmapFactory.decodeStream(imageStream, null, options)
+            } else if (filePath != null) {
+                BitmapFactory.decodeFile(filePath, options)
+            }
+        } catch (e: Exception) {
+            return false
         }
 
         var width = options.outWidth
         var height = options.outHeight
 
         var inSampleSize = 1
-        if(width > 1000 || height > 1000) {
+        if (width > 1000 || height > 1000) {
             height /= 2
             width /= 2
-            while(height / inSampleSize >= 1000 && width / inSampleSize >= 1000)
+            while (height / inSampleSize >= 1000 && width / inSampleSize >= 1000)
                 inSampleSize *= 2
         }
 
         options.inSampleSize = inSampleSize
         options.inJustDecodeBounds = false
         var imageBitmap: Bitmap?
-        if(uri != null) {
+        if (uri != null) {
             // Retrieving the bitmap from given uri
             imageBitmap = Glide.with(context!!)
                 .asBitmap()
                 .load(uri)
                 .submit(width, height)
                 .get()
-        }else{
+        } else {
             // Retrieving the bitmap from given file path
             imageBitmap = BitmapFactory.decodeFile(filePath, options)
             imageBitmap = exifRotateBitmap(filePath, imageBitmap)
-            if(filePath != null) {
+            if (filePath != null) {
                 val file = File(filePath)
                 if (file.exists())
                     file.delete()
@@ -536,8 +620,9 @@ class MainFragment : Fragment() {
         }
 
         // Saving the bitmap to given path
-        if(imageBitmap != null)
+        if (imageBitmap != null)
             saveBitmap(imageBitmap, destinationPath)
+        return true
     }
 
     private fun createNewNote(imageData: ImageData) {
@@ -547,23 +632,30 @@ class MainFragment : Fragment() {
         val imageContent = ImageNoteContent("", arrayListOf(id))
         val content = Gson().toJson(imageContent)
         mainViewModel.setSelectedNote(
-            Note(-1L, "", content, 0, 0,
+            Note(
+                -1L, "", content, 0, 0,
                 "-1", IMAGE_DEFAULT, false, null, -1L
             )
         )
     }
 
-    private fun insertImageInDatabase(photoUri: Uri?, filePath: String?){
+    private fun insertImageInDatabase(photoUri: Uri?, filePath: String?) {
         val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
         val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
         GlobalScope.launch(Dispatchers.IO) {
             val imageData = databaseViewModel.insertImage()
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 createNewNote(imageData)
             }
-            loadBitmap(photoUri, filePath, imageData.imagePath)
-            withContext(Dispatchers.Main){
-                // Notify the changes to the view
+            val isLoadSuccess = loadBitmap(photoUri, filePath, imageData.imagePath)
+            // If there is a problem retrieving the image then delete the empty entry
+            if (!isLoadSuccess)
+                databaseViewModel.deleteImage(imageData.imageId!!, imageData.imagePath)
+
+            // Notify the changes to the view
+            withContext(Dispatchers.Main) {
+                if(!isLoadSuccess)
+                    Toast.makeText(context, "Error in retrieving image", LENGTH_SHORT).show()
                 mainViewModel.setRefreshImagesList(true)
             }
         }
@@ -573,7 +665,7 @@ class MainFragment : Fragment() {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
                 val photoUri: Uri? = data?.data
-                if(photoUri != null)
+                if (photoUri != null)
                     insertImageInDatabase(photoUri, null)
                 else
                     Toast.makeText(context, "Can't access storage", LENGTH_SHORT).show()

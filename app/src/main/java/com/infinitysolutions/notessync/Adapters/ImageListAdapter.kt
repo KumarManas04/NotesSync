@@ -24,14 +24,12 @@ class ImageListAdapter(val context: Context, val list: ArrayList<ImageData>, pri
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val file = File(list[position].imagePath)
         if(file.exists()) {
-            Log.d("", "File exists")
             Glide.with(context).load(file).into(holder.imageView)
             holder.imageView.setOnClickListener {
                 mainViewModel.setImagesList(list)
                 mainViewModel.setOpenImageView(position)
             }
         }else{
-            Log.d("", "File doesn't exists")
             Glide.with(context).load(R.drawable.image_placeholder).into(holder.imageView)
         }
     }
@@ -46,6 +44,12 @@ class ImageListAdapter(val context: Context, val list: ArrayList<ImageData>, pri
         for(item in list)
             result.add(item.imageId!!)
         return result
+    }
+
+    fun setNewList(newList: List<ImageData>){
+        list.clear()
+        list.addAll(newList)
+        notifyDataSetChanged()
     }
 
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
