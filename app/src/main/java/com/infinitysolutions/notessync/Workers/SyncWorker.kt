@@ -53,10 +53,12 @@ import com.infinitysolutions.notessync.Util.AES256Helper
 import com.infinitysolutions.notessync.Util.DropboxHelper
 import com.infinitysolutions.notessync.Util.GoogleDriveHelper
 import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
+import org.json.JSONException
 import java.io.*
 import java.lang.Exception
 import java.lang.NumberFormatException
 import java.util.*
+import javax.crypto.AEADBadTagException
 import kotlin.collections.ArrayList
 
 class SyncWorker(private val context: Context, params: WorkerParameters) : Worker(context, params) {
@@ -140,8 +142,17 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
 
                     if (availableNotesList.isNotEmpty()) {
                         for (note in availableNotesList) {
-                            fileSystem = syncNote(note, fileSystem)
-                            set.remove(note.nId.toString())
+                            try {
+                                fileSystem = syncNote(note, fileSystem)
+                                set.remove(note.nId.toString())
+                            }catch(ex: Exception){
+                                when(ex){
+                                    is AEADBadTagException, is JSONException ->{ }
+                                    else ->{
+                                        throw ex
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -153,15 +164,23 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
                             }catch(e: NumberFormatException){}
                         }
                         for (id in unavailableNotesIds) {
+                            try{
                             downloadCloudNote(id, fileSystem)
                             set.remove(id.toString())
+                            }catch(ex: Exception){
+                                when(ex){
+                                    is AEADBadTagException, is JSONException ->{ }
+                                    else ->{
+                                        throw ex
+                                    }
+                                }
+                            }
                         }
                     }
 
                     writeFileSystemToCloud(fileSystem)
-                    if (imageFileSystem != null) {
+                    if (imageFileSystem != null)
                         writeImageFileSystemToCloud(imageFileSystem!!)
-                    }
                     Log.d(TAG, "Done syncing")
                 } catch (e: Exception) {
                     e.printStackTrace()

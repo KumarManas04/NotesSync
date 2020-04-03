@@ -61,8 +61,12 @@
               android:label="fragment_password" tools:layout="@layout/fragment_password"/>
     <fragment android:id="@+id/appLockFragment" android:name="com.infinitysolutions.notessync.Fragments.AppLockFragment"
               android:label="fragment_app_lock" tools:layout="@layout/fragment_app_lock">
-        <action android:id="@+id/action_appLockFragment_to_mainFragment" app:destination="@id/mainFragment"
-                app:enterAnim="@anim/fade_in" app:popExitAnim="@anim/fade_out" app:popUpTo="@+id/nav_graph"/>
+        <action
+            android:id="@+id/action_appLockFragment_to_mainFragment"
+            app:destination="@id/mainFragment"
+            app:enterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
+            app:popUpTo="@id/nav_graph" />
     </fragment>
     <fragment
         android:id="@+id/imageGalleryFragment"

@@ -2,10 +2,7 @@ package com.infinitysolutions.notessync.Fragments
 
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -13,6 +10,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -22,23 +20,16 @@ import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
-import com.infinitysolutions.notessync.Contracts.Contract
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
-import kotlinx.android.synthetic.main.fragment_main.*
-import kotlinx.android.synthetic.main.fragment_main.toolbar
-import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
-import kotlinx.android.synthetic.main.fragment_search.view.empty_items
-import kotlinx.android.synthetic.main.fragment_search.view.search_bar
-import kotlinx.android.synthetic.main.fragment_search.view.toolbar
 
 
 class SearchFragment : Fragment() {
     private lateinit  var searchRecyclerView: RecyclerView
+    private var isMultiSelectEnabled = false
     private val TAG = "SearchFragment"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -76,13 +67,22 @@ class SearchFragment : Fragment() {
             true
         }
 
+        val backCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                recyclerAdapter?.clearAll()
+            }
+        }
         mainViewModel.getMultiSelectCount().observe(this, Observer{count ->
                 if (count > 0) {
                     toolbar.title = "$count selected"
-                    if (count == 1)
+                    if (count == 1) {
+                        activity?.onBackPressedDispatcher?.addCallback(this, backCallback)
                         enableMultiSelect(toolbar, recyclerAdapter, search_bar)
+                        backCallback.isEnabled = true
+                    }
                 } else {
                     disableMultiSelect(toolbar, rootView.search_bar)
+                    backCallback.isEnabled = false
                 }
         })
         mainViewModel.setMultiSelectCount(0)
@@ -122,11 +122,13 @@ class SearchFragment : Fragment() {
     }
 
     private fun disableMultiSelect(toolbar: Toolbar, searchBar: LinearLayout){
+        isMultiSelectEnabled = false
         toolbar.visibility = GONE
         searchBar.visibility = VISIBLE
     }
 
     private fun enableMultiSelect(toolbar: Toolbar, recyclerAdapter: NotesAdapter?, searchBar: LinearLayout){
+        isMultiSelectEnabled = true
         toolbar.visibility = VISIBLE
         searchBar.visibility = GONE
         toolbar.setNavigationOnClickListener {

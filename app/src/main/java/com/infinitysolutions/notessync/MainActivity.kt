@@ -31,7 +31,6 @@ import kotlinx.android.synthetic.main.support_development_dialog.view.*
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
-    private var isExitBlocked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,10 +60,6 @@ class MainActivity : AppCompatActivity() {
                 editor.commit()
                 WorkSchedulerHelper().syncNotes(true, this)
             }
-        })
-
-        mainViewModel.getIsExitBlocked().observe(this, Observer{
-            isExitBlocked = it
         })
 
         mainViewModel.getToolbar().observe(this, Observer { toolbar ->
@@ -209,22 +204,5 @@ class MainActivity : AppCompatActivity() {
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         mainViewModel.intent = null
         super.onDestroy()
-    }
-
-    override fun onBackPressed() {
-        if(isExitBlocked){
-            AlertDialog.Builder(this)
-                .setTitle(getString(R.string.warning))
-                .setMessage(getString(R.string.encryption_warning_exit))
-                .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
-                    isExitBlocked = false
-                    super.onBackPressed()
-                }
-                .setNegativeButton(getString(R.string.no), null)
-                .setCancelable(true)
-                .show()
-        }else{
-            super.onBackPressed()
-        }
     }
 }

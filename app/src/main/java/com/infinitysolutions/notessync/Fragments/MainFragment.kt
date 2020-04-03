@@ -8,7 +8,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
@@ -17,7 +16,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -27,6 +25,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat.checkSelfPermission
@@ -159,13 +158,23 @@ class MainFragment : Fragment() {
         }
         mainViewModel.setToolbar(toolbar)
 
+        val backCallback = object: OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                recyclerAdapter?.clearAll()
+            }
+        }
+
         mainViewModel.getMultiSelectCount().observe(this, Observer{count ->
                 if (count > 0) {
                     toolbar.title = "$count selected"
-                    if (count == 1)
+                    if (count == 1) {
+                        activity?.onBackPressedDispatcher?.addCallback(this, backCallback)
                         enableMultiSelect(toolbar, recyclerAdapter, rootView.bottom_bar)
+                        backCallback.isEnabled = true
+                    }
                 } else {
                     disableMultiSelect(prefs, toolbar, rootView.bottom_bar)
+                    backCallback.isEnabled = false
                 }
         })
         mainViewModel.setMultiSelectCount(0)

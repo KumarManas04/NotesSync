@@ -14,8 +14,10 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.http.OkHttp3Requestor
 import com.dropbox.core.v2.DbxClientV2
@@ -66,12 +68,20 @@ import kotlinx.coroutines.withContext
 class PasswordFragment : Fragment() {
     private val TAG = "PasswordFragment"
     private lateinit var loginViewModel: LoginViewModel
+    private lateinit var mainViewModel: MainViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_password, container, false)
-        val userId = arguments?.getString(PREF_ID) as String
-        val cloudType = arguments?.getInt(PREF_CLOUD_TYPE) as Int
-        val passwordMode = arguments?.getInt(PASSWORD_MODE) as Int
+        var userId = ""
+        var cloudType = -1
+        var passwordMode = -1
+        try {
+            userId = arguments?.getString(PREF_ID) as String
+            cloudType = arguments?.getInt(PREF_CLOUD_TYPE) as Int
+            passwordMode = arguments?.getInt(PASSWORD_MODE) as Int
+        }catch (ex: TypeCastException){
+            findNavController(this).navigateUp()
+        }
         initDataBinding(rootView, cloudType, userId, passwordMode)
         if (passwordMode == MODE_CHANGE_PASSWORD || passwordMode == MODE_NEW_PASSWORD) {
             loginViewModel.isLoginSuccess = true
@@ -119,8 +129,7 @@ class PasswordFragment : Fragment() {
                         .setTitle(getString(R.string.warning))
                         .setMessage(getString(R.string.encryption_warning))
                         .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
-                            val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
-                            mainViewModel.setExitBlocked(true)
+                            mainViewModel.isExitBlocked = true
                             loginViewModel.secureCloudData(
                                 userId,
                                 cloudType,
@@ -140,6 +149,7 @@ class PasswordFragment : Fragment() {
 
     private fun initDataBinding(rootView: View, cloudType: Int, userId: String, passwordMode: Int) {
         loginViewModel = ViewModelProviders.of(activity!!).get(LoginViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
         loginViewModel.setLocalStoragePath(context!!.filesDir.toString())
         if (!loginViewModel.isLoginInitialized)
             initializeLogin(cloudType)
@@ -245,7 +255,7 @@ class PasswordFragment : Fragment() {
         loginViewModel.getSecureDataResult().observe(this, androidx.lifecycle.Observer { result ->
             if (result != null) {
                 val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
-                mainViewModel.setExitBlocked(false)
+                mainViewModel.isExitBlocked = false
                 if (result) {
                     Toast.makeText(activity, getString(R.string.toast_success), LENGTH_SHORT).show()
                     finishLogin(rootView.password_edit_text.text.toString(), userId, cloudType)
@@ -279,6 +289,25 @@ class PasswordFragment : Fragment() {
                     }
                 }
             })
+
+        activity?.onBackPressedDispatcher?.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (mainViewModel.isExitBlocked) {
+                    AlertDialog.Builder(context)
+                        .setTitle(getString(R.string.warning))
+                        .setMessage(getString(R.string.encryption_warning_exit))
+                        .setPositiveButton(getString(R.string.yes)) { _: DialogInterface, _: Int ->
+                            mainViewModel.isExitBlocked = false
+                            findNavController(this@PasswordFragment).navigateUp()
+                        }
+                        .setNegativeButton(getString(R.string.no), null)
+                        .setCancelable(true)
+                        .show()
+                } else {
+                    findNavController(this@PasswordFragment).navigateUp()
+                }
+            }
+        })
     }
 
     private fun initializeLogin(cloudType: Int) {
