@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SeekBar
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
@@ -41,41 +42,48 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.R
 import kotlinx.android.synthetic.main.fragment_settings.view.*
+import kotlinx.android.synthetic.main.preview_lines_dialog.view.*
 
 class SettingsFragment : Fragment() {
     private val TAG = "SettingsFragment"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
-        setupViews(rootView)
+        setupViews(rootView, container)
         return rootView
     }
 
-    private fun setupViews(rootView: View) {
+    private fun setupViews(rootView: View, container: ViewGroup?) {
         val toolbar = rootView.toolbar
         toolbar.title = getString(R.string.menu_settings)
         toolbar.setNavigationOnClickListener {
             activity?.onBackPressed()
         }
 
-        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (prefs!!.contains(PREF_THEME)) {
-            when(prefs.getInt(PREF_THEME, THEME_DEFAULT)){
-                THEME_DEFAULT-> rootView.pref_theme_text.text = getString(R.string.light)
-                THEME_DARK -> rootView.pref_theme_text.text = getString(R.string.dark)
-                THEME_AMOLED -> rootView.pref_theme_text.text = getString(R.string.amoled)
+        val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        var themeIndex = 0
+        rootView.pref_theme_text.text = when (prefs.getInt(PREF_THEME, THEME_DEFAULT)) {
+            THEME_DEFAULT -> {
+                themeIndex = 0
+                getString(R.string.light)
             }
-        }else{
-            rootView.pref_theme_text.text = getString(R.string.light)
+            THEME_DARK -> {
+                themeIndex = 1
+                getString(R.string.dark)
+            }
+            else -> {
+                themeIndex = 2
+                getString(R.string.amoled)
+            }
         }
 
         rootView.night_mode_button.setOnClickListener {
-            val content = arrayOf(getString(R.string.light), getString(R.string.dark), getString(R.string.amoled))
-            val optionsDialog = AlertDialog.Builder(activity)
-            optionsDialog.setTitle(getString(R.string.pick_theme))
-            optionsDialog.setItems(content) { dialog, which ->
+            val items = arrayOf<CharSequence>(getString(R.string.light), getString(R.string.dark), getString(R.string.amoled))
+            val builder = AlertDialog.Builder(activity)
+            builder.setTitle(getString(R.string.pick_theme))
+            builder.setSingleChoiceItems(items, themeIndex){ _, index ->
                 val editor = prefs.edit()
-                when(which){
+                when(index){
                     0 -> editor.putInt(PREF_THEME, THEME_DEFAULT)
                     1 -> editor.putInt(PREF_THEME, THEME_DARK)
                     2 -> editor.putInt(PREF_THEME, THEME_AMOLED)
@@ -84,7 +92,8 @@ class SettingsFragment : Fragment() {
                 updateWidgets()
                 activity?.recreate()
             }
-            optionsDialog.show()
+
+            builder.create().show()
         }
 
         configureAppLockButtons(rootView, prefs)
@@ -101,7 +110,7 @@ class SettingsFragment : Fragment() {
             openLink("https://github.com/KumarManas04/NotesSync")
         }
 
-        configureMaxLinesButton(rootView, prefs)
+        configureMaxLinesButton(rootView, prefs, container)
 
         configureChecklistMoveButton(rootView, prefs)
 
@@ -145,30 +154,47 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun configureMaxLinesButton(rootView: View, prefs: SharedPreferences){
-        val linesCount = prefs.getInt(PREF_MAX_PREVIEW_LINES, -1)
-        if(linesCount == -1)
-            rootView.preview_lines_count_text.text = "MAX Lines"
-        else
-            rootView.preview_lines_count_text.text = "$linesCount Lines"
+    private fun configureMaxLinesButton(rootView: View, prefs: SharedPreferences, container: ViewGroup?){
+        var value = prefs.getInt(PREF_MAX_PREVIEW_LINES, 32)
+        if(value == -1)
+            value = 32
+        rootView.preview_lines_count_text.text = "$value lines"
 
         rootView.preview_lines_count_button.setOnClickListener {
-            val content = arrayOf("2 Lines", "3 Lines", "4 Lines", "5 Lines", "MAX Lines")
-            val optionsDialog = AlertDialog.Builder(activity)
-            optionsDialog.setTitle("Pick number of lines")
-            optionsDialog.setItems(content) { _, which ->
-                val editor = prefs.edit()
-                when(which){
-                    0 -> editor.putInt(PREF_MAX_PREVIEW_LINES, 2)
-                    1 -> editor.putInt(PREF_MAX_PREVIEW_LINES, 3)
-                    2 -> editor.putInt(PREF_MAX_PREVIEW_LINES, 4)
-                    3 -> editor.putInt(PREF_MAX_PREVIEW_LINES, 5)
-                    4 -> editor.putInt(PREF_MAX_PREVIEW_LINES, Integer.MAX_VALUE)
+            val builder = AlertDialog.Builder(activity)
+            builder.setTitle("Pick number of lines")
+            val dialogView = layoutInflater.inflate(R.layout.preview_lines_dialog, container, false)
+            val seekBar = dialogView.seek_bar
+            seekBar.max = 32
+            seekBar.progress = value
+            seekBar.keyProgressIncrement = 1
+            val linesText = dialogView.lines_text
+            linesText.text = "$value"
+            builder.setView(seekBar)
+            seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seek: SeekBar, progress: Int, fromUser: Boolean) {
+                    value = progress
+                    linesText.text = "$value"
                 }
+
+                override fun onStartTrackingTouch(p0: SeekBar?) {}
+                override fun onStopTrackingTouch(p0: SeekBar?) {}
+            })
+
+            builder.setPositiveButton("Ok"){ _, _ ->
+                val editor = prefs.edit()
+                editor.putInt(PREF_MAX_PREVIEW_LINES, value)
                 editor.apply()
-                rootView.preview_lines_count_text.text = content[which]
+                rootView.preview_lines_count_text.text = "$value lines"
             }
-            optionsDialog.show()
+            builder.setOnDismissListener {
+                val editor = prefs.edit()
+                editor.putInt(PREF_MAX_PREVIEW_LINES, value)
+                editor.apply()
+                rootView.preview_lines_count_text.text = "$value lines"
+            }
+            builder.setView(dialogView)
+            builder.show()
         }
     }
 
