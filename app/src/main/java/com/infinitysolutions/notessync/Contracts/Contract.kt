@@ -67,5 +67,12 @@ class Contract{
         const val PREF_IMAGE_FILESYSTEM_STASH = "sharedPrefs.imageFilesystemStash"
         const val PREF_MOVE_CHECKED_TO_BOTTOM = "sharedPrefs.moveCheckedToBottom"
         const val PREF_MAX_PREVIEW_LINES = "sharedPrefs.maxPreviewLines"
+        const val ORDER_ASC = "ASC"
+        const val ORDER_DESC = "DESC"
+        const val ORDER_BY_TITLE = "title"
+        const val ORDER_BY_CREATED = "date_created"
+        const val ORDER_BY_UPDATED = "date_modified"
+        const val PREF_ORDER_BY = "sharedPrefs.orderBy"
+        const val PREF_ORDER = "sharedPrefs.order"
     }
 }

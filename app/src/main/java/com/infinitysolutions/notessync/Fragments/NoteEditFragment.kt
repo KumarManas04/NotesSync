@@ -158,8 +158,12 @@ class NoteEditFragment : Fragment() {
             it.getContentIfNotHandled()?.let { shouldRefresh ->
                 if (shouldRefresh) {
                     if(imageListAdapter != null) {
-                        val newList = databaseViewModel.getImagesByIds(imageListAdapter!!.getIdsList())
-                        imageListAdapter?.setNewList(newList)
+                        GlobalScope.launch(Dispatchers.IO) {
+                            val newList = databaseViewModel.getImagesByIds(imageListAdapter!!.getIdsList())
+                            withContext(Dispatchers.Main){
+                                imageListAdapter?.setNewList(newList)
+                            }
+                        }
                     }
                 }
             }

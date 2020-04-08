@@ -2,6 +2,7 @@ package com.infinitysolutions.notessync.Fragments
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
@@ -23,6 +24,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.RadioButton
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.activity.OnBackPressedCallback
@@ -38,6 +40,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
@@ -49,9 +52,16 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_PICKER
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ID_EXTRA
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ORDER_ASC
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ORDER_BY_CREATED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ORDER_BY_TITLE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ORDER_BY_UPDATED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ORDER_DESC
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_COMPACT_VIEW_MODE_ENABLED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ORDER
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ORDER_BY
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_BUTTON_EXTRA
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.WIDGET_NEW_IMAGE
@@ -64,6 +74,7 @@ import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_main.view.*
+import kotlinx.android.synthetic.main.sort_dialog.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -77,13 +88,9 @@ class MainFragment : Fragment() {
     private val TAG = "MainFragment"
     private lateinit var mainViewModel: MainViewModel
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_main, container, false)
-        initDataBinding(rootView)
+        initDataBinding(rootView, container)
 
         rootView.search_button.setOnClickListener {
             findNavController(this).navigate(R.id.action_mainFragment_to_searchFragment)
@@ -91,7 +98,7 @@ class MainFragment : Fragment() {
         return rootView
     }
 
-    private fun initDataBinding(rootView: View) {
+    private fun initDataBinding(rootView: View, container: ViewGroup?) {
         val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
         mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
@@ -102,19 +109,13 @@ class MainFragment : Fragment() {
         val notesRecyclerView = rootView.notes_recycler_view
         var recyclerAdapter: NotesAdapter? = null
         val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && !prefs.getBoolean(
-                PREF_COMPACT_VIEW_MODE_ENABLED,
-                true
-            )
-        ) {
-            notesRecyclerView.layoutManager =
-                LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
+        if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && !prefs.getBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, true)) {
+            notesRecyclerView.layoutManager = LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
             toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
             toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
         } else {
             val columnCount = resources.getInteger(R.integer.columns_count)
-            notesRecyclerView.layoutManager =
-                StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
+            notesRecyclerView.layoutManager = StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
             toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = true
             toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = false
         }
@@ -135,13 +136,50 @@ class MainFragment : Fragment() {
                 }
                 R.id.simple_view_menu_item -> {
                     val editor = prefs.edit()
-                    notesRecyclerView.layoutManager =
-                        LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
+                    notesRecyclerView.layoutManager = LinearLayoutManager(activity!!, LinearLayoutManager.VERTICAL, false)
                     editor.putBoolean(PREF_COMPACT_VIEW_MODE_ENABLED, false)
                     recyclerAdapter?.notifyDataSetChanged()
                     toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
                     toolbar.menu.findItem(R.id.compact_view_menu_item).isVisible = true
                     editor.apply()
+                }
+                R.id.sort_menu_item->{
+                    val sortOrder = when(prefs.getString(PREF_ORDER, ORDER_DESC)){
+                        ORDER_DESC -> 1
+                        else -> 0
+                    }
+                    val sortOrderBy = when(prefs.getString(PREF_ORDER_BY, ORDER_BY_UPDATED)){
+                        ORDER_BY_TITLE -> 0
+                        ORDER_BY_UPDATED -> 1
+                        ORDER_BY_CREATED -> 2
+                        else -> 4
+                    }
+
+                    val dialogView = layoutInflater.inflate(R.layout.sort_dialog, container, false)
+                    val dialog = BottomSheetDialog(context!!)
+                    val orderGroup = dialogView.order_group
+                    val sortByGroup = dialogView.sort_by_group
+                    (orderGroup.getChildAt(sortOrder) as RadioButton).isChecked = true
+                    (sortByGroup.getChildAt(sortOrderBy) as RadioButton).isChecked = true
+                    dialog.setOnDismissListener {
+                        val orderResult = when(orderGroup.checkedRadioButtonId){
+                            R.id.asc_btn -> ORDER_ASC
+                            else -> ORDER_DESC
+                        }
+                        val orderByResult = when(sortByGroup.checkedRadioButtonId){
+                            R.id.title_btn -> ORDER_BY_TITLE
+                            R.id.edited_btn -> ORDER_BY_UPDATED
+                            else -> ORDER_BY_CREATED
+                        }
+
+                        databaseViewModel.setOrder(orderResult, orderByResult)
+                        val editor = prefs.edit()
+                        editor.putString(PREF_ORDER_BY, orderByResult)
+                        editor.putString(PREF_ORDER, orderResult)
+                        editor.commit()
+                    }
+                    dialog.setContentView(dialogView)
+                    dialog.show()
                 }
                 R.id.delete_forever_menu_item -> {
                     recyclerAdapter?.deleteForeverSelectedNotes()
@@ -375,11 +413,7 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun disableMultiSelect(
-        prefs: SharedPreferences,
-        toolbar: Toolbar,
-        bottomBar: LinearLayout
-    ) {
+    private fun disableMultiSelect(prefs: SharedPreferences, toolbar: Toolbar, bottomBar: LinearLayout) {
         toolbar.navigationIcon = null
         bottomBar.visibility = VISIBLE
         toolbar.setNavigationOnClickListener {}

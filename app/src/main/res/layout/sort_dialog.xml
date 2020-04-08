@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/mainBackground"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:text="Sort Notes"
+        android:textSize="18sp"
+        android:textColor="?attr/mainTextColor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:text="Order"
+        android:layout_marginTop="20dp"
+        android:textSize="16sp"
+        android:textColor="?attr/mainTextColor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <RadioGroup
+        android:id="@+id/order_group"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/asc_btn"
+            android:text="Ascending"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="?attr/mainTextColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <RadioButton
+            android:id="@+id/desc_btn"
+            android:text="Descending"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="?attr/mainTextColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </RadioGroup>
+    <TextView
+        android:text="Sort by"
+        android:layout_marginTop="20dp"
+        android:textSize="16sp"
+        android:textColor="?attr/mainTextColor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <RadioGroup
+        android:id="@+id/sort_by_group"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/title_btn"
+            android:text="Title"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="?attr/mainTextColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <RadioButton
+            android:id="@+id/edited_btn"
+            android:text="Edited date"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="?attr/mainTextColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <RadioButton
+            android:id="@+id/created_btn"
+            android:text="Created date"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="?attr/mainTextColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </RadioGroup>
+</LinearLayout>

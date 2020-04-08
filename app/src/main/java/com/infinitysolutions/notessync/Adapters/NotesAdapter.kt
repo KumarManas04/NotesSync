@@ -98,11 +98,13 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                 if (path != null) {
                     setImage(path, holder.imageView)
                 } else {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        path = databaseViewModel.getImagePathById(imageContent.idList[0])
-                        withContext(Dispatchers.Main) {
-                            pathsMap.put(position, path)
-                            setImage(path, holder.imageView)
+                    if(imageContent.idList.isNotEmpty()) {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            path = databaseViewModel.getImagePathById(imageContent.idList[0])
+                            withContext(Dispatchers.Main) {
+                                pathsMap.put(position, path)
+                                setImage(path, holder.imageView)
+                            }
                         }
                     }
                 }

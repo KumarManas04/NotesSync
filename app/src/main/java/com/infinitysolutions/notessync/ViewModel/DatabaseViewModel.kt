@@ -21,6 +21,11 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_D
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ORDER_BY_TITLE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ORDER_BY_UPDATED
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.ORDER_DESC
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ORDER
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ORDER_BY
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SYNC_QUEUE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Fragments.NotesWidget
@@ -38,6 +43,8 @@ import kotlin.collections.ArrayList
 class DatabaseViewModel(application: Application) : AndroidViewModel(application) {
     private val query = MutableLiveData<SimpleSQLiteQuery>()
     private val viewMode = MutableLiveData<Int>()
+    private var orderBy = ORDER_BY_UPDATED
+    private var order = ORDER_DESC
     private val notesDao: NotesDao = NotesRoomDatabase.getDatabase(application).notesDao()
     private val imagesDao: ImagesDao = NotesRoomDatabase.getDatabase(application).imagesDao()
     private val repository: NotesRepository = NotesRepository(notesDao)
@@ -46,9 +53,9 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
     }
     val viewList: LiveData<List<Note>> = Transformations.switchMap(viewMode) { mode ->
         when (mode) {
-            1 -> repository.getAllList()
-            2 -> repository.getArchiveList()
-            3 -> repository.getTrashList()
+            1 -> repository.getNotesList(orderBy, order)
+            2 -> repository.getArchiveList(orderBy, order)
+            3 -> repository.getTrashList(orderBy, order)
             else -> null
         }
     }
@@ -56,6 +63,10 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
     init {
         query.value = SimpleSQLiteQuery("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13")
         viewMode.value = 1
+        val context = getApplication<Application>().applicationContext
+        val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        orderBy = prefs.getString(PREF_ORDER_BY, ORDER_BY_UPDATED)?: ORDER_BY_UPDATED
+        order = prefs.getString(PREF_ORDER, ORDER_DESC)?: ORDER_DESC
     }
 
     fun setSearchQuery(searchQuery: String) {
@@ -84,6 +95,13 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
 
     fun setViewMode(mode: Int) {
         viewMode.value = mode
+    }
+
+    fun setOrder(order: String, orderBy: String){
+        this.order = order
+        this.orderBy = orderBy
+        val vM = viewMode.value
+        viewMode.value = vM
     }
 
     fun insert(note: Note) {

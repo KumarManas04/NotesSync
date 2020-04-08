@@ -7,17 +7,17 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 @Dao
 interface NotesDao {
 
-    @Query("SELECT * FROM notes_table WHERE type = 1 OR type = 3 OR type = 7 OR type = 11 ORDER BY date_modified DESC")
-    fun getAll(): LiveData<List<Note>>
+    @RawQuery(observedEntities = [Note::class])
+    fun getNotes(query: SimpleSQLiteQuery): LiveData<List<Note>>
+
+    @RawQuery(observedEntities = [Note::class])
+    fun getArchived(query: SimpleSQLiteQuery): LiveData<List<Note>>
+
+    @RawQuery(observedEntities = [Note::class])
+    fun getTrash(query: SimpleSQLiteQuery): LiveData<List<Note>>
 
     @Query("SELECT * FROM notes_table WHERE type = 1 OR type = 3 OR type = 7 OR type = 11 ORDER BY date_modified DESC")
     fun getAllPresent(): List<Note>
-
-    @Query("SELECT * FROM notes_table WHERE type = 2 OR type = 4 OR type = 8 OR type = 12 ORDER BY date_modified DESC")
-    fun getArchived(): LiveData<List<Note>>
-
-    @Query("SELECT * FROM notes_table WHERE type = 5 OR type = 6 OR type = 9 OR type = 13 ORDER BY date_modified DESC")
-    fun getTrash(): LiveData<List<Note>>
 
     @Query("SELECT * FROM notes_table WHERE type = 5 OR type = 6 OR type = 9 OR type = 13 ORDER BY date_modified DESC")
     fun getTrashPresent(): List<Note>
@@ -27,9 +27,6 @@ interface NotesDao {
 
     @Query("SELECT * FROM notes_table WHERE note_id in (:idList)")
     fun getNotesByIds(idList: List<Long>): List<Note>
-
-//    @Query("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13 AND (:query)")
-//    fun getSearchResult(query: String): LiveData<List<Note>>
 
     @RawQuery(observedEntities = [Note::class])
     fun getSearchResult(query: SimpleSQLiteQuery): LiveData<List<Note>>
