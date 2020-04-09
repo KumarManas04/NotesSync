@@ -14,12 +14,13 @@ import com.infinitysolutions.notessync.Util.ColorsUtil
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.color_picker_item.view.*
 
-class ColorPickerAdapter(val context: Context, val mainViewModel: MainViewModel) : RecyclerView.Adapter<ColorPickerAdapter.ViewHolder>(){
+class ColorPickerAdapter(val context: Context, val mainViewModel: MainViewModel?) : RecyclerView.Adapter<ColorPickerAdapter.ViewHolder>(){
     private var selectedColor = 0
     private val colorsUtil = ColorsUtil()
 
     init{
-        selectedColor = mainViewModel.getSelectedColor().value!!
+        if(mainViewModel != null)
+            selectedColor = mainViewModel.getSelectedColor().value!!
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -39,9 +40,14 @@ class ColorPickerAdapter(val context: Context, val mainViewModel: MainViewModel)
 
         holder.colorImageView.setOnClickListener{
             selectedColor = position
-            mainViewModel.setSelectedColor(position)
+            mainViewModel?.setSelectedColor(position)
             notifyDataSetChanged()
         }
+    }
+
+    fun getSelectedColor(): Int = selectedColor
+    fun setSelectedColor(color: Int){
+        selectedColor = color
     }
 
     class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){

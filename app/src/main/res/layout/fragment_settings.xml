@@ -30,7 +30,7 @@
                     style="@style/prefsCategoryTitle"/>
 
             <LinearLayout
-                    android:id="@+id/night_mode_button"
+                    android:id="@+id/app_theme_button"
                     style="@style/prefsContainer">
 
                 <ImageView
@@ -99,6 +99,38 @@
 
                 </LinearLayout>
 
+            </LinearLayout>
+
+            <TextView
+                android:text="Notes"
+                style="@style/prefsCategoryTitle"/>
+
+            <LinearLayout
+                android:id="@+id/note_color_button"
+                style="@style/prefsContainer">
+
+                <ImageView
+                    android:src="@drawable/note_color_icon"
+                    style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                        android:text="Default note color"
+                        style="@style/prefsMain"/>
+
+                    <TextView
+                        android:text="Default color of a new note"
+                        style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/color_view"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="10dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"/>
             </LinearLayout>
 
             <LinearLayout

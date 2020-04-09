@@ -74,5 +74,6 @@ class Contract{
         const val ORDER_BY_UPDATED = "date_modified"
         const val PREF_ORDER_BY = "sharedPrefs.orderBy"
         const val PREF_ORDER = "sharedPrefs.order"
+        const val PREF_DEFAULT_NOTE_COLOR = "sharedPrefs.defaultNoteColor"
     }
 }

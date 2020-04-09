@@ -62,6 +62,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.LIST_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_ARCHIVED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_TRASH
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_DEFAULT_NOTE_COLOR
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_MOVE_CHECKED_TO_BOTTOM
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Model.ImageData
@@ -232,6 +233,9 @@ class NoteEditFragment : Fragment() {
                     R.string.edited_time_stamp,
                     formatter.format(Calendar.getInstance().timeInMillis)
                 )
+            }else{
+                val prefs = context!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+                mainViewModel.setSelectedColor(prefs.getInt(PREF_DEFAULT_NOTE_COLOR, 0))
             }
 
             mainViewModel.reminderTime = selectedNote.reminderTime

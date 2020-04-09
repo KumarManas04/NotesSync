@@ -8,6 +8,9 @@ import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,10 +19,15 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.infinitysolutions.notessync.Adapters.ColorPickerAdapter
 import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
@@ -30,6 +38,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_MOD
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_APP_LOCK_CODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_DEFAULT_NOTE_COLOR
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_MAX_PREVIEW_LINES
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_MOVE_CHECKED_TO_BOTTOM
@@ -41,6 +50,8 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.Util.ColorsUtil
+import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import kotlinx.android.synthetic.main.preview_lines_dialog.view.*
 
@@ -57,11 +68,11 @@ class SettingsFragment : Fragment() {
         val toolbar = rootView.toolbar
         toolbar.title = getString(R.string.menu_settings)
         toolbar.setNavigationOnClickListener {
-            activity?.onBackPressed()
+            findNavController(this).navigateUp()
         }
 
         val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        var themeIndex = 0
+        val themeIndex: Int
         rootView.pref_theme_text.text = when (prefs.getInt(PREF_THEME, THEME_DEFAULT)) {
             THEME_DEFAULT -> {
                 themeIndex = 0
@@ -77,7 +88,7 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        rootView.night_mode_button.setOnClickListener {
+        rootView.app_theme_button.setOnClickListener {
             val items = arrayOf<CharSequence>(getString(R.string.light), getString(R.string.dark), getString(R.string.amoled))
             val builder = AlertDialog.Builder(activity)
             builder.setTitle(getString(R.string.pick_theme))
@@ -110,6 +121,7 @@ class SettingsFragment : Fragment() {
             openLink("https://github.com/KumarManas04/NotesSync")
         }
 
+        configureNoteColorButton(rootView, prefs, container)
         configureMaxLinesButton(rootView, prefs, container)
 
         configureChecklistMoveButton(rootView, prefs)
@@ -151,6 +163,37 @@ class SettingsFragment : Fragment() {
             configureChangePassButton(rootView)
         } else {
             resetLoginButton(rootView)
+        }
+    }
+
+    private fun configureNoteColorButton(rootView: View, prefs: SharedPreferences, container: ViewGroup?) {
+        var defaultColor = prefs.getInt(PREF_DEFAULT_NOTE_COLOR, 0)
+        val colorsUtil = ColorsUtil()
+        val colorIndicator = rootView.color_view
+        val drawable = ContextCompat.getDrawable(context!!, R.drawable.round_color)
+        drawable?.colorFilter = PorterDuffColorFilter(Color.parseColor(colorsUtil.getColor(defaultColor)), PorterDuff.Mode.SRC)
+        colorIndicator.background = drawable
+
+        rootView.note_color_button.setOnClickListener {
+            val dialogView = layoutInflater.inflate(R.layout.color_picker_dialog, container, false)
+            val dialog = BottomSheetDialog(context!!)
+
+            val layoutManager = LinearLayoutManager(context!!, RecyclerView.HORIZONTAL, false)
+            dialogView.color_picker.layoutManager = layoutManager
+            val adapter = ColorPickerAdapter(context!!, null)
+            adapter.setSelectedColor(defaultColor)
+            dialogView.color_picker.adapter = adapter
+            dialog.setOnDismissListener {
+                defaultColor = adapter.getSelectedColor()
+                val editor = prefs.edit()
+                editor.putInt(PREF_DEFAULT_NOTE_COLOR, defaultColor)
+                editor.apply()
+                val drawable = ContextCompat.getDrawable(context!!, R.drawable.round_color)
+                drawable?.colorFilter = PorterDuffColorFilter(Color.parseColor(colorsUtil.getColor(defaultColor)), PorterDuff.Mode.SRC)
+                colorIndicator.background = drawable
+            }
+            dialog.setContentView(dialogView)
+            dialog.show()
         }
     }
 
