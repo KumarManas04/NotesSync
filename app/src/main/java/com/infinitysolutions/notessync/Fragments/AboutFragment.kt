@@ -49,7 +49,7 @@ class AboutFragment : Fragment() {
             val to = arrayOf("infinitysolutionsv1.1@gmail.com")
             intent.type = "vnd.android.cursor.dir/email"
             intent.putExtra(Intent.EXTRA_EMAIL, to)
-            intent.putExtra(Intent.EXTRA_SUBJECT, "[Notes Sync][v"+BuildConfig.VERSION_NAME+"]")
+            intent.putExtra(Intent.EXTRA_SUBJECT, "[Notes Sync][v${BuildConfig.VERSION_NAME}]")
             intent.putExtra(Intent.EXTRA_TEXT, "Your problems, suggestions, requests...")
             startActivity(Intent.createChooser(intent, "Send Email"))
         }

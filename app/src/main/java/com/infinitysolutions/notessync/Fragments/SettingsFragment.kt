@@ -16,6 +16,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
 import android.widget.SeekBar
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
@@ -54,6 +55,7 @@ import com.infinitysolutions.notessync.Util.ColorsUtil
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import kotlinx.android.synthetic.main.preview_lines_dialog.view.*
+import kotlinx.android.synthetic.main.theme_dialog.view.*
 
 class SettingsFragment : Fragment() {
     private val TAG = "SettingsFragment"
@@ -72,7 +74,7 @@ class SettingsFragment : Fragment() {
         }
 
         val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        val themeIndex: Int
+        var themeIndex: Int
         rootView.pref_theme_text.text = when (prefs.getInt(PREF_THEME, THEME_DEFAULT)) {
             THEME_DEFAULT -> {
                 themeIndex = 0
@@ -89,22 +91,33 @@ class SettingsFragment : Fragment() {
         }
 
         rootView.app_theme_button.setOnClickListener {
-            val items = arrayOf<CharSequence>(getString(R.string.light), getString(R.string.dark), getString(R.string.amoled))
-            val builder = AlertDialog.Builder(activity)
-            builder.setTitle(getString(R.string.pick_theme))
-            builder.setSingleChoiceItems(items, themeIndex){ _, index ->
-                val editor = prefs.edit()
-                when(index){
-                    0 -> editor.putInt(PREF_THEME, THEME_DEFAULT)
-                    1 -> editor.putInt(PREF_THEME, THEME_DARK)
-                    2 -> editor.putInt(PREF_THEME, THEME_AMOLED)
+            val dialogView = layoutInflater.inflate(R.layout.theme_dialog, container, false)
+            val dialog = BottomSheetDialog(context!!)
+            val themeGroup = dialogView.theme_group
+            (themeGroup.getChildAt(themeIndex) as RadioButton).isChecked = true
+            dialog.setOnDismissListener {
+                themeIndex = when (themeGroup.checkedRadioButtonId) {
+                    R.id.light_btn -> 0
+                    R.id.dark_btn -> 1
+                    else -> 2
                 }
-                editor.commit()
-                updateWidgets()
-                activity?.recreate()
+
+                val newTheme = when (themeIndex) {
+                    0 -> THEME_DEFAULT
+                    1 -> THEME_DARK
+                    else -> THEME_AMOLED
+                }
+                if (newTheme != prefs.getInt(PREF_THEME, THEME_DEFAULT)) {
+                    val editor = prefs.edit()
+                    editor.putInt(PREF_THEME, newTheme)
+                    editor.commit()
+                    updateWidgets()
+                    activity?.recreate()
+                }
             }
 
-            builder.create().show()
+            dialog.setContentView(dialogView)
+            dialog.show()
         }
 
         configureAppLockButtons(rootView, prefs)
@@ -204,16 +217,14 @@ class SettingsFragment : Fragment() {
         rootView.preview_lines_count_text.text = "$value lines"
 
         rootView.preview_lines_count_button.setOnClickListener {
-            val builder = AlertDialog.Builder(activity)
-            builder.setTitle("Pick number of lines")
             val dialogView = layoutInflater.inflate(R.layout.preview_lines_dialog, container, false)
+            val dialog = BottomSheetDialog(context!!)
             val seekBar = dialogView.seek_bar
             seekBar.max = 32
             seekBar.progress = value
             seekBar.keyProgressIncrement = 1
             val linesText = dialogView.lines_text
             linesText.text = "$value"
-            builder.setView(seekBar)
             seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seek: SeekBar, progress: Int, fromUser: Boolean) {
                     value = progress
@@ -224,20 +235,14 @@ class SettingsFragment : Fragment() {
                 override fun onStopTrackingTouch(p0: SeekBar?) {}
             })
 
-            builder.setPositiveButton("Ok"){ _, _ ->
+            dialog.setOnDismissListener {
                 val editor = prefs.edit()
                 editor.putInt(PREF_MAX_PREVIEW_LINES, value)
                 editor.apply()
                 rootView.preview_lines_count_text.text = "$value lines"
             }
-            builder.setOnDismissListener {
-                val editor = prefs.edit()
-                editor.putInt(PREF_MAX_PREVIEW_LINES, value)
-                editor.apply()
-                rootView.preview_lines_count_text.text = "$value lines"
-            }
-            builder.setView(dialogView)
-            builder.show()
+            dialog.setContentView(dialogView)
+            dialog.show()
         }
     }
 

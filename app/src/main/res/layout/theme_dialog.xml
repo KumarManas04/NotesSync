@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/mainBackground"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="App theme"
+        android:textColor="?attr/mainTextColor"
+        android:textSize="18sp" />
+
+    <RadioGroup
+        android:id="@+id/theme_group"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/light_btn"
+            android:text="Light"
+            android:textSize="16sp"
+            android:textColor="?attr/mainTextColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <RadioButton
+            android:id="@+id/dark_btn"
+            android:text="Dark"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:textColor="?attr/mainTextColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <RadioButton
+            android:id="@+id/amoled_btn"
+            android:text="Amoled"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:textColor="?attr/mainTextColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </RadioGroup>
+</LinearLayout>
