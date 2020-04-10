@@ -430,6 +430,7 @@ class MainFragment : Fragment() {
         toolbar.menu.findItem(R.id.restore_menu_item).isVisible = false
         toolbar.menu.findItem(R.id.select_all_menu_item).isVisible = false
         toolbar.menu.findItem(R.id.sync_menu_item).isVisible = true
+        toolbar.menu.findItem(R.id.sort_menu_item).isVisible = true
         if (prefs.contains(PREF_COMPACT_VIEW_MODE_ENABLED) && !prefs.getBoolean(
                 PREF_COMPACT_VIEW_MODE_ENABLED,
                 true
@@ -456,6 +457,7 @@ class MainFragment : Fragment() {
         toolbar.menu.findItem(R.id.simple_view_menu_item).isVisible = false
         toolbar.menu.findItem(R.id.sync_menu_item).isVisible = false
         toolbar.menu.findItem(R.id.select_all_menu_item).isVisible = true
+        toolbar.menu.findItem(R.id.sort_menu_item).isVisible = false
         when (mainViewModel.getViewMode().value) {
             1 -> {
                 // Notes

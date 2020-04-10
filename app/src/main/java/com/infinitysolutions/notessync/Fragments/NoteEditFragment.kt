@@ -774,7 +774,6 @@ class NoteEditFragment : Fragment() {
             .setPositiveButton(getString(R.string.yes)) { _, _ ->
                 val selectedNote = mainViewModel.getSelectedNote()
                 if (selectedNote?.nId == -1L) {
-                    mainViewModel.setSelectedNote(null)
                     if (isImageType(selectedNote.noteType)) {
                         val idsList = ArrayList<Long>()
                         for (imageData in mainViewModel.getImagesList())
@@ -822,6 +821,7 @@ class NoteEditFragment : Fragment() {
                         }
                     }
                 }
+                mainViewModel.setSelectedNote(null)
                 findNavController(this).navigateUp()
             }
             .setNegativeButton(getString(R.string.no), null)
