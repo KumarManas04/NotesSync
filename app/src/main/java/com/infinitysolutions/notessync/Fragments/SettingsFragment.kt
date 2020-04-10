@@ -95,25 +95,35 @@ class SettingsFragment : Fragment() {
             val dialog = BottomSheetDialog(context!!)
             val themeGroup = dialogView.theme_group
             (themeGroup.getChildAt(themeIndex) as RadioButton).isChecked = true
-            dialog.setOnDismissListener {
-                themeIndex = when (themeGroup.checkedRadioButtonId) {
-                    R.id.light_btn -> 0
-                    R.id.dark_btn -> 1
-                    else -> 2
-                }
-
-                val newTheme = when (themeIndex) {
-                    0 -> THEME_DEFAULT
-                    1 -> THEME_DARK
-                    else -> THEME_AMOLED
-                }
-                if (newTheme != prefs.getInt(PREF_THEME, THEME_DEFAULT)) {
+            dialogView.light_btn.setOnClickListener {
+                if(themeIndex != 0){
                     val editor = prefs.edit()
-                    editor.putInt(PREF_THEME, newTheme)
+                    editor.putInt(PREF_THEME, THEME_DEFAULT)
                     editor.commit()
                     updateWidgets()
                     activity?.recreate()
-                }
+                }else
+                    dialog.dismiss()
+            }
+            dialogView.dark_btn.setOnClickListener {
+                if(themeIndex != 1){
+                    val editor = prefs.edit()
+                    editor.putInt(PREF_THEME, THEME_DARK)
+                    editor.commit()
+                    updateWidgets()
+                    activity?.recreate()
+                }else
+                    dialog.dismiss()
+            }
+            dialogView.amoled_btn.setOnClickListener {
+                if(themeIndex != 2){
+                    val editor = prefs.edit()
+                    editor.putInt(PREF_THEME, THEME_AMOLED)
+                    editor.commit()
+                    updateWidgets()
+                    activity?.recreate()
+                }else
+                    dialog.dismiss()
             }
 
             dialog.setContentView(dialogView)
