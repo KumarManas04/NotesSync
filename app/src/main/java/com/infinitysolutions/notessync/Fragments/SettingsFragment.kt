@@ -96,34 +96,13 @@ class SettingsFragment : Fragment() {
             val themeGroup = dialogView.theme_group
             (themeGroup.getChildAt(themeIndex) as RadioButton).isChecked = true
             dialogView.light_btn.setOnClickListener {
-                if(themeIndex != 0){
-                    val editor = prefs.edit()
-                    editor.putInt(PREF_THEME, THEME_DEFAULT)
-                    editor.commit()
-                    updateWidgets()
-                    activity?.recreate()
-                }else
-                    dialog.dismiss()
+                changeTheme(prefs, themeIndex, THEME_DEFAULT, dialog)
             }
             dialogView.dark_btn.setOnClickListener {
-                if(themeIndex != 1){
-                    val editor = prefs.edit()
-                    editor.putInt(PREF_THEME, THEME_DARK)
-                    editor.commit()
-                    updateWidgets()
-                    activity?.recreate()
-                }else
-                    dialog.dismiss()
+                changeTheme(prefs, themeIndex, THEME_DARK, dialog)
             }
             dialogView.amoled_btn.setOnClickListener {
-                if(themeIndex != 2){
-                    val editor = prefs.edit()
-                    editor.putInt(PREF_THEME, THEME_AMOLED)
-                    editor.commit()
-                    updateWidgets()
-                    activity?.recreate()
-                }else
-                    dialog.dismiss()
+                changeTheme(prefs, themeIndex, THEME_AMOLED, dialog)
             }
 
             dialog.setContentView(dialogView)
@@ -187,6 +166,17 @@ class SettingsFragment : Fragment() {
         } else {
             resetLoginButton(rootView)
         }
+    }
+
+    private fun changeTheme(prefs: SharedPreferences, themeIndex: Int, toTheme: Int, dialog: BottomSheetDialog){
+        if(themeIndex != toTheme){
+            val editor = prefs.edit()
+            editor.putInt(PREF_THEME, toTheme)
+            editor.commit()
+            updateWidgets()
+            activity?.recreate()
+        }else
+            dialog.dismiss()
     }
 
     private fun configureNoteColorButton(rootView: View, prefs: SharedPreferences, container: ViewGroup?) {

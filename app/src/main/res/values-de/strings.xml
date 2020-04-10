@@ -124,6 +124,7 @@
     <string name="new_list">Neue Liste</string>
     <string name="close">Schließen</string>
     <string name="changelog_details"><![CDATA[<html>
+<b>VERSION 2.3 APRIL 11, 2020</b><li>Added ability to multi-select notes</li><li>Improved Search</li><li>Added option to sort notes</li><li>Added option to select default note color</li><li>Improved note syncing</li><li>UI improvements</li><li>Fixed bugs</li><li>Added contributions list</li>
 <b>VERSION 2.2 (03.03.2020)</b><li>Added option to discard changes</li><li>Added option to convert note to checklist and vice-versa</li><li>Added more note colors</li><li>UI improvements</li><li>Fixed problems with adding image</li><li>Now images load instantly</li><li>Option to select no. of lines in note preview</li><li>Option to move checked item to bottom</li><li>Fixed widget view</li><li>Performance improvements</li>
 <b>VERSION 2.0 (20.01.2020)</b><li>Neu: Bilder können zu jeder Art von Notizen hinzugefügt werden</li><li>Neu: Kompaktansicht</li><li>Neu: Kopierfunktion</li><li>Bilder von und nach Notes Sync teilen</li><li>Neu: Papierkorb leeren</li><li>App-Icon geändert</li><li>Bugfix: Synchronisationsfehler</li><li>Bugfix: Automatische Synchronisation wird nun sofort ausgeführt</li><li>Viele Bugfixes</li><li>Performance verbessert</li>
 <b>VERSION 1.7 (06.09.2019)</b><li>Bugfix: Titel mancher Notizen wurden im Widget nicht angezeigt</li>
