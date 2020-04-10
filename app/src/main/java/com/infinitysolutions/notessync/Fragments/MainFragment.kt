@@ -73,6 +73,7 @@ import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
+import kotlinx.android.synthetic.main.add_image_dialog.view.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.sort_dialog.view.*
 import kotlinx.coroutines.Dispatchers
@@ -248,7 +249,7 @@ class MainFragment : Fragment() {
 
         rootView.new_image_note_btn.setOnClickListener {
             rootView.new_image_note_btn.setOnCreateContextMenuListener { menu, _, _ ->
-                openNewImageMenu(menu)
+                openNewImageMenu(menu, container)
             }
             rootView.new_image_note_btn.showContextMenu()
         }
@@ -394,7 +395,7 @@ class MainFragment : Fragment() {
                                 rootView.new_image_note_btn.post {
                                     Log.d(TAG, "Triggered onPost")
                                     rootView.new_image_note_btn.setOnCreateContextMenuListener { menu, _, _ ->
-                                        openNewImageMenu(menu)
+                                        openNewImageMenu(menu, container)
                                     }
                                     rootView.new_image_note_btn.showContextMenu()
                                 }
@@ -477,7 +478,7 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun openNewImageMenu(menu: Menu) {
+    private fun openNewImageMenu(menu: Menu, container: ViewGroup?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
             checkSelfPermission(
                 context!!,
@@ -492,7 +493,10 @@ class MainFragment : Fragment() {
             )
             return
         } else {
-            menu.add(getString(R.string.take_photo)).setOnMenuItemClickListener {
+            val dialogView = layoutInflater.inflate(R.layout.add_image_dialog, container, false)
+            val dialog = BottomSheetDialog(context!!)
+            dialogView.camera_button.setOnClickListener{
+                dialog.dismiss()
                 val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                 if (intent.resolveActivity(activity!!.packageManager) != null) {
                     val photoFile: File? = try {
@@ -520,15 +524,15 @@ class MainFragment : Fragment() {
                     Toast.makeText(context, getString(R.string.toast_no_camera_app), LENGTH_SHORT)
                         .show()
                 }
-                true
             }
-
-            menu.add(getString(R.string.pick_image)).setOnMenuItemClickListener {
+            dialogView.pick_image_button.setOnClickListener{
+                dialog.dismiss()
                 val i = Intent(Intent.ACTION_PICK)
                 i.type = "image/*"
                 startActivityForResult(i, IMAGE_PICKER_REQUEST_CODE)
-                true
             }
+            dialog.setContentView(dialogView)
+            dialog.show()
         }
     }
 
