@@ -164,4 +164,8 @@
     <string name="warning">Achtung!</string>
     <string name="encryption_warning">Die Verschlüsselung könnte etwas Zeit in Anspruch nehmen. Der Prozess sollte nicht unterbrochen werden, deshalb achte bitte auf eine stabile Internetverbindung. Fortfahren?</string>
     <string name="encryption_warning_exit">Der Verschlüsselungsprozess sollte nicht unterbrochen werden, da dies zum Datenverlust führen kann. Trotzdem beenden?</string>
+    <string name="contributor_details"><![CDATA[<html>
+    <b>Translations</b>
+    <li>Ronny Steiner (German translation and moving hardcoded strings to strings.xml)</li>
+    </html>]]></string>
 </resources>

@@ -70,6 +70,15 @@ class AboutFragment : Fragment() {
                 .setPositiveButton( getString(com.infinitysolutions.notessync.R.string.close), null)
                 .show()
         }
+
+        rootView.contributors_button.setOnClickListener {
+            AlertDialog.Builder(context)
+                .setTitle("Contributions")
+                .setMessage(HtmlCompat.fromHtml(getString(com.infinitysolutions.notessync.R.string.contributor_details)
+                    , HtmlCompat.FROM_HTML_MODE_LEGACY))
+                .setPositiveButton( getString(com.infinitysolutions.notessync.R.string.close), null)
+                .show()
+        }
     }
 
     private fun openLink(link: String) {

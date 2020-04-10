@@ -156,6 +156,28 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/contributors_button"
+                style="@style/prefsContainer">
+
+                <ImageView
+                    android:src="@drawable/contributions_icon"
+                    style="@style/prefsIcon"/>
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                        android:text="Contributors"
+                        style="@style/prefsMain"/>
+
+                    <TextView
+                        android:text="Details of all the open source contributions made to Notes Sync"
+                        style="@style/prefsSummary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
             <LinearLayout style="@style/prefsContainer">
 
                 <ImageView
