@@ -4,6 +4,7 @@ package com.infinitysolutions.notessync.Fragments
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -49,28 +50,29 @@ class SearchFragment : Fragment() {
         val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
         val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
-        var recyclerAdapter: NotesAdapter? = null
+        val recyclerAdapter = NotesAdapter(mainViewModel, databaseViewModel, listOf(), context!!)
+        searchRecyclerView.adapter = recyclerAdapter
         val toolbar = rootView.toolbar
         toolbar.inflateMenu(R.menu.search_fragment_menu)
         toolbar.setNavigationIcon(R.drawable.clear_all_menu_icon_tinted)
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.archive_menu_item -> {
-                    recyclerAdapter?.archiveSelectedNotes()
+                    recyclerAdapter.archiveSelectedNotes()
                     disableMultiSelect(toolbar, rootView.search_bar)
                 }
                 R.id.delete_menu_item -> {
-                    recyclerAdapter?.deleteSelectedNotes()
+                    recyclerAdapter.deleteSelectedNotes()
                     disableMultiSelect(toolbar, rootView.search_bar)
                 }
-                R.id.select_all_menu_item -> recyclerAdapter?.selectAll()
+                R.id.select_all_menu_item -> recyclerAdapter.selectAll()
             }
             true
         }
 
         val backCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                recyclerAdapter?.clearAll()
+                recyclerAdapter.clearAll()
             }
         }
         mainViewModel.getMultiSelectCount().observe(this, Observer{count ->
@@ -94,7 +96,7 @@ class SearchFragment : Fragment() {
 
         rootView.search_edit_text.postDelayed({
             rootView.search_edit_text.requestFocus()
-            val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val imm = context?.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showSoftInput(rootView.search_edit_text, 0)
         }, 50)
 
@@ -102,8 +104,10 @@ class SearchFragment : Fragment() {
             if(resultList != null && resultList.isNotEmpty()){
                 searchRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE
-                recyclerAdapter = NotesAdapter(mainViewModel, databaseViewModel, resultList, context!!)
-                searchRecyclerView.adapter = recyclerAdapter
+                recyclerAdapter.changeList(resultList)
+                val columnCount = resources.getInteger(R.integer.columns_count)
+                searchRecyclerView.layoutManager = StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL)
+//                searchRecyclerView.adapter = recyclerAdapter
             }else{
                 searchRecyclerView.visibility = GONE
                 rootView.empty_items.visibility = VISIBLE

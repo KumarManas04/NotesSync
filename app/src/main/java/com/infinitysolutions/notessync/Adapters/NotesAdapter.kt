@@ -60,7 +60,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 
-class NotesAdapter(private val mainViewModel: MainViewModel, private val databaseViewModel: DatabaseViewModel, private val items: List<Note>, val context: Context) : RecyclerView.Adapter<NotesAdapter.ViewHolder>() {
+class NotesAdapter(private val mainViewModel: MainViewModel, private val databaseViewModel: DatabaseViewModel, private var items: List<Note>, val context: Context) : RecyclerView.Adapter<NotesAdapter.ViewHolder>() {
     private val colorsUtil = ColorsUtil()
     private val pathsMap = SparseArray<String>()
     private val TAG = "NotesAdapter"
@@ -183,7 +183,13 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         }
     }
 
-    fun isImageType(type: Int): Boolean{
+    fun changeList(newItems: List<Note>){
+        items = newItems
+        selectedPositions.clear()
+        notifyDataSetChanged()
+    }
+
+    private fun isImageType(type: Int): Boolean{
         return when(type){
             IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_TRASH, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED, IMAGE_LIST_TRASH -> true
             else -> false
@@ -285,10 +291,6 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                 items[position].reminderTime
             )
         )
-    }
-
-    fun getList(): List<Note>{
-        return items
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

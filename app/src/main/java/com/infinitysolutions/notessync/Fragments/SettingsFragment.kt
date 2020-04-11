@@ -169,14 +169,14 @@ class SettingsFragment : Fragment() {
     }
 
     private fun changeTheme(prefs: SharedPreferences, themeIndex: Int, toTheme: Int, dialog: BottomSheetDialog){
+        dialog.dismiss()
         if(themeIndex != toTheme){
             val editor = prefs.edit()
             editor.putInt(PREF_THEME, toTheme)
             editor.commit()
             updateWidgets()
             activity?.recreate()
-        }else
-            dialog.dismiss()
+        }
     }
 
     private fun configureNoteColorButton(rootView: View, prefs: SharedPreferences, container: ViewGroup?) {
