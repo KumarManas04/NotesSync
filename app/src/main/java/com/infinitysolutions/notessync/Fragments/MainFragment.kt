@@ -2,7 +2,6 @@ package com.infinitysolutions.notessync.Fragments
 
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
@@ -163,21 +162,40 @@ class MainFragment : Fragment() {
                     (orderGroup.getChildAt(sortOrder) as RadioButton).isChecked = true
                     (sortByGroup.getChildAt(sortOrderBy) as RadioButton).isChecked = true
                     dialog.setOnDismissListener {
+                        val newSortOrder: Int
+                        val newSortOrderBy: Int
                         val orderResult = when(orderGroup.checkedRadioButtonId){
-                            R.id.asc_btn -> ORDER_ASC
-                            else -> ORDER_DESC
+                            R.id.asc_btn -> {
+                                newSortOrder = 0
+                                ORDER_ASC
+                            }
+                            else -> {
+                                newSortOrder = 1
+                                ORDER_DESC
+                            }
                         }
                         val orderByResult = when(sortByGroup.checkedRadioButtonId){
-                            R.id.title_btn -> ORDER_BY_TITLE
-                            R.id.edited_btn -> ORDER_BY_UPDATED
-                            else -> ORDER_BY_CREATED
+                            R.id.title_btn -> {
+                                newSortOrderBy = 0
+                                ORDER_BY_TITLE
+                            }
+                            R.id.edited_btn -> {
+                                newSortOrderBy = 1
+                                ORDER_BY_UPDATED
+                            }
+                            else -> {
+                                newSortOrderBy = 2
+                                ORDER_BY_CREATED
+                            }
                         }
 
-                        databaseViewModel.setOrder(orderResult, orderByResult)
-                        val editor = prefs.edit()
-                        editor.putString(PREF_ORDER_BY, orderByResult)
-                        editor.putString(PREF_ORDER, orderResult)
-                        editor.commit()
+                        if(sortOrder != newSortOrder || sortOrderBy != newSortOrderBy) {
+                            databaseViewModel.setOrder(orderResult, orderByResult)
+                            val editor = prefs.edit()
+                            editor.putString(PREF_ORDER_BY, orderByResult)
+                            editor.putString(PREF_ORDER, orderResult)
+                            editor.commit()
+                        }
                     }
                     dialog.setContentView(dialogView)
                     dialog.show()

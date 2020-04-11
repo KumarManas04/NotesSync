@@ -21,6 +21,9 @@ import android.widget.Toast.LENGTH_SHORT
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.util.containsKey
 import androidx.core.util.forEach
+import androidx.core.view.isVisible
+import androidx.core.view.setMargins
+import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -122,6 +125,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
             VISIBLE
         }
 
+        holder.parentView.setPadding(0)
         if(!selectedPositions.contains(position)){
             holder.parentView.setBackgroundResource(R.drawable.notes_item_round)
             holder.parentView.backgroundTintList =
@@ -129,6 +133,11 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         }else{
             holder.parentView.setBackgroundResource(R.drawable.notes_selected_bg)
             holder.parentView.backgroundTintList = null
+            if(isImageType(items[position].noteType)) {
+                val density = context.resources.displayMetrics.density
+                val paddingPixels: Int = (3 * density).toInt()
+                holder.parentView.setPadding(paddingPixels, paddingPixels, paddingPixels, 0)
+            }
         }
 
         holder.itemContainer.setOnClickListener {
@@ -171,6 +180,13 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                 IMAGE_LIST_TRASH -> changeNoteType(position, IMAGE_LIST_DEFAULT)
                 else -> changeNoteType(position, NOTE_DEFAULT)
             }
+        }
+    }
+
+    fun isImageType(type: Int): Boolean{
+        return when(type){
+            IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_TRASH, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED, IMAGE_LIST_TRASH -> true
+            else -> false
         }
     }
 
