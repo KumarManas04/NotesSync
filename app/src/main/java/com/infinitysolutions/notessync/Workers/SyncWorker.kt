@@ -42,6 +42,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.IMAGE_TRASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_DELETED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_FILESYSTEM_STASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_IMAGE_FILESYSTEM_STASH
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SYNC_QUEUE
@@ -220,9 +221,11 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
             val fileSystemString = prefs.getString(PREF_FILESYSTEM_STASH, null)
             if(fileSystemString != null){
                 val fileSystem = Gson().fromJson(fileSystemString, Array<NoteFile>::class.java).asList()
-                val appFolderId = getAppFolderId()
-                googleDriveHelper.appFolderId = appFolderId
-                googleDriveHelper.fileSystemId = getFileSystemId(appFolderId)
+                if(mDriveType == CLOUD_GOOGLE_DRIVE) {
+                    val appFolderId = getAppFolderId()
+                    googleDriveHelper.appFolderId = appFolderId
+                    googleDriveHelper.fileSystemId = getFileSystemId(appFolderId)
+                }
                 writeFileSystemToCloud(fileSystem)
                 editor.putString(PREF_FILESYSTEM_STASH, null)
             }
@@ -806,7 +809,7 @@ class SyncWorker(private val context: Context, params: WorkerParameters) : Worke
 
     private fun checkAndPrepareEncryption() {
         val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (prefs.getBoolean(Contract.PREF_ENCRYPTED, false)) {
+        if (prefs.getBoolean(PREF_ENCRYPTED, false)) {
             val password = prefs.getString(Contract.PREF_CODE, null)
             val userId = prefs.getString(Contract.PREF_ID, null)
             if (password != null && userId != null) {
