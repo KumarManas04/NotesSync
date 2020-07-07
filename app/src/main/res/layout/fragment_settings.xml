@@ -134,6 +134,27 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/note_color_type_button"
+                style="@style/prefsContainer">
+
+                <ImageView
+                    style="@style/prefsIcon"
+                    android:src="@drawable/note_color_icon" />
+
+                <LinearLayout style="@style/prefsTextContainer">
+
+                    <TextView
+                        style="@style/prefsMain"
+                        android:text="ColorType" />
+
+                    <TextView
+                        android:id="@+id/pref_note_color_type"
+                        style="@style/prefsSummary" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/preview_lines_count_button"
                 style="@style/prefsContainer">
 

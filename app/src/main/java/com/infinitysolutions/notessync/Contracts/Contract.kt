@@ -27,6 +27,9 @@ class Contract{
         const val THEME_DEFAULT = 0
         const val THEME_DARK = 1
         const val THEME_AMOLED = 2
+        const val PREF_NOTE_COLOR_TYPE = "sharedPrefs.currentNoteColorType"
+        const val NOTE_COLOR_TYPE_DEFAULT = 0
+        const val NOTE_COLOR_TYPE_LIGHT = 1
         const val PREF_CLOUD_TYPE = "sharedPrefs.cloudType"
         const val PREF_ACCESS_TOKEN = "sharedPrefs.accessToken"
         const val PREF_ID = "sharedPrefs.userId"

@@ -35,6 +35,8 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBO
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_CHANGE_PASSWORD
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_NEW_PASSWORD
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_COLOR_TYPE_DEFAULT
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.NOTE_COLOR_TYPE_LIGHT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_MODE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_APP_LOCK_CODE
@@ -43,6 +45,7 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_DEFAULT
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_MAX_PREVIEW_LINES
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_MOVE_CHECKED_TO_BOTTOM
+import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_NOTE_COLOR_TYPE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.STATE_CHANGE_PIN
@@ -59,6 +62,10 @@ import kotlinx.android.synthetic.main.theme_dialog.view.*
 
 class SettingsFragment : Fragment() {
     private val TAG = "SettingsFragment"
+
+    companion object {
+        var COLOR_TYPE_STRING = "dark"
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
@@ -103,6 +110,43 @@ class SettingsFragment : Fragment() {
             }
             dialogView.amoled_btn.setOnClickListener {
                 changeTheme(prefs, themeIndex, THEME_AMOLED, dialog)
+            }
+
+            dialog.setContentView(dialogView)
+            dialog.show()
+        }
+
+        var colorTypeIndex: Int
+        rootView.pref_note_color_type.text =
+            when (prefs.getInt(PREF_NOTE_COLOR_TYPE, NOTE_COLOR_TYPE_DEFAULT)) {
+                NOTE_COLOR_TYPE_DEFAULT -> {
+                    colorTypeIndex = 0
+                    COLOR_TYPE_STRING = "dark"
+                    "Dark"
+                }
+                NOTE_COLOR_TYPE_LIGHT -> {
+                    colorTypeIndex = 1
+                    COLOR_TYPE_STRING = "light"
+                    "Light"
+                }
+                else -> {
+                    colorTypeIndex = 0
+                    COLOR_TYPE_STRING = "dark"
+                    "Dark"
+                }
+            }
+
+        rootView.note_color_type_button.setOnClickListener {
+            val dialogView =
+                layoutInflater.inflate(R.layout.note_color_type_dialog, container, false)
+            val dialog = BottomSheetDialog(context!!)
+            val themeGroup = dialogView.theme_group
+            (themeGroup.getChildAt(colorTypeIndex) as RadioButton).isChecked = true
+            dialogView.light_btn.setOnClickListener {
+                changeNoteColorType(prefs, colorTypeIndex, NOTE_COLOR_TYPE_LIGHT, dialog)
+            }
+            dialogView.dark_btn.setOnClickListener {
+                changeNoteColorType(prefs, colorTypeIndex, NOTE_COLOR_TYPE_DEFAULT, dialog)
             }
 
             dialog.setContentView(dialogView)
@@ -168,6 +212,22 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    private fun changeNoteColorType(
+        prefs: SharedPreferences,
+        noteColorTypeIndex: Int,
+        toColorType: Int,
+        dialog: BottomSheetDialog
+    ) {
+        dialog.dismiss()
+        if (noteColorTypeIndex != toColorType) {
+            val editor = prefs.edit()
+            editor.putInt(PREF_NOTE_COLOR_TYPE, toColorType)
+            editor.commit()
+            updateWidgets()
+            activity?.recreate()
+        }
+    }
+
     private fun changeTheme(prefs: SharedPreferences, themeIndex: Int, toTheme: Int, dialog: BottomSheetDialog){
         dialog.dismiss()
         if(themeIndex != toTheme){
@@ -208,6 +268,19 @@ class SettingsFragment : Fragment() {
             dialog.setContentView(dialogView)
             dialog.show()
         }
+    }
+
+    private fun configureNoteColorTypeButton(
+        rootView: View,
+        prefs: SharedPreferences,
+        container: ViewGroup?
+    ) {
+        /*var defaultColorType = prefs.getInt(PREF_NOTE_COLOR_TYPE, 0)
+        val editor = prefs.edit()
+        editor.putInt(PREF_NOTE_COLOR_TYPE, defaultColorType)
+        editor.commit()
+        updateWidgets()
+        activity?.recreate()*/
     }
 
     private fun configureMaxLinesButton(rootView: View, prefs: SharedPreferences, container: ViewGroup?){
