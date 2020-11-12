@@ -23,7 +23,7 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".NoteEditActivity" />
 
-        <receiver android:name=".Fragments.NotesWidget">
+        <receiver android:name=".fragments.NotesWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -34,7 +34,7 @@
         </receiver>
 
         <service
-            android:name=".Services.WidgetRemoteViewsService"
+            android:name=".services.WidgetRemoteViewsService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
         <activity android:name=".MainActivity">

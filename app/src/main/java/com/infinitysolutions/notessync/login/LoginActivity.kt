@@ -2,7 +2,7 @@ package com.infinitysolutions.notessync.login
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.infinitysolutions.notessync.Contracts.Contract
+import com.infinitysolutions.notessync.contracts.Contract
 import com.infinitysolutions.notessync.R
 
 class LoginActivity : AppCompatActivity() {

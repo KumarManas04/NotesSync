@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/noteEditFragment2"
-        android:name="com.infinitysolutions.notessync.Fragments.NoteEditFragment"
+        android:name="com.infinitysolutions.notessync.fragments.NoteEditFragment"
         android:label="NoteEditFragment" >
         <action
             android:id="@+id/action_noteEditFragment2_to_imageGalleryFragment2"
@@ -15,7 +15,7 @@
     </fragment>
     <fragment
         android:id="@+id/appLockFragment2"
-        android:name="com.infinitysolutions.notessync.Fragments.AppLockFragment"
+        android:name="com.infinitysolutions.notessync.fragments.AppLockFragment"
         android:label="fragment_app_lock"
         tools:layout="@layout/fragment_app_lock" >
         <action
@@ -25,6 +25,6 @@
     </fragment>
     <fragment
         android:id="@+id/imageGalleryFragment2"
-        android:name="com.infinitysolutions.notessync.Fragments.ImageGalleryFragment"
+        android:name="com.infinitysolutions.notessync.fragments.ImageGalleryFragment"
         android:label="ImageGalleryFragment" />
 </navigation>

@@ -4,7 +4,7 @@
             xmlns:tools="http://schemas.android.com/tools" android:id="@+id/nav_graph"
             app:startDestination="@id/appLockFragment">
 
-    <fragment android:id="@+id/mainFragment" android:name="com.infinitysolutions.notessync.Fragments.MainFragment"
+    <fragment android:id="@+id/mainFragment" android:name="com.infinitysolutions.notessync.fragments.MainFragment"
               android:label="fragment_main" tools:layout="@layout/fragment_main">
         <action android:id="@+id/action_mainFragment_to_noteEditFragment" app:destination="@id/noteEditFragment"
                 app:enterAnim="@anim/fade_in" app:popExitAnim="@anim/fade_out"/>
@@ -17,7 +17,7 @@
                 app:enterAnim="@anim/fade_in" app:popExitAnim="@anim/fade_out"/>
     </fragment>
     <fragment android:id="@+id/noteEditFragment"
-              android:name="com.infinitysolutions.notessync.Fragments.NoteEditFragment"
+              android:name="com.infinitysolutions.notessync.fragments.NoteEditFragment"
               android:label="NoteEditFragment">
         <action
             android:id="@+id/action_noteEditFragment_to_imageGalleryFragment"
@@ -26,13 +26,13 @@
                 android:name="CurrentImagePosition" />
         </action>
     </fragment>
-    <fragment android:id="@+id/searchFragment" android:name="com.infinitysolutions.notessync.Fragments.SearchFragment"
+    <fragment android:id="@+id/searchFragment" android:name="com.infinitysolutions.notessync.fragments.SearchFragment"
               android:label="fragment_search" tools:layout="@layout/fragment_search">
         <action android:id="@+id/action_searchFragment_to_noteEditFragment" app:destination="@id/noteEditFragment"
                 app:enterAnim="@anim/fade_in" app:popExitAnim="@anim/fade_out"/>
     </fragment>
     <fragment android:id="@+id/settingsFragment"
-              android:name="com.infinitysolutions.notessync.Fragments.SettingsFragment"
+              android:name="com.infinitysolutions.notessync.fragments.SettingsFragment"
               android:label="fragment_settings" tools:layout="@layout/fragment_settings">
         <action android:id="@+id/action_settingsFragment_to_aboutFragment" app:destination="@id/aboutFragment"
                 app:enterAnim="@anim/fade_in" app:popExitAnim="@anim/fade_out"/>
@@ -44,7 +44,7 @@
         <action android:id="@+id/action_settingsFragment_to_appLockFragment" app:destination="@id/appLockFragment"
                 app:enterAnim="@anim/fade_in" app:popExitAnim="@anim/fade_out"/>
     </fragment>
-    <fragment android:id="@+id/aboutFragment" android:name="com.infinitysolutions.notessync.Fragments.AboutFragment"
+    <fragment android:id="@+id/aboutFragment" android:name="com.infinitysolutions.notessync.fragments.AboutFragment"
               android:label="fragment_about" tools:layout="@layout/fragment_about"/>
     <fragment android:id="@+id/cloudPickerFragment"
               android:name="com.infinitysolutions.notessync.login.CloudPickerFragment"
@@ -54,12 +54,12 @@
                 app:popUpTo="@+id/mainFragment"/>
     </fragment>
     <fragment android:id="@+id/resourcesFragment"
-              android:name="com.infinitysolutions.notessync.Fragments.ResourcesFragment"
+              android:name="com.infinitysolutions.notessync.fragments.ResourcesFragment"
               android:label="fragment_resources" tools:layout="@layout/fragment_resources"/>
     <fragment android:id="@+id/passwordFragment"
-              android:name="com.infinitysolutions.notessync.Fragments.PasswordFragment"
+              android:name="com.infinitysolutions.notessync.fragments.PasswordFragment"
               android:label="fragment_password" tools:layout="@layout/fragment_password"/>
-    <fragment android:id="@+id/appLockFragment" android:name="com.infinitysolutions.notessync.Fragments.AppLockFragment"
+    <fragment android:id="@+id/appLockFragment" android:name="com.infinitysolutions.notessync.fragments.AppLockFragment"
               android:label="fragment_app_lock" tools:layout="@layout/fragment_app_lock">
         <action
             android:id="@+id/action_appLockFragment_to_mainFragment"
@@ -70,7 +70,7 @@
     </fragment>
     <fragment
         android:id="@+id/imageGalleryFragment"
-        android:name="com.infinitysolutions.notessync.Fragments.ImageGalleryFragment"
+        android:name="com.infinitysolutions.notessync.fragments.ImageGalleryFragment"
         android:label="fragment_image_gallery"
         tools:layout="@layout/fragment_image_gallery" />
 </navigation>

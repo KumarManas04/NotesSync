@@ -2,7 +2,6 @@ package com.infinitysolutions.notessync
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,20 +11,18 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_SYNC_QUEUE
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
-import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
-import com.infinitysolutions.notessync.ViewModel.MainViewModel
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_THEME
+import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_AMOLED
+import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DARK
+import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DEFAULT
+import com.infinitysolutions.notessync.util.WorkSchedulerHelper
+import com.infinitysolutions.notessync.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.support_development_dialog.view.*
 

@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?attr/mainBackground"
-        tools:context=".Fragments.AppLockFragment">
+        tools:context=".fragments.AppLockFragment">
 
     <TextView
             android:id="@+id/message_text_view"

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="?attr/mainBackground"
     android:orientation="vertical"
-    tools:context=".Fragments.SearchFragment">
+    tools:context=".fragments.SearchFragment">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"

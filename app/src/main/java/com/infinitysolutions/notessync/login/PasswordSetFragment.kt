@@ -12,14 +12,14 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.infinitysolutions.notessync.Contracts.Contract
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_CHANGE_PASSWORD
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_NEW_PASSWORD
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_MODE
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CODE
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ENCRYPTED
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
+import com.infinitysolutions.notessync.contracts.Contract
+import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_CHANGE_PASSWORD
+import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_NEW_PASSWORD
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PASSWORD_MODE
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CLOUD_TYPE
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CODE
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ENCRYPTED
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.R
 import kotlinx.android.synthetic.main.fragment_password_set.view.*
 

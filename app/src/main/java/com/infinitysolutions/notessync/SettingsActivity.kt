@@ -1,9 +1,8 @@
 package com.infinitysolutions.notessync
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.infinitysolutions.notessync.Contracts.Contract
+import com.infinitysolutions.notessync.contracts.Contract
 
 class SettingsActivity : AppCompatActivity() {
 

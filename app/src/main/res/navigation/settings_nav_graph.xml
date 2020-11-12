@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/settingsFragment2"
-        android:name="com.infinitysolutions.notessync.Fragments.SettingsFragment"
+        android:name="com.infinitysolutions.notessync.fragments.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" >
         <action
@@ -19,11 +19,11 @@
     </fragment>
     <fragment
         android:id="@+id/resourcesFragment2"
-        android:name="com.infinitysolutions.notessync.Fragments.ResourcesFragment"
+        android:name="com.infinitysolutions.notessync.fragments.ResourcesFragment"
         android:label="fragment_resources"
         tools:layout="@layout/fragment_resources" />
     <fragment
         android:id="@+id/aboutFragment3"
-        android:name="com.infinitysolutions.notessync.Fragments.AboutFragment"
+        android:name="com.infinitysolutions.notessync.fragments.AboutFragment"
         android:label="AboutFragment" />
 </navigation>

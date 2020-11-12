@@ -3,15 +3,15 @@ package com.infinitysolutions.notessync.login
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.MODE_CHANGE_PASSWORD
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PASSWORD_MODE
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_TYPE
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_THEME
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_AMOLED
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
-import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
+import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_CHANGE_PASSWORD
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PASSWORD_MODE
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CLOUD_TYPE
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ID
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_THEME
+import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_AMOLED
+import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DARK
+import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.R
 
 class ChangePasswordActivity : AppCompatActivity() {
