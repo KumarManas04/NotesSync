@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cloud_login_nav_graph"
+    app:startDestination="@id/cloudPickerFragment2">
+
+    <fragment
+        android:id="@+id/cloudPickerFragment2"
+        android:name="com.infinitysolutions.notessync.login.CloudPickerFragment"
+        android:label="fragment_cloud_picker"
+        tools:layout="@layout/fragment_cloud_picker" >
+        <action
+            android:id="@+id/action_cloudPickerFragment2_to_passwordCheckFragment"
+            app:destination="@id/passwordCheckFragment"
+            app:popUpTo="@id/cloud_login_nav_graph" />
+    </fragment>
+    <fragment
+        android:id="@+id/passwordCheckFragment"
+        android:name="com.infinitysolutions.notessync.login.PasswordCheckFragment"
+        android:label="PasswordCheckFragment" >
+        <action
+            android:id="@+id/action_passwordCheckFragment_to_passwordSetFragment"
+            app:destination="@id/passwordSetFragment"
+            app:popUpTo="@id/cloud_login_nav_graph" />
+    </fragment>
+    <fragment
+        android:id="@+id/passwordSetFragment"
+        android:name="com.infinitysolutions.notessync.login.PasswordSetFragment"
+        android:label="fragment_password_set"
+        tools:layout="@layout/fragment_password_set" />
+</navigation>

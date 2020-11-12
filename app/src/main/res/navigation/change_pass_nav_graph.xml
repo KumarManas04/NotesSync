@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/change_pass_nav_graph"
+    app:startDestination="@id/passwordCheckFragment2">
+
+    <fragment
+        android:id="@+id/passwordCheckFragment2"
+        android:name="com.infinitysolutions.notessync.login.PasswordCheckFragment"
+        android:label="PasswordCheckFragment" >
+        <action
+            android:id="@+id/action_passwordCheckFragment2_to_passwordSetFragment2"
+            app:destination="@id/passwordSetFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/passwordSetFragment2"
+        android:name="com.infinitysolutions.notessync.login.PasswordSetFragment"
+        android:label="fragment_password_set"
+        tools:layout="@layout/fragment_password_set" />
+</navigation>

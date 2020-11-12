@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settings_nav_graph"
+    app:startDestination="@id/settingsFragment2">
+
+    <fragment
+        android:id="@+id/settingsFragment2"
+        android:name="com.infinitysolutions.notessync.Fragments.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_settingsFragment2_to_resourcesFragment2"
+            app:destination="@id/resourcesFragment2" />
+        <action
+            android:id="@+id/action_settingsFragment2_to_aboutFragment3"
+            app:destination="@id/aboutFragment3" />
+    </fragment>
+    <fragment
+        android:id="@+id/resourcesFragment2"
+        android:name="com.infinitysolutions.notessync.Fragments.ResourcesFragment"
+        android:label="fragment_resources"
+        tools:layout="@layout/fragment_resources" />
+    <fragment
+        android:id="@+id/aboutFragment3"
+        android:name="com.infinitysolutions.notessync.Fragments.AboutFragment"
+        android:label="AboutFragment" />
+</navigation>

@@ -15,7 +15,6 @@ class MainViewModel: ViewModel(){
     private val multiSelectCount = MutableLiveData<Int>()
     private val selectedColor = MutableLiveData<Int>()
     private val shouldOpenEditor = MutableLiveData<Boolean>()
-    private val syncNotes = MutableLiveData<Event<Int>>()
     private val imagesList = ArrayList<ImageData>()
     private val openImageView = MutableLiveData<Event<Int>>()
     private val mToolbar = MutableLiveData<Toolbar?>()
@@ -72,10 +71,6 @@ class MainViewModel: ViewModel(){
         shouldOpenEditor.value = shouldOpen
     }
 
-    fun setSyncNotes(noteType: Int){
-        syncNotes.value = Event(noteType)
-    }
-
     fun setImagesList(list: ArrayList<ImageData>?){
         imagesList.clear()
         if(list != null)
@@ -98,7 +93,6 @@ class MainViewModel: ViewModel(){
     fun getToolbar(): LiveData<Toolbar?> = mToolbar
     fun getSelectedNote(): Note? = selectedNote
     fun getShouldOpenEditor(): LiveData<Boolean> = shouldOpenEditor
-    fun getSyncNotes(): LiveData<Event<Int>> = syncNotes
     fun getImagesList(): ArrayList<ImageData> = imagesList
     fun getOpenImageView(): LiveData<Event<Int>> = openImageView
 

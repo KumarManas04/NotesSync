@@ -29,7 +29,7 @@ class ReminderWorker(private val context: Context, params: WorkerParameters): Wo
         val bundle = Bundle()
         bundle.putLong("NOTE_ID", noteId)
         val pendingIntent = NavDeepLinkBuilder(applicationContext)
-            .setGraph(R.navigation.nav_graph)
+            .setGraph(R.navigation.home_nav_graph)
             .setArguments(bundle)
             .setDestination(R.id.noteEditFragment)
             .createPendingIntent()

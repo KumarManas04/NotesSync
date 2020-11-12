@@ -1,6 +1,7 @@
 package com.infinitysolutions.notessync.Fragments
 
 
+import android.app.Activity.RESULT_OK
 import android.app.AlertDialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -29,6 +30,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.infinitysolutions.notessync.Adapters.ColorPickerAdapter
+import com.infinitysolutions.notessync.login.LoginActivity
 import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
@@ -52,6 +54,8 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.Util.ColorsUtil
+import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
+import com.infinitysolutions.notessync.login.ChangePasswordActivity
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import kotlinx.android.synthetic.main.preview_lines_dialog.view.*
@@ -59,6 +63,7 @@ import kotlinx.android.synthetic.main.theme_dialog.view.*
 
 class SettingsFragment : Fragment() {
     private val TAG = "SettingsFragment"
+    private val LOGIN_REQUEST_CODE = 199
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
@@ -74,7 +79,7 @@ class SettingsFragment : Fragment() {
         }
 
         val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        var themeIndex: Int
+        val themeIndex: Int
         rootView.pref_theme_text.text = when (prefs.getInt(PREF_THEME, THEME_DEFAULT)) {
             THEME_DEFAULT -> {
                 themeIndex = 0
@@ -112,11 +117,11 @@ class SettingsFragment : Fragment() {
         configureAppLockButtons(rootView, prefs)
 
         rootView.about_button.setOnClickListener {
-            findNavController(this).navigate(R.id.action_settingsFragment_to_aboutFragment)
+            findNavController(this).navigate(R.id.action_settingsFragment2_to_aboutFragment3)
         }
 
         rootView.resources_button.setOnClickListener {
-            findNavController(this).navigate(R.id.action_settingsFragment_to_resourcesFragment)
+            findNavController(this).navigate(R.id.action_settingsFragment2_to_resourcesFragment2)
         }
 
         rootView.open_source_button.setOnClickListener {
@@ -201,7 +206,6 @@ class SettingsFragment : Fragment() {
                 val editor = prefs.edit()
                 editor.putInt(PREF_DEFAULT_NOTE_COLOR, defaultColor)
                 editor.apply()
-                val drawable = ContextCompat.getDrawable(context!!, R.drawable.round_color)
                 drawable?.colorFilter = PorterDuffColorFilter(Color.parseColor(colorsUtil.getColor(defaultColor)), PorterDuff.Mode.SRC)
                 colorIndicator.background = drawable
             }
@@ -311,11 +315,7 @@ class SettingsFragment : Fragment() {
             }
 
             rootView.change_pass_button.setOnClickListener {
-                val bundle = Bundle()
-                bundle.putInt(PREF_CLOUD_TYPE, prefs.getInt(PREF_CLOUD_TYPE, CLOUD_GOOGLE_DRIVE))
-                bundle.putString(Contract.PREF_ID, prefs.getString(Contract.PREF_ID, null))
-                bundle.putInt(PASSWORD_MODE, passwordMode)
-                findNavController(this).navigate(R.id.action_settingsFragment_to_passwordFragment, bundle)
+                startActivityForResult(Intent(activity, ChangePasswordActivity::class.java), 1234)
             }
         }
     }
@@ -325,7 +325,7 @@ class SettingsFragment : Fragment() {
         rootView.logout_text.text = getString(R.string.login_pref_summary)
         rootView.logout_icon.setImageResource(R.drawable.pref_login_icon)
         rootView.logout_button.setOnClickListener {
-            findNavController(this).navigate(R.id.action_settingsFragment_to_cloudPickerFragment)
+            startActivityForResult(Intent(context, LoginActivity::class.java), LOGIN_REQUEST_CODE)
         }
 
         rootView.change_pass_title.text = getString(R.string.enable_encrypted_sync)
@@ -363,5 +363,15 @@ class SettingsFragment : Fragment() {
             AppWidgetManager.getInstance(activity).getAppWidgetIds(ComponentName(activity!!, NotesWidget::class.java))
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
         activity?.sendBroadcast(intent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == LOGIN_REQUEST_CODE && resultCode == RESULT_OK){
+            val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE) ?: return
+            val editor = prefs.edit()
+            editor.putStringSet(Contract.PREF_SYNC_QUEUE, hashSetOf("1"))
+            editor.commit()
+            WorkSchedulerHelper().syncNotes(true, context!!)
+        }
     }
 }

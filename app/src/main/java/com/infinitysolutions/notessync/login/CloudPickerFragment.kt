@@ -1,7 +1,8 @@
-package com.infinitysolutions.notessync.Fragments
+package com.infinitysolutions.notessync.login
 
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
@@ -10,7 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.dropbox.core.android.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -26,18 +26,14 @@ import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_CLOUD_T
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_cloud_picker.view.*
 
 class CloudPickerFragment : Fragment() {
     private val TAG = "CloudPickerFragment"
-    private lateinit var mainViewModel: MainViewModel
     private val REQUEST_SIGN_IN = 133
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_cloud_picker, container, false)
-
-        mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
         rootView.g_drive.setOnClickListener {
             val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
@@ -52,8 +48,8 @@ class CloudPickerFragment : Fragment() {
                     val client = GoogleSignIn.getClient(activity!!, signInOptions)
                     startActivityForResult(client.signInIntent, REQUEST_SIGN_IN)
                 }else{
-                    mainViewModel.setSyncNotes(CLOUD_GOOGLE_DRIVE)
-                    activity?.onBackPressed()
+                    activity?.setResult(RESULT_OK)
+                    activity?.finish()
                 }
             }
         }
@@ -66,8 +62,8 @@ class CloudPickerFragment : Fragment() {
                 if (accessToken == null)
                     Auth.startOAuth2Authentication(activity, getString(R.string.app_key))
                 else{
-                    mainViewModel.setSyncNotes(CLOUD_DROPBOX)
-                    activity?.onBackPressed()
+                    activity?.setResult(RESULT_OK)
+                    activity?.finish()
                 }
             }
         }
@@ -114,6 +110,6 @@ class CloudPickerFragment : Fragment() {
         bundle.putString(PREF_ID, id)
         bundle.putInt(PREF_CLOUD_TYPE, cloudType)
         bundle.putInt(PASSWORD_MODE, MODE_LOGIN_TIME_PASSWORD)
-        findNavController(this).navigate(R.id.action_cloudPickerFragment_to_passwordFragment, bundle)
+        findNavController(this).navigate(R.id.action_cloudPickerFragment2_to_passwordCheckFragment, bundle)
     }
 }

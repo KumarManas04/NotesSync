@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/note_edit_nav_graph"
+    app:startDestination="@id/noteEditFragment2">
+
+    <fragment
+        android:id="@+id/noteEditFragment2"
+        android:name="com.infinitysolutions.notessync.Fragments.NoteEditFragment"
+        android:label="NoteEditFragment" >
+        <action
+            android:id="@+id/action_noteEditFragment2_to_imageGalleryFragment2"
+            app:destination="@id/imageGalleryFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/appLockFragment2"
+        android:name="com.infinitysolutions.notessync.Fragments.AppLockFragment"
+        android:label="fragment_app_lock"
+        tools:layout="@layout/fragment_app_lock" >
+        <action
+            android:id="@+id/action_appLockFragment2_to_noteEditFragment2"
+            app:destination="@id/noteEditFragment2"
+            app:popUpTo="@id/note_edit_nav_graph" />
+    </fragment>
+    <fragment
+        android:id="@+id/imageGalleryFragment2"
+        android:name="com.infinitysolutions.notessync.Fragments.ImageGalleryFragment"
+        android:label="ImageGalleryFragment" />
+</navigation>

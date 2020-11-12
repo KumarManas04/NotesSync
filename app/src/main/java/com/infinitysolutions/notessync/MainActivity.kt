@@ -52,16 +52,6 @@ class MainActivity : AppCompatActivity() {
     private fun initDataBinding() {
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
-        mainViewModel.getSyncNotes().observe(this, Observer {
-            it.getContentIfNotHandled()?.let {
-                val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-                val editor = prefs.edit()
-                editor.putStringSet(PREF_SYNC_QUEUE, hashSetOf("1"))
-                editor.commit()
-                WorkSchedulerHelper().syncNotes(true, this)
-            }
-        })
-
         mainViewModel.getToolbar().observe(this, Observer { toolbar ->
             if (toolbar != null) {
                 val toggle = ActionBarDrawerToggle(

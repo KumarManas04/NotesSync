@@ -42,6 +42,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.Adapters.NotesAdapter
+import com.infinitysolutions.notessync.login.LoginActivity
+import com.infinitysolutions.notessync.Contracts.Contract
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.Contracts.Contract.Companion.FILE_PROVIDER_AUTHORITY
@@ -70,6 +72,7 @@ import com.infinitysolutions.notessync.Model.ImageData
 import com.infinitysolutions.notessync.Model.ImageNoteContent
 import com.infinitysolutions.notessync.Model.Note
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.Util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.ViewModel.DatabaseViewModel
 import com.infinitysolutions.notessync.ViewModel.MainViewModel
 import kotlinx.android.synthetic.main.add_image_dialog.view.*
@@ -86,6 +89,7 @@ import java.util.*
 
 class MainFragment : Fragment() {
     private val TAG = "MainFragment"
+    private val LOGIN_REQUEST_CODE = 199
     private lateinit var mainViewModel: MainViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -555,12 +559,16 @@ class MainFragment : Fragment() {
     }
 
     private fun syncFiles() {
-        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE) ?: return
         when (getLoginStatus(prefs)) {
-            CLOUD_GOOGLE_DRIVE -> mainViewModel.setSyncNotes(CLOUD_GOOGLE_DRIVE)
-            CLOUD_DROPBOX -> mainViewModel.setSyncNotes(CLOUD_DROPBOX)
-            else -> findNavController(this).navigate(R.id.action_mainFragment_to_cloudPickerFragment)
+            CLOUD_GOOGLE_DRIVE, CLOUD_DROPBOX -> syncAll(prefs)
+            else -> startActivityForResult(Intent(context, LoginActivity::class.java), LOGIN_REQUEST_CODE)
         }
+    }
+
+    private fun syncAll(prefs: SharedPreferences){
+        prefs.edit().putStringSet(Contract.PREF_SYNC_QUEUE, hashSetOf("1")).commit()
+        WorkSchedulerHelper().syncNotes(true, context!!)
     }
 
     private fun getLoginStatus(prefs: SharedPreferences?): Int {
@@ -735,6 +743,10 @@ class MainFragment : Fragment() {
                     else
                         Toast.makeText(context, "Error in retrieving image", LENGTH_SHORT).show()
                 }
+            }else if(requestCode == LOGIN_REQUEST_CODE){
+                val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+                if(prefs != null)
+                    syncAll(prefs)
             }
         }
     }
