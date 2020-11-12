@@ -30,6 +30,11 @@ Download it from Google Play Store - https://play.google.com/store/apps/details?
    - In your strings.xml and AndroidManifest.xml replace `YOUR_APP_KEY_HERE` with the key copied in previous step
 6. Build and run the app
 
+## How to contribute
+1. Pick an issue to work on/ Create an issue for new and exciting ideas
+2. Ask for permission to work on the issue
+3. Raise PR to the 'contributions' branch
+
 ## Developed by
 * Kumar Manas - <kumarmanas04@gmail.com>
 
