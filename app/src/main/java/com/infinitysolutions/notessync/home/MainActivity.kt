@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync
+package com.infinitysolutions.notessync.home
 
 import android.app.AlertDialog
 import android.content.Context
@@ -16,6 +16,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
+import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_AMOLED
@@ -80,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                             imm?.hideSoftInputFromWindow(v.windowToken, 0)
                         }
                     }
-                    R.id.imageGalleryFragment->{
+                    R.id.imageGalleryFragment ->{
                         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                         //Hide keyboard
                         val view = this.currentFocus

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/app_lock_nav_graph"
+    app:startDestination="@id/pinCheckFragment">
+    <fragment
+        android:id="@+id/pinCheckFragment"
+        android:name="com.infinitysolutions.notessync.applock.PinCheckFragment"
+        android:label="fragment_app_lock"
+        tools:layout="@layout/fragment_app_lock" >
+        <action
+            android:id="@+id/action_pinCheckFragment_to_pinChangeFragment"
+            app:destination="@id/pinChangeFragment"
+            app:popUpTo="@id/app_lock_nav_graph" />
+    </fragment>
+    <fragment
+        android:id="@+id/pinChangeFragment"
+        android:name="com.infinitysolutions.notessync.applock.PinChangeFragment"
+        android:label="PinChangeFragment" />
+</navigation>

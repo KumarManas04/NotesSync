@@ -1,11 +1,11 @@
-package com.infinitysolutions.notessync
+package com.infinitysolutions.notessync.settings
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract
 
-class NoteEditActivity : AppCompatActivity() {
-    private val TAG = "NoteEditActivity"
+class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,7 +19,7 @@ class NoteEditActivity : AppCompatActivity() {
             }
         }
 
-        setContentView(R.layout.activity_note_edit)
-
+        setContentView(R.layout.activity_settings)
     }
+
 }

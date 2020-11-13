@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.adapters
+package com.infinitysolutions.notessync.widget
 
 import android.content.Context
 import android.content.Intent

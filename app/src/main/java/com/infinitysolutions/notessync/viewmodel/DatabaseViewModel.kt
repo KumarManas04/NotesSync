@@ -27,7 +27,7 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ORDER
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ORDER_BY
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_SYNC_QUEUE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
-import com.infinitysolutions.notessync.fragments.NotesWidget
+import com.infinitysolutions.notessync.widget.NotesWidget
 import com.infinitysolutions.notessync.model.*
 import com.infinitysolutions.notessync.repository.NotesRepository
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper

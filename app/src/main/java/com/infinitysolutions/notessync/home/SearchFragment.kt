@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.fragments
+package com.infinitysolutions.notessync.home
 
 
 import android.content.Context.INPUT_METHOD_SERVICE
@@ -19,7 +19,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.infinitysolutions.notessync.adapters.NotesAdapter
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.viewmodel.DatabaseViewModel
 import com.infinitysolutions.notessync.viewmodel.MainViewModel

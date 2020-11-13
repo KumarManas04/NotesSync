@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.fragments
+package com.infinitysolutions.notessync.noteedit
 
 
 import android.app.AlertDialog
@@ -18,7 +18,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.infinitysolutions.notessync.adapters.GalleryAdapter
 import com.infinitysolutions.notessync.contracts.Contract.Companion.FILE_PROVIDER_AUTHORITY
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.viewmodel.DatabaseViewModel

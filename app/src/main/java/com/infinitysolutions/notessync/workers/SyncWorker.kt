@@ -47,7 +47,7 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_FILESYS
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_IMAGE_FILESYSTEM_STASH
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_SYNC_QUEUE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
-import com.infinitysolutions.notessync.fragments.NotesWidget
+import com.infinitysolutions.notessync.widget.NotesWidget
 import com.infinitysolutions.notessync.model.*
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.util.AES256Helper

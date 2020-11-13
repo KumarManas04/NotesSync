@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.fragments
+package com.infinitysolutions.notessync.settings
 
 
 import android.content.Intent

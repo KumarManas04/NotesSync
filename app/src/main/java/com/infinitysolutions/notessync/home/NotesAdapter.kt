@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.adapters
+package com.infinitysolutions.notessync.home
 
 import android.app.AlertDialog
 import android.content.Context

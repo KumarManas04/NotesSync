@@ -18,12 +18,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".login.ChangePasswordActivity"></activity>
+        <activity android:name=".applock.AppLockActivity"></activity>
+        <activity android:name=".login.ChangePasswordActivity" />
         <activity android:name=".login.LoginActivity" />
-        <activity android:name=".SettingsActivity" />
-        <activity android:name=".NoteEditActivity" />
+        <activity android:name=".settings.SettingsActivity" />
+        <activity android:name=".noteedit.NoteEditActivity" />
 
-        <receiver android:name=".fragments.NotesWidget">
+        <receiver android:name=".widget.NotesWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -34,10 +35,10 @@
         </receiver>
 
         <service
-            android:name=".services.WidgetRemoteViewsService"
+            android:name=".widget.WidgetRemoteViewsService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".home.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

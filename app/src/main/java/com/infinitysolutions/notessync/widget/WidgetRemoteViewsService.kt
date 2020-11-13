@@ -1,8 +1,7 @@
-package com.infinitysolutions.notessync.services
+package com.infinitysolutions.notessync.widget
 
 import android.content.Intent
 import android.widget.RemoteViewsService
-import com.infinitysolutions.notessync.adapters.WidgetRemoteViewsFactory
 
 class WidgetRemoteViewsService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent?): RemoteViewsFactory {

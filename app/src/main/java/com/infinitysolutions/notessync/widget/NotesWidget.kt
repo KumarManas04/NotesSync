@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.fragments
+package com.infinitysolutions.notessync.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -15,9 +15,8 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_BUTTO
 import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_IMAGE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_LIST
 import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_NOTE
-import com.infinitysolutions.notessync.MainActivity
+import com.infinitysolutions.notessync.home.MainActivity
 import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.services.WidgetRemoteViewsService
 
 class NotesWidget : AppWidgetProvider() {
 

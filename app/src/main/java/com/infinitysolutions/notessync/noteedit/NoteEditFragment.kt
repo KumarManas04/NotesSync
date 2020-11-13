@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.fragments
+package com.infinitysolutions.notessync.noteedit
 
 
 import android.Manifest
@@ -44,8 +44,6 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.infinitysolutions.checklistview.ChecklistView
-import com.infinitysolutions.notessync.adapters.ColorPickerAdapter
-import com.infinitysolutions.notessync.adapters.ImageListAdapter
 import com.infinitysolutions.notessync.contracts.Contract
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_ARCHIVED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_CAPTURE_REQUEST_CODE

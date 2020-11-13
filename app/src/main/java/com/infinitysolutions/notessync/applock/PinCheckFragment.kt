@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.fragments
+package com.infinitysolutions.notessync.applock
 
 
 import android.content.Context.MODE_PRIVATE
@@ -10,19 +10,21 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.infinitysolutions.notessync.contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_APP_LOCK_CODE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_NEW_PIN
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_CHANGE_PIN
+import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_CHECK_PIN
+import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_MAIN_PIN
+import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_NOTE_EDIT
 import kotlinx.android.synthetic.main.fragment_app_lock.view.*
 
-class AppLockFragment : Fragment() {
-    private val TAG = "AppLockFragment"
+class PinCheckFragment : Fragment() {
+    private val TAG = "PinCheckFragment"
     private val passCode = MutableLiveData<String>()
-    private var pass2 = ""
 
     init {
         passCode.value = ""
@@ -31,20 +33,10 @@ class AppLockFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_app_lock, container, false)
 
-        val type = arguments?.getInt(APP_LOCK_STATE)
-        if (type != null) {
-            if (type == STATE_NEW_PIN) {
-                rootView.message_text_view.text = getString(R.string.enter_new_pin)
-                prepareButtons(rootView)
-            } else {
-                rootView.message_text_view.text = getString(R.string.enter_old_pin)
-                prepareButtons(rootView)
-            }
-        } else {
-            initEntryPin(rootView)
-        }
+        val type = arguments?.getInt(APP_LOCK_STATE) ?: STATE_CHECK_PIN
+        initEntryPin(rootView, type)
 
-        passCode.observe(this, Observer { code ->
+        passCode.observe(this, { code ->
             when (code.length) {
                 0 -> {
                     rootView.indicator_1.setImageResource(R.drawable.circle_stroke)
@@ -63,21 +55,20 @@ class AppLockFragment : Fragment() {
                 }
                 4 -> {
                     rootView.indicator_4.setImageResource(R.drawable.round_color)
-                    submitCode(rootView, code)
+                    submitCode(code, type)
                 }
             }
         })
         return rootView
     }
 
-    private fun initEntryPin(rootView: View) {
+    private fun initEntryPin(rootView: View, type: Int) {
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         if (prefs != null) {
-            if (prefs.contains(PREF_APP_LOCK_CODE)) {
+            if (prefs.contains(PREF_APP_LOCK_CODE))
                 prepareButtons(rootView)
-            } else {
-                findNavController(this).navigate(R.id.action_appLockFragment_to_mainFragment)
-            }
+            else
+                nextScreen(type)
         }
     }
 
@@ -123,55 +114,25 @@ class AppLockFragment : Fragment() {
         }
     }
 
-    private fun submitCode(rootView: View, code: String) {
-        val type = arguments?.getInt(APP_LOCK_STATE)
-        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (type != null) {
-            if (type == STATE_NEW_PIN) {
-                if (pass2 == "") {
-                    pass2 = code
-                    passCode.value = ""
-                    rootView.message_text_view.text = getString(R.string.re_enter_pin)
-                } else {
-                    if (code == pass2) {
-                        if (prefs != null) {
-                            prefs.edit().putString(PREF_APP_LOCK_CODE, code).commit()
-                            activity?.onBackPressed()
-                        }
-                    } else {
-                        Toast.makeText(activity, getString(R.string.toast_pins_dont_match), LENGTH_SHORT).show()
-                        passCode.value = ""
-                        pass2 = ""
-                        rootView.message_text_view.text = getString(R.string.enter_new_pin)
-                    }
-                }
-            } else {
-                if (pass2 == "") {
-                    if (prefs != null) {
-                        val oldPIN = prefs.getString(PREF_APP_LOCK_CODE, null)
-                        if (oldPIN == code) {
-                            pass2 = code
-                            passCode.value = ""
-                            rootView.message_text_view.text = getString(R.string.enter_new_pin)
-                        } else {
-                            Toast.makeText(activity, getString(R.string.toast_old_pins_incorrect), LENGTH_SHORT).show()
-                            passCode.value = ""
-                        }
-                    }
-                } else {
-                    prefs?.edit()?.putString(PREF_APP_LOCK_CODE, code)?.apply()
-                    activity?.onBackPressed()
-                }
+    private fun nextScreen(type: Int){
+        //TODO: Recheck this to configure according to nav graphs
+        when(type){
+            STATE_NEW_PIN, STATE_CHANGE_PIN -> findNavController(this).navigate(R.id.action_pinCheckFragment_to_pinChangeFragment)
+            STATE_MAIN_PIN -> findNavController(this).navigate(R.id.action_appLockFragment_to_mainFragment)
+            STATE_NOTE_EDIT ->{
             }
-        } else {
-            if (prefs != null) {
-                val pin = prefs.getString(PREF_APP_LOCK_CODE, null)
-                if (pin != null && pin == code) {
-                    findNavController(this).navigate(R.id.action_appLockFragment_to_mainFragment)
-                }else{
-                    Toast.makeText(activity, getString(R.string.toast_pin_incorrect), LENGTH_SHORT).show()
-                    passCode.value = ""
-                }
+        }
+    }
+
+    private fun submitCode(code: String, type: Int) {
+        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        if (prefs != null) {
+            val pin = prefs.getString(PREF_APP_LOCK_CODE, null)
+            if (pin != null && pin == code) {
+                nextScreen(type)
+            }else{
+                Toast.makeText(activity, getString(R.string.toast_pin_incorrect), LENGTH_SHORT).show()
+                passCode.value = ""
             }
         }
     }

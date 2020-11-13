@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.fragments
+package com.infinitysolutions.notessync.home
 
 import android.Manifest
 import android.app.Activity
@@ -41,7 +41,6 @@ import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
-import com.infinitysolutions.notessync.adapters.NotesAdapter
 import com.infinitysolutions.notessync.login.LoginActivity
 import com.infinitysolutions.notessync.contracts.Contract
 import com.infinitysolutions.notessync.contracts.Contract.Companion.CLOUD_DROPBOX

@@ -59,6 +59,9 @@ class Contract{
         const val APP_LOCK_STATE = "appLockState"
         const val STATE_NEW_PIN = 0
         const val STATE_CHANGE_PIN = 1
+        const val STATE_CHECK_PIN = 2
+        const val STATE_MAIN_PIN = 3
+        const val STATE_NOTE_EDIT = 4
         const val IMAGE_CAPTURE_REQUEST_CODE = 1010
         const val IMAGE_PICKER_REQUEST_CODE = 1020
         const val FILE_PROVIDER_AUTHORITY = "com.infinitysolutions.notessync.fileprovider"

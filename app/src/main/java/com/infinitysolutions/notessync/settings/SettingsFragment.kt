@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.fragments
+package com.infinitysolutions.notessync.settings
 
 
 import android.app.Activity.RESULT_OK
@@ -29,7 +29,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.infinitysolutions.notessync.adapters.ColorPickerAdapter
+import com.infinitysolutions.notessync.noteedit.ColorPickerAdapter
 import com.infinitysolutions.notessync.login.LoginActivity
 import com.infinitysolutions.notessync.contracts.Contract
 import com.infinitysolutions.notessync.contracts.Contract.Companion.APP_LOCK_STATE
@@ -52,6 +52,8 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_AMOLED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.applock.AppLockActivity
+import com.infinitysolutions.notessync.widget.NotesWidget
 import com.infinitysolutions.notessync.util.ColorsUtil
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.login.ChangePasswordActivity
@@ -269,9 +271,9 @@ class SettingsFragment : Fragment() {
         if (prefs.contains(PREF_APP_LOCK_CODE)){
             rootView.app_lock_toggle.isChecked = true
             rootView.change_pin_button.setOnClickListener {
-                val bundle = Bundle()
-                bundle.putInt(APP_LOCK_STATE, STATE_CHANGE_PIN)
-                findNavController(this).navigate(R.id.action_settingsFragment_to_appLockFragment, bundle)
+                val appLockIntent = Intent(activity, AppLockActivity::class.java)
+                appLockIntent.putExtra(APP_LOCK_STATE, STATE_CHANGE_PIN)
+                startActivity(appLockIntent)
             }
         }else{
             rootView.app_lock_toggle.isChecked = false
@@ -282,13 +284,9 @@ class SettingsFragment : Fragment() {
 
         rootView.app_lock_toggle.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked){
-                val bundle = Bundle()
-                bundle.putInt(APP_LOCK_STATE, STATE_NEW_PIN)
-                try {
-                    findNavController(this).navigate(R.id.action_settingsFragment_to_appLockFragment, bundle)
-                }catch (e: Exception){
-                    rootView.app_lock_toggle.isChecked = false
-                }
+                val appLockIntent = Intent(activity, AppLockActivity::class.java)
+                appLockIntent.putExtra(APP_LOCK_STATE, STATE_NEW_PIN)
+                startActivity(appLockIntent)
             }else{
                 prefs.edit().remove(PREF_APP_LOCK_CODE).commit()
             }

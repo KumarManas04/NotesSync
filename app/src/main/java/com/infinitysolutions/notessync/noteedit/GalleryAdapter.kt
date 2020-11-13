@@ -1,4 +1,4 @@
-package com.infinitysolutions.notessync.adapters
+package com.infinitysolutions.notessync.noteedit
 
 import android.content.Context
 import android.graphics.Bitmap
