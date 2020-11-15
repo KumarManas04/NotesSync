@@ -18,7 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".applock.AppLockActivity"></activity>
+        <activity android:name=".encrypt.EnableEncryptionActivity"></activity>
+        <activity android:name=".applock.AppLockActivity" />
         <activity android:name=".login.ChangePasswordActivity" />
         <activity android:name=".login.LoginActivity" />
         <activity android:name=".settings.SettingsActivity" />

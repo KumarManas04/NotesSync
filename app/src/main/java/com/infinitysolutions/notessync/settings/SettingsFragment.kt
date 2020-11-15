@@ -53,6 +53,7 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.applock.AppLockActivity
+import com.infinitysolutions.notessync.encrypt.EnableEncryptionActivity
 import com.infinitysolutions.notessync.widget.NotesWidget
 import com.infinitysolutions.notessync.util.ColorsUtil
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper
@@ -301,18 +302,18 @@ class SettingsFragment : Fragment() {
         //This will only be reached when user is logged in
         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         if (prefs != null){
-            val passwordMode = if (prefs.contains(PREF_ENCRYPTED) && prefs.getBoolean(PREF_ENCRYPTED, false)){
+            if (prefs.contains(PREF_ENCRYPTED) && prefs.getBoolean(PREF_ENCRYPTED, false)){
                 rootView.change_pass_title.text = getString(R.string.change_password)
                 rootView.change_pass_text.text = getString(R.string.change_password_summary)
-                MODE_CHANGE_PASSWORD
+                rootView.change_pass_button.setOnClickListener {
+                    startActivityForResult(Intent(activity, ChangePasswordActivity::class.java), 1234)
+                }
             }else{
                 rootView.change_pass_title.text = getString(R.string.enable_encrypted_sync)
                 rootView.change_pass_text.text = getString(R.string.encrypted_sync_summary)
-                MODE_NEW_PASSWORD
-            }
-
-            rootView.change_pass_button.setOnClickListener {
-                startActivityForResult(Intent(activity, ChangePasswordActivity::class.java), 1234)
+                rootView.change_pass_button.setOnClickListener {
+                    startActivity(Intent(activity, EnableEncryptionActivity::class.java))
+                }
             }
         }
     }
