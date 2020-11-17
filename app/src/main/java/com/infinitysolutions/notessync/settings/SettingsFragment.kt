@@ -77,7 +77,7 @@ class SettingsFragment : Fragment() {
         val toolbar = rootView.toolbar
         toolbar.title = getString(R.string.menu_settings)
         toolbar.setNavigationOnClickListener {
-            findNavController(this).navigateUp()
+            activity?.onBackPressed()
         }
 
         val prefs = activity!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
@@ -364,12 +364,23 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if(requestCode == LOGIN_REQUEST_CODE && resultCode == RESULT_OK){
-            val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE) ?: return
-            val editor = prefs.edit()
-            editor.putStringSet(Contract.PREF_SYNC_QUEUE, hashSetOf("1"))
-            editor.commit()
-            WorkSchedulerHelper().syncNotes(true, context!!)
+        if(requestCode == LOGIN_REQUEST_CODE) {
+            val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+            if(resultCode == RESULT_OK){
+                if(prefs != null) {
+                    prefs.edit().putStringSet(Contract.PREF_SYNC_QUEUE, hashSetOf("1")).commit()
+                    WorkSchedulerHelper().syncNotes(true, context!!)
+                }
+            }else{
+                val editor = prefs?.edit()
+                editor?.remove(PREF_ACCESS_TOKEN)
+                editor?.remove(PREF_CLOUD_TYPE)
+                editor?.remove(Contract.PREF_ID)
+                editor?.apply()
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                val googleSignInClient = GoogleSignIn.getClient(activity!!, gso)
+                googleSignInClient.signOut()
+            }
         }
     }
 }

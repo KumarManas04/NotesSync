@@ -34,6 +34,7 @@ class EnableEncryptionActivity : AppCompatActivity() {
     private val TAG = "EnableEncryptionActivity"
     private lateinit var encryptionViewModel: EncryptionViewModel
 
+    //TODO: Add theme code
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_enable_encrypion)

@@ -19,7 +19,6 @@ class MainViewModel: ViewModel(){
     private val mToolbar = MutableLiveData<Toolbar?>()
     private val viewMode = MutableLiveData<Int>()
     private val refreshImagesList = MutableLiveData<Event<Boolean>>()
-    var isExitBlocked = false
     var noteType: Int? = null
     private var currentPhotoPath: String? = null
     var intent: Intent? = null

@@ -5,8 +5,10 @@ import android.app.Activity.RESULT_OK
 import android.app.AlertDialog
 import android.app.Service
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -37,6 +39,12 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CLOUD_T
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PASSWORD_VERIFY_CORRECT
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PASSWORD_VERIFY_ERROR
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PASSWORD_VERIFY_INVALID
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ACCESS_TOKEN
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CODE
+import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.util.DropboxHelper
 import com.infinitysolutions.notessync.util.GoogleDriveHelper
 import kotlinx.android.synthetic.main.fragment_password_check.view.*
@@ -67,8 +75,8 @@ class PasswordCheckFragment : Fragment() {
             activity?.finish()
         }
 
-        initializeLogin(cloudType)
         initDataBinding(rootView, userId, cloudType, passwordCheckMode)
+        initializeLogin(cloudType)
         rootView.submit_button.setOnClickListener {
             if (rootView.password_edit_text.text.isNotEmpty())
                 passwordViewModel.runVerification(userId, cloudType, rootView.password_edit_text.text.toString())
@@ -86,7 +94,7 @@ class PasswordCheckFragment : Fragment() {
     ) {
         passwordViewModel =
             ViewModelProviders.of(activity!!)[PasswordViewModel::class.java]
-        passwordViewModel.getLoadingMessage().observe(this, Observer { loading ->
+        passwordViewModel.getLoadingMessage().observe(this, { loading ->
             if (loading != null) {
                 rootView.loading_panel.visibility = VISIBLE
                 rootView.input_bar.visibility = GONE
@@ -96,7 +104,7 @@ class PasswordCheckFragment : Fragment() {
             }
         })
 
-        passwordViewModel.getEncryptionCheckResult().observe(this, Observer {result ->
+        passwordViewModel.getEncryptionCheckResult().observe(this, { result ->
             if(result != null){
                 when(result){
                     ENCRYPTED_NO ->{
@@ -105,9 +113,9 @@ class PasswordCheckFragment : Fragment() {
                             bundle.putString(PREF_ID, userId)
                             bundle.putInt(PREF_CLOUD_TYPE, cloudType)
                             bundle.putInt(PASSWORD_MODE, passwordCheckMode)
-                            findNavController(this).navigate(R.id.action_passwordCheckFragment_to_passwordSetFragment)
+                            findNavController(this).navigate(R.id.action_passwordCheckFragment_to_passwordSetFragment, bundle)
                         }else if(passwordCheckMode == MODE_CHANGE_PASSWORD){
-                            val prefs = activity?.getSharedPreferences(Contract.SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+                            val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
                             prefs?.edit()?.putBoolean(PREF_ENCRYPTED, false)?.commit()
                             activity?.setResult(RESULT_CANCELED)
                             activity?.finish()
@@ -131,16 +139,16 @@ class PasswordCheckFragment : Fragment() {
             }
         })
 
-        passwordViewModel.getVerifyPasswordResult().observe(this, Observer { result ->
+        passwordViewModel.getVerifyPasswordResult().observe(this, { result ->
             if (result != null) {
                 when (result) {
-                    Contract.PASSWORD_VERIFY_INVALID -> {
+                    PASSWORD_VERIFY_INVALID -> {
                         Toast.makeText(
                             activity, getString(R.string.toast_password_invalid),
                             LENGTH_SHORT
                         ).show()
                     }
-                    Contract.PASSWORD_VERIFY_CORRECT -> {
+                    PASSWORD_VERIFY_CORRECT -> {
                         if (passwordCheckMode == MODE_LOGIN_TIME_PASSWORD)
                             finishLogin(
                                 rootView.password_edit_text.text.toString(),
@@ -152,10 +160,10 @@ class PasswordCheckFragment : Fragment() {
                             bundle.putString(PREF_ID, userId)
                             bundle.putInt(PREF_CLOUD_TYPE, cloudType)
                             bundle.putInt(PASSWORD_MODE, passwordCheckMode)
-                            findNavController(this).navigate(R.id.action_passwordCheckFragment_to_passwordSetFragment, bundle)
+                            findNavController(this).navigate(R.id.action_passwordCheckFragment2_to_passwordSetFragment2, bundle)
                         }
                     }
-                    Contract.PASSWORD_VERIFY_ERROR -> {
+                    PASSWORD_VERIFY_ERROR -> {
                         Toast.makeText(
                             activity, getString(R.string.toast_error),
                             LENGTH_SHORT
@@ -190,10 +198,10 @@ class PasswordCheckFragment : Fragment() {
 
     private fun finishLogin(password: String, userId: String, cloudType: Int) {
         // Login successful. Return to previous activity with result ok
-        val prefs = activity?.getSharedPreferences(Contract.SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
         val editor = prefs?.edit()
-        editor?.putString(Contract.PREF_CODE, password)
-        editor?.putBoolean(Contract.PREF_ENCRYPTED, true)
+        editor?.putString(PREF_CODE, password)
+        editor?.putBoolean(PREF_ENCRYPTED, true)
         editor?.putString(PREF_ID, userId)
         editor?.putInt(PREF_CLOUD_TYPE, cloudType)
         editor?.commit()
@@ -222,8 +230,8 @@ class PasswordCheckFragment : Fragment() {
     }
 
     private fun getDropboxClient(): DbxClientV2? {
-        val prefs = activity?.getSharedPreferences(Contract.SHARED_PREFS_NAME, Service.MODE_PRIVATE)
-        val accessToken = prefs?.getString(Contract.PREF_ACCESS_TOKEN, null)
+        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, Service.MODE_PRIVATE)
+        val accessToken = prefs?.getString(PREF_ACCESS_TOKEN, null)
         return if (accessToken != null) {
             val requestConfig = DbxRequestConfig.newBuilder("Notes-Sync")
                 .withHttpRequestor(OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))

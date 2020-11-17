@@ -1,123 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/mainBackground"
+    android:fitsSystemWindows="true"
     tools:context=".encrypt.EnableEncryptionActivity">
 
-    <ImageView
-        android:id="@+id/image_password"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_marginTop="100dp"
-        android:background="@drawable/round_color"
-        android:backgroundTint="#66bb6a"
-        android:padding="40dp"
-        android:src="@drawable/password_icon"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <LinearLayout
-        android:id="@+id/loading_panel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/image_password"
-        tools:visibility="gone">
-
-        <ProgressBar
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:indeterminate="true" />
-
-        <TextView
-            android:id="@+id/loading_message"
-            android:text="@string/check_encryption_loading_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textColor="?attr/mainTextColor" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/input_bar"
-        android:visibility="gone"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:visibility="visible">
+        android:layout_height="match_parent"
+        android:background="?attr/mainBackground">
 
-        <TextView
-            android:id="@+id/info_text_view"
+        <ImageView
+            android:id="@+id/image_password"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginTop="100dp"
+            android:background="@drawable/round_color"
+            android:backgroundTint="#66bb6a"
+            android:padding="40dp"
+            android:src="@drawable/password_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/loading_panel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="20dp"
-            android:textColor="?attr/mainTextColor"
-            android:textSize="18sp" />
+            android:orientation="vertical"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/image_password"
+            tools:visibility="gone">
 
-        <EditText
-            android:id="@+id/password_edit_text"
+            <ProgressBar
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:indeterminate="true" />
+
+            <TextView
+                android:id="@+id/loading_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/check_encryption_loading_text"
+                android:textColor="?attr/mainTextColor" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/input_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/password_input_background"
-            android:hint="@string/enter_password"
-            android:inputType="textPassword"
-            android:padding="14dp"
-            android:textColor="?attr/mainTextColor"
-            android:textCursorDrawable="@null"
-            android:textSize="16sp" />
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible">
 
-        <EditText
-            android:id="@+id/again_password_edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/password_input_background"
-            android:hint="@string/re_enter_password"
-            android:inputType="textPassword"
-            android:padding="14dp"
-            android:textColor="?attr/mainTextColor"
-            android:textCursorDrawable="@null"
-            android:textSize="16sp" />
+            <TextView
+                android:id="@+id/info_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="20dp"
+                android:textColor="?attr/mainTextColor"
+                android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/warning_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="20dp"
-            android:text="@string/warning_password"
-            android:textColor="#f44336"
-            android:textSize="16sp" />
+            <EditText
+                android:id="@+id/password_edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/password_input_background"
+                android:hint="@string/enter_password"
+                android:inputType="textPassword"
+                android:padding="14dp"
+                android:textColor="?attr/mainTextColor"
+                android:textCursorDrawable="@null"
+                android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/submit_button"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/password_submit_background"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="@string/submit"
-            android:textColor="#ffffff" />
+            <EditText
+                android:id="@+id/again_password_edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/password_input_background"
+                android:hint="@string/re_enter_password"
+                android:inputType="textPassword"
+                android:padding="14dp"
+                android:textColor="?attr/mainTextColor"
+                android:textCursorDrawable="@null"
+                android:textSize="16sp" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/warning_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="20dp"
+                android:text="@string/warning_password"
+                android:textColor="#f44336"
+                android:textSize="16sp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <Button
+                android:id="@+id/submit_button"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/password_submit_background"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/submit"
+                android:textColor="#ffffff" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

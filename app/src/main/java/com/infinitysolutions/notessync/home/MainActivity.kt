@@ -16,12 +16,17 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.contracts.Contract
+import com.infinitysolutions.notessync.contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_MAIN_PIN
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_AMOLED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DEFAULT
+import com.infinitysolutions.notessync.settings.SettingsActivity
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
@@ -44,13 +49,17 @@ class MainActivity : AppCompatActivity() {
 
         WorkSchedulerHelper().setAutoDelete(this)
         setContentView(R.layout.activity_main)
+
+        val bundle = Bundle()
+        bundle.putInt(APP_LOCK_STATE, STATE_MAIN_PIN)
+        findNavController(R.id.nav_host_fragment).setGraph(R.navigation.home_nav_graph, bundle)
         initDataBinding()
     }
 
     private fun initDataBinding() {
         val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
-        mainViewModel.getToolbar().observe(this, Observer { toolbar ->
+        mainViewModel.getToolbar().observe(this, { toolbar ->
             if (toolbar != null) {
                 val toggle = ActionBarDrawerToggle(
                     this,
@@ -74,15 +83,6 @@ class MainActivity : AppCompatActivity() {
                 when (destination.id) {
                     R.id.mainFragment -> {
                         drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-                        //Hide keyboard
-                        val view = this.currentFocus
-                        view?.let { v ->
-                            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-                            imm?.hideSoftInputFromWindow(v.windowToken, 0)
-                        }
-                    }
-                    R.id.imageGalleryFragment ->{
-                        drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                         //Hide keyboard
                         val view = this.currentFocus
                         view?.let { v ->
@@ -117,9 +117,7 @@ class MainActivity : AppCompatActivity() {
                     drawer_layout.closeDrawers()
                 }
                 R.id.settings -> {
-                    Navigation.findNavController(this, R.id.nav_host_fragment)
-                        .navigate(R.id.action_mainFragment_to_settingsFragment)
-                    drawer_layout.closeDrawers()
+                    startActivity(Intent(this, SettingsActivity::class.java))
                 }
                 R.id.support_development ->{
                     drawer_layout.closeDrawers()

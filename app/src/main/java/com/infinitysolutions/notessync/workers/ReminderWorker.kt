@@ -29,9 +29,9 @@ class ReminderWorker(private val context: Context, params: WorkerParameters): Wo
         val bundle = Bundle()
         bundle.putLong("NOTE_ID", noteId)
         val pendingIntent = NavDeepLinkBuilder(applicationContext)
-            .setGraph(R.navigation.home_nav_graph)
+            .setGraph(R.navigation.note_edit_nav_graph)
             .setArguments(bundle)
-            .setDestination(R.id.noteEditFragment)
+            .setDestination(R.id.noteEditFragment2)
             .createPendingIntent()
 
         val formatter = SimpleDateFormat("h:mm a MMM d", Locale.ENGLISH)

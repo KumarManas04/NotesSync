@@ -7,6 +7,8 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
@@ -21,6 +23,7 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CODE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_LOGIN_TIME_PASSWORD
 import kotlinx.android.synthetic.main.fragment_password_set.view.*
 
 class PasswordSetFragment : Fragment() {
@@ -56,6 +59,17 @@ class PasswordSetFragment : Fragment() {
                 passwordMode
             )
         }
+
+        if(passwordMode == MODE_LOGIN_TIME_PASSWORD){
+            rootView.ps_skip_button.visibility = VISIBLE
+            rootView.ps_skip_button.setOnClickListener {
+                activity?.setResult(RESULT_OK)
+                activity?.finish()
+            }
+        }else{
+            rootView.ps_skip_button.visibility = GONE
+        }
+
         return rootView
     }
 

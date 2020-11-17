@@ -145,10 +145,11 @@ class NoteEditFragment : Fragment() {
         mainViewModel.getOpenImageView().observe(this, androidx.lifecycle.Observer {
             it.getContentIfNotHandled()?.let { imagePosition ->
                 val bundle = bundleOf("currentPosition" to imagePosition)
-                findNavController(this).navigate(
-                    R.id.action_noteEditFragment_to_imageGalleryFragment,
-                    bundle
-                )
+                //TODO: Change
+//                findNavController(this).navigate(
+//                    R.id.action_noteEditFragment_to_imageGalleryFragment,
+//                    bundle
+//                )
             }
         })
 

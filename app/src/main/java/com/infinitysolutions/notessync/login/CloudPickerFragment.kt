@@ -1,7 +1,7 @@
 package com.infinitysolutions.notessync.login
 
 
-import android.app.Activity
+import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
@@ -17,6 +17,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
+import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_LOGIN_TIME_PASSWORD
@@ -25,7 +26,6 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ACCESS_
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
-import com.infinitysolutions.notessync.R
 import kotlinx.android.synthetic.main.fragment_cloud_picker.view.*
 
 class CloudPickerFragment : Fragment() {
@@ -90,7 +90,7 @@ class CloudPickerFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when(requestCode){
             REQUEST_SIGN_IN->{
-                if (resultCode == Activity.RESULT_OK && data != null) {
+                if (resultCode == RESULT_OK && data != null) {
                     val googleAccount = GoogleSignIn.getLastSignedInAccount(activity)
                     if (googleAccount != null) {
                         val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)

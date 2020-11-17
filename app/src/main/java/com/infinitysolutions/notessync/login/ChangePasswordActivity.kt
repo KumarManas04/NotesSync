@@ -27,11 +27,11 @@ class ChangePasswordActivity : AppCompatActivity() {
             }
         }
 
+        setContentView(R.layout.activity_change_password)
         val bundle = Bundle()
         bundle.putString(PREF_ID, prefs.getString(PREF_ID, null))
         bundle.putInt(PREF_CLOUD_TYPE, prefs.getInt(PREF_CLOUD_TYPE, -1))
         bundle.putInt(PASSWORD_MODE, MODE_CHANGE_PASSWORD)
         findNavController(R.id.nav_host_fragment).setGraph(R.navigation.change_pass_nav_graph, bundle)
-        setContentView(R.layout.activity_change_password)
     }
 }

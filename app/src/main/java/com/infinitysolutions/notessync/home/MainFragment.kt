@@ -2,6 +2,7 @@ package com.infinitysolutions.notessync.home
 
 import android.Manifest
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
@@ -39,6 +40,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.login.LoginActivity
@@ -71,6 +73,7 @@ import com.infinitysolutions.notessync.model.ImageData
 import com.infinitysolutions.notessync.model.ImageNoteContent
 import com.infinitysolutions.notessync.model.Note
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.viewmodel.DatabaseViewModel
 import com.infinitysolutions.notessync.viewmodel.MainViewModel
@@ -337,7 +340,8 @@ class MainFragment : Fragment() {
                     // If we don't put the navigation statement in try-catch block then app crashes due to unable to
                     // find navController. This is an issue in the Navigation components in Jetpack
                     try {
-                        findNavController(this).navigate(R.id.action_mainFragment_to_noteEditFragment)
+                        //TODO: Change appropriately
+//                        findNavController(this).navigate(R.id.action_mainFragment_to_noteEditFragment)
                     } catch (e: Exception) {
                     }
                 }
@@ -428,7 +432,8 @@ class MainFragment : Fragment() {
                     if (noteId != -1L) {
                         val bundle = Bundle()
                         bundle.putLong("NOTE_ID", noteId)
-                        findNavController(this).navigate(R.id.noteEditFragment, bundle)
+                        //TODO: Change this
+//                        findNavController(this).navigate(R.id.noteEditFragment, bundle)
                     }
                 }
             }
@@ -727,7 +732,23 @@ class MainFragment : Fragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
+        if(requestCode == LOGIN_REQUEST_CODE){
+            val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+            if(resultCode == RESULT_OK){
+                if(prefs != null)
+                    syncAll(prefs)
+            }else{
+                val editor = prefs?.edit()
+                editor?.remove(PREF_ACCESS_TOKEN)
+                editor?.remove(PREF_CLOUD_TYPE)
+                editor?.remove(PREF_ID)
+                editor?.apply()
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                val googleSignInClient = GoogleSignIn.getClient(activity!!, gso)
+                googleSignInClient.signOut()
+            }
+        }
+        if (resultCode == RESULT_OK) {
             if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
                 val photoUri: Uri? = data?.data
                 if (photoUri != null)
@@ -742,10 +763,6 @@ class MainFragment : Fragment() {
                     else
                         Toast.makeText(context, "Error in retrieving image", LENGTH_SHORT).show()
                 }
-            }else if(requestCode == LOGIN_REQUEST_CODE){
-                val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-                if(prefs != null)
-                    syncAll(prefs)
             }
         }
     }

@@ -21,10 +21,10 @@ class AppLockActivity : AppCompatActivity() {
             }
         }
 
+        setContentView(R.layout.activity_app_lock)
         val type = intent.getIntExtra(APP_LOCK_STATE, STATE_CHECK_PIN)
         val bundle = Bundle()
         bundle.putInt(APP_LOCK_STATE, type)
         findNavController(R.id.nav_host_fragment).setGraph(R.navigation.app_lock_nav_graph, bundle)
-        setContentView(R.layout.activity_app_lock)
     }
 }

@@ -116,7 +116,8 @@ class SearchFragment : Fragment() {
                 // If we don't put the navigation statement in try-catch block then app crashes due to unable to
                 // find navController. This is an issue in the Navigation components in Jetpack
                 try {
-                    findNavController(this).navigate(R.id.action_searchFragment_to_noteEditFragment)
+                    //TODO: Change appropriately
+//                    findNavController(this).navigate(R.id.action_searchFragment_to_noteEditFragment)
                 }catch (e: Exception){
                 }
             }
