@@ -115,11 +115,12 @@ class PinCheckFragment : Fragment() {
     }
 
     private fun nextScreen(type: Int){
-        //TODO: Recheck this to configure according to nav graphs
         when(type){
             STATE_NEW_PIN, STATE_CHANGE_PIN -> findNavController(this).navigate(R.id.action_pinCheckFragment_to_pinChangeFragment)
             STATE_MAIN_PIN -> findNavController(this).navigate(R.id.action_appLockFragment_to_mainFragment)
-            STATE_NOTE_EDIT ->{
+            STATE_NOTE_EDIT -> findNavController(this).navigate(R.id.action_appLockFragment2_to_noteEditFragment2)
+            else ->{
+                activity?.finish()
             }
         }
     }

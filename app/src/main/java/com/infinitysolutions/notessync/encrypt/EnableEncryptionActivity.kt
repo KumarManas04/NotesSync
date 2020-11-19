@@ -34,12 +34,19 @@ class EnableEncryptionActivity : AppCompatActivity() {
     private val TAG = "EnableEncryptionActivity"
     private lateinit var encryptionViewModel: EncryptionViewModel
 
-    //TODO: Add theme code
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_enable_encrypion)
 
         val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        if (prefs.contains(Contract.PREF_THEME)) {
+            when (prefs.getInt(Contract.PREF_THEME, Contract.THEME_DEFAULT)) {
+                Contract.THEME_DEFAULT -> setTheme(R.style.AppTheme)
+                Contract.THEME_DARK -> setTheme(R.style.AppThemeDark)
+                Contract.THEME_AMOLED -> setTheme(R.style.AppThemeAmoled)
+            }
+        }
+
         val cloudType = getCloudType(prefs)
         val userId = prefs.getString(PREF_ID, null) ?: "-1"
 

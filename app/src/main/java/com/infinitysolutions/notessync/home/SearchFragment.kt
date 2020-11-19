@@ -14,14 +14,11 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.viewmodel.DatabaseViewModel
-import com.infinitysolutions.notessync.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 
@@ -44,10 +41,10 @@ class SearchFragment : Fragment() {
     }
 
     private fun initDataBinding(rootView: View){
-        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
-        val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        val homeDatabaseViewModel = ViewModelProviders.of(activity!!).get(HomeDatabaseViewModel::class.java)
+        val homeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
-        val recyclerAdapter = NotesAdapter(mainViewModel, databaseViewModel, listOf(), context!!)
+        val recyclerAdapter = NotesAdapter(homeViewModel, homeDatabaseViewModel, listOf(), context!!)
         searchRecyclerView.adapter = recyclerAdapter
         val toolbar = rootView.toolbar
         toolbar.inflateMenu(R.menu.search_fragment_menu)
@@ -72,7 +69,7 @@ class SearchFragment : Fragment() {
                 recyclerAdapter.clearAll()
             }
         }
-        mainViewModel.getMultiSelectCount().observe(this, Observer{count ->
+        homeViewModel.getMultiSelectCount().observe(this, { count ->
                 if (count > 0) {
                     toolbar.title = "$count selected"
                     if (count == 1) {
@@ -85,10 +82,10 @@ class SearchFragment : Fragment() {
                     backCallback.isEnabled = false
                 }
         })
-        mainViewModel.setMultiSelectCount(0)
+        homeViewModel.setMultiSelectCount(0)
 
         rootView.search_edit_text.addTextChangedListener {
-            databaseViewModel.setSearchQuery(it.toString())
+            homeDatabaseViewModel.setSearchQuery(it.toString())
         }
 
         rootView.search_edit_text.postDelayed({
@@ -97,7 +94,7 @@ class SearchFragment : Fragment() {
             imm.showSoftInput(rootView.search_edit_text, 0)
         }, 50)
 
-        databaseViewModel.searchResultList.observe(this, Observer {resultList->
+        homeDatabaseViewModel.searchResultList.observe(this, { resultList->
             if(resultList != null && resultList.isNotEmpty()){
                 searchRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE
@@ -108,18 +105,6 @@ class SearchFragment : Fragment() {
             }else{
                 searchRecyclerView.visibility = GONE
                 rootView.empty_items.visibility = VISIBLE
-            }
-        })
-
-        mainViewModel.getShouldOpenEditor().observe(this, Observer {should ->
-            if(should){
-                // If we don't put the navigation statement in try-catch block then app crashes due to unable to
-                // find navController. This is an issue in the Navigation components in Jetpack
-                try {
-                    //TODO: Change appropriately
-//                    findNavController(this).navigate(R.id.action_searchFragment_to_noteEditFragment)
-                }catch (e: Exception){
-                }
             }
         })
     }

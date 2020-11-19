@@ -68,6 +68,7 @@ class SettingsFragment : Fragment() {
     private val TAG = "SettingsFragment"
     private val LOGIN_REQUEST_CODE = 199
     private val SET_PIN_REQUEST_CODE = 191
+    private val ENABLE_ENCRYPTION_REQUEST_CODE = 192
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
@@ -318,7 +319,7 @@ class SettingsFragment : Fragment() {
             rootView.change_pass_title.text = getString(R.string.enable_encrypted_sync)
             rootView.change_pass_text.text = getString(R.string.encrypted_sync_summary)
             rootView.change_pass_button.setOnClickListener {
-                startActivity(Intent(activity, EnableEncryptionActivity::class.java))
+                startActivityForResult(Intent(activity, EnableEncryptionActivity::class.java), ENABLE_ENCRYPTION_REQUEST_CODE)
             }
         }
     }
@@ -388,11 +389,17 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        if(requestCode == SET_PIN_REQUEST_CODE){
+        if(requestCode == SET_PIN_REQUEST_CODE || requestCode == ENABLE_ENCRYPTION_REQUEST_CODE){
             val rootView = view
             val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
             if(rootView != null && prefs != null)
                 configureAppLockButtons(rootView, prefs)
+        }
+
+        if(requestCode == ENABLE_ENCRYPTION_REQUEST_CODE){
+            val rootView = view
+            if(rootView != null)
+                configureChangePassButton(rootView)
         }
     }
 }

@@ -13,12 +13,10 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.contracts.Contract
 import com.infinitysolutions.notessync.contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_THEME
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
@@ -57,9 +55,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initDataBinding() {
-        val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        val homeViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
 
-        mainViewModel.getToolbar().observe(this, { toolbar ->
+        homeViewModel.getToolbar().observe(this, { toolbar ->
             if (toolbar != null) {
                 val toggle = ActionBarDrawerToggle(
                     this,

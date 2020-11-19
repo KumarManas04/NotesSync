@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -26,6 +27,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.gson.Gson
+import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_ARCHIVED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_LIST_ARCHIVED
@@ -37,16 +39,15 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.LIST_TRASH
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_ARCHIVED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_DEFAULT
+import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_ID_EXTRA
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_TRASH
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_MAX_PREVIEW_LINES
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.model.ImageNoteContent
 import com.infinitysolutions.notessync.model.Note
-import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.noteedit.NoteEditActivity
 import com.infinitysolutions.notessync.util.ChecklistConverter
 import com.infinitysolutions.notessync.util.ColorsUtil
-import com.infinitysolutions.notessync.viewmodel.DatabaseViewModel
-import com.infinitysolutions.notessync.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.notes_list_item.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -55,7 +56,12 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 
-class NotesAdapter(private val mainViewModel: MainViewModel, private val databaseViewModel: DatabaseViewModel, private var items: List<Note>, val context: Context) : RecyclerView.Adapter<NotesAdapter.ViewHolder>() {
+class NotesAdapter(
+    private val homeViewModel: HomeViewModel,
+    private val databaseViewModel: HomeDatabaseViewModel,
+    private var items: List<Note>,
+    val context: Context
+) : RecyclerView.Adapter<NotesAdapter.ViewHolder>() {
     private val colorsUtil = ColorsUtil()
     private val pathsMap = SparseArray<String>()
     private val TAG = "NotesAdapter"
@@ -83,20 +89,20 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         holder.titleTextView.text = items[position].noteTitle
 
         var noteContent = items[position].noteContent
-        when(items[position].noteType) {
-            LIST_DEFAULT, LIST_ARCHIVED, LIST_TRASH ->{
+        when (items[position].noteType) {
+            LIST_DEFAULT, LIST_ARCHIVED, LIST_TRASH -> {
                 holder.imageView.visibility = GONE
                 if (noteContent != null && (noteContent.contains("[ ]") || noteContent.contains("[x]")))
                     noteContent = ChecklistConverter.convertList(noteContent)
             }
-            IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_TRASH, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED, IMAGE_LIST_TRASH ->{
+            IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_TRASH, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED, IMAGE_LIST_TRASH -> {
                 holder.imageView.visibility = VISIBLE
                 val imageContent = Gson().fromJson(noteContent, ImageNoteContent::class.java)
                 var path = pathsMap.get(position)
                 if (path != null) {
                     setImage(path, holder.imageView)
                 } else {
-                    if(imageContent.idList.isNotEmpty()) {
+                    if (imageContent.idList.isNotEmpty()) {
                         GlobalScope.launch(Dispatchers.IO) {
                             path = databaseViewModel.getImagePathById(imageContent.idList[0])
                             withContext(Dispatchers.Main) {
@@ -108,7 +114,7 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
                 }
                 noteContent = imageContent.noteContent
             }
-            else ->{
+            else -> {
                 holder.imageView.visibility = GONE
             }
         }
@@ -121,14 +127,14 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         }
 
         holder.parentView.setPadding(0)
-        if(!selectedPositions.contains(position)){
+        if (!selectedPositions.contains(position)) {
             holder.parentView.setBackgroundResource(R.drawable.notes_item_round)
             holder.parentView.backgroundTintList =
                 ColorStateList.valueOf(Color.parseColor(colorsUtil.getColor(items[position].noteColor)))
-        }else{
+        } else {
             holder.parentView.setBackgroundResource(R.drawable.notes_selected_bg)
             holder.parentView.backgroundTintList = null
-            if(isImageType(items[position].noteType)) {
+            if (isImageType(items[position].noteType)) {
                 val density = context.resources.displayMetrics.density
                 val paddingPixels: Int = (3 * density).toInt()
                 holder.parentView.setPadding(paddingPixels, paddingPixels, paddingPixels, 0)
@@ -136,39 +142,40 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         }
 
         holder.itemContainer.setOnClickListener {
-            if(!isMultiSelectEnabled){
+            if (!isMultiSelectEnabled) {
                 // Normal operations
                 if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH && items[position].noteType != IMAGE_TRASH && items[position].noteType != IMAGE_LIST_TRASH) {
-                    mainViewModel.setSelectedNote(items[position])
-                    mainViewModel.setShouldOpenEditor(true)
+                    val noteIntent = Intent(context, NoteEditActivity::class.java)
+                    noteIntent.putExtra(NOTE_ID_EXTRA, items[position].nId)
+                    context.startActivity(noteIntent)
                 }
-            }else{
+            } else {
                 if (selectedPositions.contains(position)) {
                     selectedPositions.remove(position)
-                    if(selectedPositions.size <= 0) {
+                    if (selectedPositions.size <= 0) {
                         isMultiSelectEnabled = false
                     }
-                }else
+                } else
                     selectedPositions.add(position)
-                mainViewModel.setMultiSelectCount(selectedPositions.size)
+                homeViewModel.setMultiSelectCount(selectedPositions.size)
                 notifyItemChanged(position)
             }
         }
 
         holder.itemContainer.setOnLongClickListener {
-            if(!isMultiSelectEnabled) {
-                mainViewModel.setMultiSelectCount(1)
+            if (!isMultiSelectEnabled) {
+                homeViewModel.setMultiSelectCount(1)
                 selectedPositions.add(position)
                 isMultiSelectEnabled = true
                 notifyItemChanged(position)
                 true
-            }else
+            } else
                 false
         }
     }
 
-    fun restoreSelectedNotes(){
-        for(position in selectedPositions){
+    fun restoreSelectedNotes() {
+        for (position in selectedPositions) {
             when (items[position].noteType) {
                 IMAGE_TRASH -> changeNoteType(position, IMAGE_DEFAULT)
                 LIST_TRASH -> changeNoteType(position, LIST_DEFAULT)
@@ -178,21 +185,21 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         }
     }
 
-    fun changeList(newItems: List<Note>){
+    fun changeList(newItems: List<Note>) {
         items = newItems
         selectedPositions.clear()
         notifyDataSetChanged()
     }
 
-    private fun isImageType(type: Int): Boolean{
-        return when(type){
+    private fun isImageType(type: Int): Boolean {
+        return when (type) {
             IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_TRASH, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED, IMAGE_LIST_TRASH -> true
             else -> false
         }
     }
 
-    fun archiveSelectedNotes(){
-        for(position in selectedPositions){
+    fun archiveSelectedNotes() {
+        for (position in selectedPositions) {
             when (items[position].noteType) {
                 IMAGE_DEFAULT -> changeNoteType(position, IMAGE_ARCHIVED)
                 LIST_DEFAULT -> changeNoteType(position, LIST_ARCHIVED)
@@ -202,8 +209,8 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         }
     }
 
-    fun unarchiveSelectedNotes(){
-        for(position in selectedPositions){
+    fun unarchiveSelectedNotes() {
+        for (position in selectedPositions) {
             when (items[position].noteType) {
                 IMAGE_ARCHIVED -> changeNoteType(position, IMAGE_DEFAULT)
                 LIST_ARCHIVED -> changeNoteType(position, LIST_DEFAULT)
@@ -213,8 +220,8 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
         }
     }
 
-    fun deleteSelectedNotes(){
-        for(position in selectedPositions){
+    fun deleteSelectedNotes() {
+        for (position in selectedPositions) {
             when (items[position].noteType) {
                 IMAGE_DEFAULT, IMAGE_ARCHIVED -> changeNoteType(position, IMAGE_TRASH)
                 LIST_DEFAULT, LIST_ARCHIVED -> changeNoteType(position, LIST_TRASH)
@@ -226,15 +233,16 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
             }
         }
 
-        Toast.makeText(context, this.context.getString(R.string.toast_moved_to_trash), LENGTH_SHORT).show()
+        Toast.makeText(context, this.context.getString(R.string.toast_moved_to_trash), LENGTH_SHORT)
+            .show()
     }
 
-    fun deleteForeverSelectedNotes(){
+    fun deleteForeverSelectedNotes() {
         AlertDialog.Builder(context)
             .setTitle(this.context.getString(R.string.action_delete_forever))
             .setMessage(this.context.getString(R.string.question_delete_forever))
             .setPositiveButton(this.context.getString(R.string.yes)) { _: DialogInterface, _: Int ->
-                for(position in selectedPositions)
+                for (position in selectedPositions)
                     databaseViewModel.deleteNote(items[position])
             }
             .setNegativeButton(this.context.getString(R.string.no), null)
@@ -242,33 +250,44 @@ class NotesAdapter(private val mainViewModel: MainViewModel, private val databas
             .show()
     }
 
-    fun selectAll(){
-        for(position in items.indices)
+    fun selectAll() {
+        for (position in items.indices)
             selectedPositions.add(position)
-        mainViewModel.setMultiSelectCount(selectedPositions.size)
+        homeViewModel.setMultiSelectCount(selectedPositions.size)
         notifyDataSetChanged()
     }
 
-    fun clearAll(){
+    fun clearAll() {
         selectedPositions.clear()
-        mainViewModel.setMultiSelectCount(0)
+        homeViewModel.setMultiSelectCount(0)
         isMultiSelectEnabled = false
         notifyDataSetChanged()
     }
 
-    private fun setImage(path: String?, imageView: ImageView){
-        if(path == null)
+    private fun setImage(path: String?, imageView: ImageView) {
+        if (path == null)
             return
-            Glide.with(context).load(File(path)).listener(object : RequestListener<Drawable> {
-                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                    return false
-                }
+        Glide.with(context).load(File(path)).listener(object : RequestListener<Drawable> {
+            override fun onLoadFailed(
+                e: GlideException?,
+                model: Any?,
+                target: Target<Drawable>?,
+                isFirstResource: Boolean
+            ): Boolean {
+                return false
+            }
 
-                override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-                    imageView.clipToOutline = true
-                    return false
-                }
-            }).into(imageView)
+            override fun onResourceReady(
+                resource: Drawable?,
+                model: Any?,
+                target: Target<Drawable>?,
+                dataSource: DataSource?,
+                isFirstResource: Boolean
+            ): Boolean {
+                imageView.clipToOutline = true
+                return false
+            }
+        }).into(imageView)
     }
 
     private fun changeNoteType(position: Int, noteType: Int) {

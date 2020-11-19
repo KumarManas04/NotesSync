@@ -19,6 +19,10 @@ class Contract{
         const val FILE_TYPE_FOLDER = "application/vnd.google-apps.folder"
         const val FILE_TYPE_TEXT = "text/plain"
         const val NOTE_ID_EXTRA = "noteIdExtra"
+        const val NOTE_TYPE_EXTRA = "noteTypeExtra"
+        const val NOTE_CONTENT_EXTRA = "noteContentExtra"
+        const val PHOTO_URI_EXTRA = "photoUriExtra"
+        const val FILE_PATH_EXTRA = "filePathExtra"
         const val CLOUD_GOOGLE_DRIVE = 0
         const val CLOUD_DROPBOX = 1
         const val SHARED_PREFS_NAME = "com.infinitySolutions.notesSync.sharedPrefs"
