@@ -53,6 +53,7 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.applock.AppLockActivity
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.encrypt.EnableEncryptionActivity
 import com.infinitysolutions.notessync.widget.NotesWidget
 import com.infinitysolutions.notessync.util.ColorsUtil
@@ -66,6 +67,7 @@ import kotlinx.android.synthetic.main.theme_dialog.view.*
 class SettingsFragment : Fragment() {
     private val TAG = "SettingsFragment"
     private val LOGIN_REQUEST_CODE = 199
+    private val SET_PIN_REQUEST_CODE = 191
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
@@ -220,7 +222,7 @@ class SettingsFragment : Fragment() {
         var value = prefs.getInt(PREF_MAX_PREVIEW_LINES, 32)
         if(value == -1)
             value = 32
-        rootView.preview_lines_count_text.text = "$value lines"
+        rootView.preview_lines_count_text.text = if(value == 32) "No Limit" else "$value lines"
 
         rootView.preview_lines_count_button.setOnClickListener {
             val dialogView = layoutInflater.inflate(R.layout.preview_lines_dialog, container, false)
@@ -230,11 +232,11 @@ class SettingsFragment : Fragment() {
             seekBar.progress = value
             seekBar.keyProgressIncrement = 1
             val linesText = dialogView.lines_text
-            linesText.text = "$value"
+            linesText.text = if(value == 32) "No Limit" else "$value"
             seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seek: SeekBar, progress: Int, fromUser: Boolean) {
                     value = progress
-                    linesText.text = "$value"
+                    linesText.text = if(value == 32) "No Limit" else "$value"
                 }
 
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
@@ -243,9 +245,9 @@ class SettingsFragment : Fragment() {
 
             dialog.setOnDismissListener {
                 val editor = prefs.edit()
-                editor.putInt(PREF_MAX_PREVIEW_LINES, value)
+                editor.putInt(PREF_MAX_PREVIEW_LINES, if(value == 32) Integer.MAX_VALUE else value)
                 editor.apply()
-                rootView.preview_lines_count_text.text = "$value lines"
+                rootView.preview_lines_count_text.text = if(value == 32) "No Limit" else "$value lines"
             }
             dialog.setContentView(dialogView)
             dialog.show()
@@ -285,10 +287,12 @@ class SettingsFragment : Fragment() {
 
         rootView.app_lock_toggle.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked){
+                // Enable App Lock
                 val appLockIntent = Intent(activity, AppLockActivity::class.java)
                 appLockIntent.putExtra(APP_LOCK_STATE, STATE_NEW_PIN)
-                startActivity(appLockIntent)
+                startActivityForResult(appLockIntent, SET_PIN_REQUEST_CODE)
             }else{
+                // Disable App Lock
                 prefs.edit().remove(PREF_APP_LOCK_CODE).commit()
             }
         }
@@ -300,20 +304,21 @@ class SettingsFragment : Fragment() {
 
     private fun configureChangePassButton(rootView: View){
         //This will only be reached when user is logged in
-        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        if (prefs != null){
-            if (prefs.contains(PREF_ENCRYPTED) && prefs.getBoolean(PREF_ENCRYPTED, false)){
-                rootView.change_pass_title.text = getString(R.string.change_password)
-                rootView.change_pass_text.text = getString(R.string.change_password_summary)
-                rootView.change_pass_button.setOnClickListener {
-                    startActivityForResult(Intent(activity, ChangePasswordActivity::class.java), 1234)
-                }
-            }else{
-                rootView.change_pass_title.text = getString(R.string.enable_encrypted_sync)
-                rootView.change_pass_text.text = getString(R.string.encrypted_sync_summary)
-                rootView.change_pass_button.setOnClickListener {
-                    startActivity(Intent(activity, EnableEncryptionActivity::class.java))
-                }
+        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE) ?: return
+        if(!prefs.contains(PREF_ENCRYPTED))
+            return
+
+        if(prefs.getBoolean(PREF_ENCRYPTED, false)){
+            rootView.change_pass_title.text = getString(R.string.change_password)
+            rootView.change_pass_text.text = getString(R.string.change_password_summary)
+            rootView.change_pass_button.setOnClickListener {
+                startActivityForResult(Intent(activity, ChangePasswordActivity::class.java), 1234)
+            }
+        }else{
+            rootView.change_pass_title.text = getString(R.string.enable_encrypted_sync)
+            rootView.change_pass_text.text = getString(R.string.encrypted_sync_summary)
+            rootView.change_pass_button.setOnClickListener {
+                startActivity(Intent(activity, EnableEncryptionActivity::class.java))
             }
         }
     }
@@ -375,12 +380,19 @@ class SettingsFragment : Fragment() {
                 val editor = prefs?.edit()
                 editor?.remove(PREF_ACCESS_TOKEN)
                 editor?.remove(PREF_CLOUD_TYPE)
-                editor?.remove(Contract.PREF_ID)
+                editor?.remove(PREF_ID)
                 editor?.apply()
                 val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
                 val googleSignInClient = GoogleSignIn.getClient(activity!!, gso)
                 googleSignInClient.signOut()
             }
+        }
+
+        if(requestCode == SET_PIN_REQUEST_CODE){
+            val rootView = view
+            val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+            if(rootView != null && prefs != null)
+                configureAppLockButtons(rootView, prefs)
         }
     }
 }
