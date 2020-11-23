@@ -69,8 +69,6 @@ import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.util.ChecklistConverter
 import com.infinitysolutions.notessync.util.ColorsUtil
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper
-import com.infinitysolutions.notessync.viewmodel.DatabaseViewModel
-import com.infinitysolutions.notessync.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.add_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_note_edit.view.*
@@ -88,8 +86,8 @@ import kotlin.collections.ArrayList
 
 class NoteEditFragment : Fragment() {
     private val TAG = "NoteEditFragment"
-    private lateinit var databaseViewModel: DatabaseViewModel
-    private lateinit var mainViewModel: MainViewModel
+    private lateinit var noteEditDatabaseViewModel: NoteEditDatabaseViewModel
+    private lateinit var noteEditViewModel: NoteEditViewModel
     private lateinit var noteTitle: EditText
     private lateinit var noteContent: EditText
     private lateinit var checklistView: ChecklistView
@@ -116,8 +114,8 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun initDataBinding(rootView: View) {
-        databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
-        mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        noteEditDatabaseViewModel = ViewModelProviders.of(activity!!).get(NoteEditDatabaseViewModel::class.java)
+        noteEditViewModel = ViewModelProviders.of(activity!!).get(NoteEditViewModel::class.java)
 
         noteTitle = rootView.note_title
         noteContent = rootView.note_content
@@ -130,7 +128,7 @@ class NoteEditFragment : Fragment() {
         imageRecyclerView = rootView.images_recycler_view
         imageRecyclerView.layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
 
-        mainViewModel.getSelectedColor()
+        noteEditViewModel.getSelectedColor()
             .observe(this, androidx.lifecycle.Observer { selectedColor ->
                 noteTitle.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
                 rootView.last_edited_text.setTextColor(
@@ -142,19 +140,19 @@ class NoteEditFragment : Fragment() {
                 )
             })
 
-        mainViewModel.getOpenImageView().observe(this, androidx.lifecycle.Observer {
+        noteEditViewModel.getOpenImageView().observe(this, androidx.lifecycle.Observer {
             it.getContentIfNotHandled()?.let { imagePosition ->
                 val bundle = bundleOf("currentPosition" to imagePosition)
                 findNavController(this).navigate(R.id.action_noteEditFragment2_to_imageGalleryFragment2, bundle)
             }
         })
 
-        mainViewModel.getRefreshImagesList().observe(this, androidx.lifecycle.Observer {
+        noteEditViewModel.getRefreshImagesList().observe(this, androidx.lifecycle.Observer {
             it.getContentIfNotHandled()?.let { shouldRefresh ->
                 if (shouldRefresh) {
                     if(imageListAdapter != null) {
                         GlobalScope.launch(Dispatchers.IO) {
-                            val newList = databaseViewModel.getImagesByIds(imageListAdapter!!.getIdsList())
+                            val newList = noteEditDatabaseViewModel.getImagesByIds(imageListAdapter!!.getIdsList())
                             withContext(Dispatchers.Main){
                                 imageListAdapter?.setNewList(newList)
                             }
@@ -182,33 +180,29 @@ class NoteEditFragment : Fragment() {
             val noteId = arguments?.getLong("NOTE_ID")
             if (noteId != null) {
                 GlobalScope.launch(Dispatchers.IO) {
-                    val note = databaseViewModel.getNoteById(noteId)
+                    val note = noteEditDatabaseViewModel.getNoteById(noteId)
                     withContext(Dispatchers.Main) {
-                        mainViewModel.setSelectedNote(note)
+                        noteEditViewModel.setCurrentNote(note)
                         prepareNoteView(rootView)
                     }
                 }
             }
         } else {
-            if (mainViewModel.getShouldOpenEditor().value != null) {
-                if (mainViewModel.getShouldOpenEditor().value!!)
-                    mainViewModel.setShouldOpenEditor(false)
-                prepareNoteView(rootView)
-            }
+            prepareNoteView(rootView)
         }
     }
 
     private fun prepareNoteView(rootView: View) {
-        val selectedNote = mainViewModel.getSelectedNote()
+        val selectedNote = noteEditViewModel.getCurrentNote()
         if (selectedNote != null) {
-            val noteType: Int = if (mainViewModel.noteType != null)
-                mainViewModel.noteType!!
+            val noteType: Int = if (noteEditViewModel.noteType != null)
+                noteEditViewModel.noteType!!
             else {
-                mainViewModel.noteType = selectedNote.noteType
+                noteEditViewModel.noteType = selectedNote.noteType
                 selectedNote.noteType
             }
 
-            when (mainViewModel.noteType) {
+            when (noteEditViewModel.noteType) {
                 NOTE_ARCHIVED, IMAGE_ARCHIVED, LIST_ARCHIVED, IMAGE_LIST_ARCHIVED -> {
                     rootView.toolbar.menu.findItem(R.id.archive_menu_item).isVisible = false
                     rootView.toolbar.menu.findItem(R.id.unarchive_menu_item).isVisible = true
@@ -221,7 +215,7 @@ class NoteEditFragment : Fragment() {
 
             if (selectedNote.nId != -1L) {
                 noteTitle.setText(selectedNote.noteTitle)
-                mainViewModel.setSelectedColor(selectedNote.noteColor)
+                noteEditViewModel.setSelectedColor(selectedNote.noteColor)
                 val formatter = SimpleDateFormat("MMM d, yyyy", Locale.ENGLISH)
                 rootView.last_edited_text.text = getString(
                     R.string.edited_time_stamp,
@@ -229,10 +223,10 @@ class NoteEditFragment : Fragment() {
                 )
             }else{
                 val prefs = context!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-                mainViewModel.setSelectedColor(prefs.getInt(PREF_DEFAULT_NOTE_COLOR, 0))
+                noteEditViewModel.setSelectedColor(prefs.getInt(PREF_DEFAULT_NOTE_COLOR, 0))
             }
 
-            mainViewModel.reminderTime = selectedNote.reminderTime
+            noteEditViewModel.reminderTime = selectedNote.reminderTime
             when (noteType) {
                 LIST_DEFAULT, LIST_ARCHIVED -> {
                     checklistView.visibility = VISIBLE
@@ -259,9 +253,9 @@ class NoteEditFragment : Fragment() {
                     }
 
                     GlobalScope.launch(Dispatchers.IO) {
-                        val idList = if (mainViewModel.getImagesList().isNotEmpty()) {
+                        val idList = if (noteEditViewModel.getImagesList().isNotEmpty()) {
                             val idList1 = ArrayList<Long>()
-                            for (item in mainViewModel.getImagesList())
+                            for (item in noteEditViewModel.getImagesList())
                                 idList1.add(item.imageId!!)
                             idList1
                         } else {
@@ -269,19 +263,19 @@ class NoteEditFragment : Fragment() {
                         }
 
                         // Retrieving data on image Ids in note from DB
-                        val list = databaseViewModel.getImagesByIds(idList)
+                        val list = noteEditDatabaseViewModel.getImagesByIds(idList)
                         withContext(Dispatchers.Main) {
                             if (list.isEmpty()) {
                                 // All images deleted
                                 imageRecyclerView.visibility = GONE
-                                mainViewModel.noteType = when (noteType) {
+                                noteEditViewModel.noteType = when (noteType) {
                                     IMAGE_ARCHIVED -> NOTE_ARCHIVED
                                     IMAGE_LIST_DEFAULT -> LIST_DEFAULT
                                     IMAGE_LIST_ARCHIVED -> LIST_ARCHIVED
                                     else -> NOTE_DEFAULT
                                 }
 
-                                mainViewModel.setSelectedNote(
+                                noteEditViewModel.setCurrentNote(
                                     Note(
                                         selectedNote.nId,
                                         selectedNote.noteTitle,
@@ -296,12 +290,12 @@ class NoteEditFragment : Fragment() {
                                     )
                                 )
                             } else {
-                                imageListAdapter = ImageListAdapter(context!!, list, mainViewModel)
+                                imageListAdapter = ImageListAdapter(context!!, list, noteEditViewModel)
                                 imageRecyclerView.adapter = imageListAdapter
                                 imageRecyclerView.isNestedScrollingEnabled = false
                             }
-                            if (mainViewModel.getImagesList().isEmpty())
-                                mainViewModel.setImagesList(list)
+                            if (noteEditViewModel.getImagesList().isEmpty())
+                                noteEditViewModel.setImagesList(list)
                         }
                     }
                 }
@@ -338,18 +332,18 @@ class NoteEditFragment : Fragment() {
     private fun startAddBottomDialog(container: ViewGroup?) {
         val dialogView = layoutInflater.inflate(R.layout.add_bottom_sheet, container, false)
         val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
-        val selectedNote = mainViewModel.getSelectedNote()
+        val selectedNote = noteEditViewModel.getCurrentNote()
 
         if (selectedNote != null) {
-            if (mainViewModel.reminderTime != -1L) {
+            if (noteEditViewModel.reminderTime != -1L) {
                 dialogView.cancel_reminder_button.visibility = VISIBLE
                 val formatter = SimpleDateFormat("h:mm a MMM d, YYYY", Locale.ENGLISH)
                 dialogView.reminder_text.text =
-                    getString(R.string.reminder_set, formatter.format(mainViewModel.reminderTime))
+                    getString(R.string.reminder_set, formatter.format(noteEditViewModel.reminderTime))
                 dialogView.reminder_text.setTextColor(
                     Color.parseColor(
                         colorsUtil.getColor(
-                            mainViewModel.getSelectedColor().value
+                            noteEditViewModel.getSelectedColor().value
                         )
                     )
                 )
@@ -362,7 +356,7 @@ class NoteEditFragment : Fragment() {
                                 selectedNote.nId,
                                 context!!
                             )
-                            mainViewModel.reminderTime = -1L
+                            noteEditViewModel.reminderTime = -1L
                             dialog.dismiss()
                         }
                         .setNegativeButton(getString(R.string.no), null)
@@ -371,7 +365,7 @@ class NoteEditFragment : Fragment() {
                 dialogView.cancel_reminder_button.setColorFilter(
                     Color.parseColor(
                         colorsUtil.getColor(
-                            mainViewModel.getSelectedColor().value
+                            noteEditViewModel.getSelectedColor().value
                         )
                     )
                 )
@@ -389,7 +383,7 @@ class NoteEditFragment : Fragment() {
                 pickReminderTime(selectedNote.nId)
             }
 
-            when (mainViewModel.noteType) {
+            when (noteEditViewModel.noteType) {
                 LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
                     dialogView.checklist_button_text.text = "Convert to note"
                 }
@@ -419,13 +413,13 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun convertChecklist() {
-        when (mainViewModel.noteType) {
+        when (noteEditViewModel.noteType) {
             LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
                 // Convert to note
                 val listContent = checklistView.toString()
                 val str = listContent.replace("□ ", "")
                 val newNoteContent = str.replace("✓ ", "")
-                mainViewModel.noteType = when (mainViewModel.noteType) {
+                noteEditViewModel.noteType = when (noteEditViewModel.noteType) {
                     LIST_ARCHIVED -> NOTE_ARCHIVED
                     IMAGE_LIST_DEFAULT -> IMAGE_DEFAULT
                     IMAGE_LIST_ARCHIVED -> IMAGE_ARCHIVED
@@ -440,7 +434,7 @@ class NoteEditFragment : Fragment() {
                 val noteText = noteContent.text.toString()
                 val str = "□ $noteText"
                 val newNoteContent = str.replace("\n", "\n□ ")
-                mainViewModel.noteType = when (mainViewModel.noteType) {
+                noteEditViewModel.noteType = when (noteEditViewModel.noteType) {
                     NOTE_ARCHIVED -> LIST_ARCHIVED
                     IMAGE_DEFAULT -> IMAGE_LIST_DEFAULT
                     IMAGE_ARCHIVED -> IMAGE_LIST_ARCHIVED
@@ -455,7 +449,7 @@ class NoteEditFragment : Fragment() {
 
     private fun startBottomSheetDialog(container: ViewGroup?) {
         val dialogView = layoutInflater.inflate(R.layout.bottom_sheet, container, false)
-        val dialog = BottomSheetDialog(this@NoteEditFragment.context!!)
+        val dialog = BottomSheetDialog(context!!)
 
         dialogView.share_button.setOnClickListener {
             dialog.dismiss()
@@ -468,7 +462,7 @@ class NoteEditFragment : Fragment() {
         }
 
         dialogView.discard_changes_button.setOnClickListener {
-            val note: Note? = mainViewModel.getSelectedNote()
+            val note: Note? = noteEditViewModel.getCurrentNote()
             if (note != null) {
                 AlertDialog.Builder(activity)
                     .setTitle("Discard changes")
@@ -484,9 +478,9 @@ class NoteEditFragment : Fragment() {
         }
 
         dialogView.make_copy_button.setOnClickListener {
-            databaseViewModel.makeCopy(
-                mainViewModel.getSelectedNote(),
-                mainViewModel.noteType,
+            noteEditDatabaseViewModel.makeCopy(
+                noteEditViewModel.getCurrentNote(),
+                noteEditViewModel.noteType,
                 noteTitle.text.toString(),
                 getNoteText()
             )
@@ -494,11 +488,9 @@ class NoteEditFragment : Fragment() {
             Toast.makeText(context, getString(R.string.toast_copy_done), LENGTH_SHORT).show()
         }
 
-        val layoutManager =
-            LinearLayoutManager(this@NoteEditFragment.context!!, RecyclerView.HORIZONTAL, false)
+        val layoutManager = LinearLayoutManager(context!!, RecyclerView.HORIZONTAL, false)
         dialogView.color_picker.layoutManager = layoutManager
-        dialogView.color_picker.adapter =
-            ColorPickerAdapter(this@NoteEditFragment.context!!, mainViewModel)
+        dialogView.color_picker.adapter = ColorPickerAdapter(context!!, noteEditViewModel)
         dialog.setContentView(dialogView)
         dialog.show()
     }
@@ -506,7 +498,7 @@ class NoteEditFragment : Fragment() {
     private fun discardChanges(note: Note) {
         noteTitle.setText(note.noteTitle)
         // Getting the content from original note
-        val contentText = when (mainViewModel.noteType) {
+        val contentText = when (noteEditViewModel.noteType) {
             IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
                 val imageData = Gson().fromJson(note.noteContent, ImageNoteContent::class.java)
                 imageData.noteContent
@@ -514,7 +506,7 @@ class NoteEditFragment : Fragment() {
             else -> note.noteContent
         }
 
-        mainViewModel.setSelectedColor(note.noteColor)
+        noteEditViewModel.setSelectedColor(note.noteColor)
         // Changing the views according to original note
         when (note.noteType) {
             LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
@@ -530,33 +522,33 @@ class NoteEditFragment : Fragment() {
         // Converting current note type according to original note type
         when (note.noteType) {
             LIST_DEFAULT, IMAGE_LIST_DEFAULT -> {
-                if (isImageType(mainViewModel.noteType!!))
-                    mainViewModel.noteType = IMAGE_LIST_DEFAULT
+                if (isImageType(noteEditViewModel.noteType!!))
+                    noteEditViewModel.noteType = IMAGE_LIST_DEFAULT
                 else
-                    mainViewModel.noteType = LIST_DEFAULT
+                    noteEditViewModel.noteType = LIST_DEFAULT
             }
             LIST_ARCHIVED, IMAGE_LIST_ARCHIVED -> {
-                if (isImageType(mainViewModel.noteType!!))
-                    mainViewModel.noteType = IMAGE_LIST_ARCHIVED
+                if (isImageType(noteEditViewModel.noteType!!))
+                    noteEditViewModel.noteType = IMAGE_LIST_ARCHIVED
                 else
-                    mainViewModel.noteType = LIST_ARCHIVED
+                    noteEditViewModel.noteType = LIST_ARCHIVED
             }
             NOTE_DEFAULT, IMAGE_DEFAULT -> {
-                if (isImageType(mainViewModel.noteType!!))
-                    mainViewModel.noteType = IMAGE_DEFAULT
+                if (isImageType(noteEditViewModel.noteType!!))
+                    noteEditViewModel.noteType = IMAGE_DEFAULT
                 else
-                    mainViewModel.noteType = NOTE_DEFAULT
+                    noteEditViewModel.noteType = NOTE_DEFAULT
             }
             NOTE_ARCHIVED, IMAGE_ARCHIVED -> {
-                if (isImageType(mainViewModel.noteType!!))
-                    mainViewModel.noteType = IMAGE_ARCHIVED
+                if (isImageType(noteEditViewModel.noteType!!))
+                    noteEditViewModel.noteType = IMAGE_ARCHIVED
                 else
-                    mainViewModel.noteType = NOTE_ARCHIVED
+                    noteEditViewModel.noteType = NOTE_ARCHIVED
             }
         }
 
         // Setting the original note details
-        when (mainViewModel.noteType) {
+        when (noteEditViewModel.noteType) {
             LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
                 setChecklistContent(contentText)
             }
@@ -578,7 +570,7 @@ class NoteEditFragment : Fragment() {
 
     private fun shareNote() {
         var shareIntent: Intent
-        val shareText = when (mainViewModel.noteType) {
+        val shareText = when (noteEditViewModel.noteType) {
             LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
                 checklistView.toString()
             }
@@ -588,7 +580,7 @@ class NoteEditFragment : Fragment() {
         }
 
         // Sharing a note
-        if (mainViewModel.noteType == IMAGE_DEFAULT || mainViewModel.noteType == IMAGE_LIST_DEFAULT || mainViewModel.noteType == IMAGE_ARCHIVED || mainViewModel.noteType == IMAGE_LIST_ARCHIVED) {
+        if (noteEditViewModel.noteType == IMAGE_DEFAULT || noteEditViewModel.noteType == IMAGE_LIST_DEFAULT || noteEditViewModel.noteType == IMAGE_ARCHIVED || noteEditViewModel.noteType == IMAGE_LIST_ARCHIVED) {
             // Sharing image type note
             shareIntent = Intent(Intent.ACTION_SEND_MULTIPLE)
             shareIntent.type = "*/*"
@@ -660,7 +652,7 @@ class NoteEditFragment : Fragment() {
                 )
                 if (cal.timeInMillis > Calendar.getInstance().timeInMillis) {
                     WorkSchedulerHelper().setReminder(noteId, cal.timeInMillis, context!!)
-                    mainViewModel.reminderTime = cal.timeInMillis
+                    noteEditViewModel.reminderTime = cal.timeInMillis
                 } else {
                     Toast.makeText(
                         activity,
@@ -680,9 +672,9 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun archiveNote() {
-        val selectedNote = mainViewModel.getSelectedNote()
+        val selectedNote = noteEditViewModel.getCurrentNote()
         if (selectedNote != null && selectedNote.nId != -1L) {
-            val noteType: Int = when (mainViewModel.noteType) {
+            noteEditViewModel.noteType = when (noteEditViewModel.noteType) {
                 NOTE_DEFAULT -> NOTE_ARCHIVED
                 LIST_DEFAULT -> LIST_ARCHIVED
                 IMAGE_DEFAULT -> IMAGE_ARCHIVED
@@ -694,36 +686,19 @@ class NoteEditFragment : Fragment() {
                 else -> -1
             }
 
-            if (noteType != -1) {
-                databaseViewModel.insert(
-                    Note(
-                        selectedNote.nId,
-                        noteTitle.text.toString(),
-                        getNoteText(),
-                        selectedNote.dateCreated,
-                        Calendar.getInstance().timeInMillis,
-                        selectedNote.gDriveId,
-                        noteType,
-                        selectedNote.synced,
-                        mainViewModel.getSelectedColor().value,
-                        selectedNote.reminderTime
-                    )
-                )
-            }
-            mainViewModel.setSelectedNote(null)
-            mainViewModel.setImagesList(null)
-            mainViewModel.noteType = null
-            activity?.onBackPressed()
+            saveNote(getNoteText())
+            activity?.finish()
         }
     }
 
     private fun saveNote(content: String) {
         val timeModified = Calendar.getInstance().timeInMillis
-        val selectedNote = mainViewModel.getSelectedNote()
+        val selectedNote = noteEditViewModel.getCurrentNote()
         if (selectedNote != null) {
             if (selectedNote.nId == -1L) {
+                // New Note
                 if (content.isNotEmpty() || noteTitle.text.isNotEmpty()) {
-                    databaseViewModel.insert(
+                    noteEditDatabaseViewModel.insert(
                         Note(
                             null,
                             noteTitle.text.toString(),
@@ -731,18 +706,20 @@ class NoteEditFragment : Fragment() {
                             timeModified,
                             timeModified,
                             "-1",
-                            mainViewModel.noteType!!,
+                            noteEditViewModel.noteType!!,
                             false,
-                            mainViewModel.getSelectedColor().value,
+                            noteEditViewModel.getSelectedColor().value,
                             -1L
                         )
                     )
                 }
             } else {
+                // Old Note
                 if (content.isEmpty() && noteTitle.text.isEmpty()) {
-                    databaseViewModel.deleteNote(selectedNote)
+                    // If the user removed everything from the note
+                    noteEditDatabaseViewModel.deleteNote(selectedNote)
                 } else {
-                    databaseViewModel.insert(
+                    noteEditDatabaseViewModel.insert(
                         Note(
                             selectedNote.nId,
                             noteTitle.text.toString(),
@@ -750,10 +727,10 @@ class NoteEditFragment : Fragment() {
                             selectedNote.dateCreated,
                             timeModified,
                             selectedNote.gDriveId,
-                            mainViewModel.noteType!!,
+                            noteEditViewModel.noteType!!,
                             selectedNote.synced,
-                            mainViewModel.getSelectedColor().value,
-                            mainViewModel.reminderTime
+                            noteEditViewModel.getSelectedColor().value,
+                            noteEditViewModel.reminderTime
                         )
                     )
                 }
@@ -766,18 +743,18 @@ class NoteEditFragment : Fragment() {
             .setTitle(getString(R.string.delete_note))
             .setMessage(getString(R.string.delete_question))
             .setPositiveButton(getString(R.string.yes)) { _, _ ->
-                val selectedNote = mainViewModel.getSelectedNote()
+                val selectedNote = noteEditViewModel.getCurrentNote()
                 if (selectedNote?.nId == -1L) {
                     if (isImageType(selectedNote.noteType)) {
                         val idsList = ArrayList<Long>()
-                        for (imageData in mainViewModel.getImagesList())
+                        for (imageData in noteEditViewModel.getImagesList())
                             idsList.add(imageData.imageId!!)
-                        databaseViewModel.deleteImagesByIds(idsList)
-                        mainViewModel.setImagesList(null)
+                        noteEditDatabaseViewModel.deleteImagesByIds(idsList)
+                        noteEditViewModel.setImagesList(null)
                     }
                 } else {
                     if (selectedNote != null) {
-                        val noteType = when (mainViewModel.noteType) {
+                        val noteType = when (noteEditViewModel.noteType) {
                             IMAGE_DEFAULT, IMAGE_ARCHIVED -> {
                                 IMAGE_TRASH
                             }
@@ -792,7 +769,7 @@ class NoteEditFragment : Fragment() {
                             }
                         }
 
-                        databaseViewModel.insert(
+                        noteEditDatabaseViewModel.insert(
                             Note(
                                 selectedNote.nId,
                                 selectedNote.noteTitle,
@@ -802,7 +779,7 @@ class NoteEditFragment : Fragment() {
                                 selectedNote.gDriveId,
                                 noteType,
                                 selectedNote.synced,
-                                mainViewModel.getSelectedColor().value,
+                                noteEditViewModel.getSelectedColor().value,
                                 -1L
                             )
                         )
@@ -815,15 +792,15 @@ class NoteEditFragment : Fragment() {
                         }
                     }
                 }
-                mainViewModel.setSelectedNote(null)
-                findNavController(this).navigateUp()
+
+                activity?.finish()
             }
             .setNegativeButton(getString(R.string.no), null)
             .show()
     }
 
     @Throws(IOException::class)
-    private fun createImageFile(): File? {
+    private fun createImageFile(): File {
         val path = activity!!.filesDir.toString()
         val time = Calendar.getInstance().timeInMillis
         return File(path, "$time.jpg")
@@ -852,7 +829,7 @@ class NoteEditFragment : Fragment() {
                     null
                 }
                 if (photoFile != null) {
-                    mainViewModel.setCurrentPhotoPath(photoFile.absolutePath)
+                    noteEditViewModel.setCurrentPhotoPath(photoFile.absolutePath)
                     val photoUri = FileProvider.getUriForFile(
                         context!!,
                         "com.infinitysolutions.notessync.fileprovider",
@@ -890,7 +867,7 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun getNoteText(): String {
-        return when (mainViewModel.noteType) {
+        return when (noteEditViewModel.noteType) {
             LIST_DEFAULT, LIST_ARCHIVED -> {
                 checklistView.toString()
             }
@@ -917,21 +894,21 @@ class NoteEditFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        if (::mainViewModel.isInitialized) {
-            val selectedNote = mainViewModel.getSelectedNote()
+        if (::noteEditViewModel.isInitialized) {
+            val selectedNote = noteEditViewModel.getCurrentNote()
             if (selectedNote != null) {
                 val noteContentText = getNoteText()
                 if (!activity!!.isChangingConfigurations) {
                     if ((selectedNote.noteContent != noteContentText)
-                        || (selectedNote.noteType != mainViewModel.noteType)
+                        || (selectedNote.noteType != noteEditViewModel.noteType)
                         || (selectedNote.noteTitle != noteTitle.text.toString())
-                        || (selectedNote.noteColor != mainViewModel.getSelectedColor().value)
-                        || (selectedNote.reminderTime != mainViewModel.reminderTime)
+                        || (selectedNote.noteColor != noteEditViewModel.getSelectedColor().value)
+                        || (selectedNote.reminderTime != noteEditViewModel.reminderTime)
                     ) {
                         saveNote(noteContentText)
                     }
-                    mainViewModel.setImagesList(null)
-                    mainViewModel.noteType = null
+                    noteEditViewModel.setImagesList(null)
+                    noteEditViewModel.noteType = null
                 }
             }
         }
@@ -941,10 +918,10 @@ class NoteEditFragment : Fragment() {
     private fun loadImage(imageData: ImageData) {
         imageRecyclerView.visibility = VISIBLE
 
-        val selectedNote = mainViewModel.getSelectedNote()
+        val selectedNote = noteEditViewModel.getCurrentNote()
         if (selectedNote != null) {
             val selectedNoteContent =
-                if (mainViewModel.noteType != null && isImageType(mainViewModel.noteType!!))
+                if (noteEditViewModel.noteType != null && isImageType(noteEditViewModel.noteType!!))
                     Gson().fromJson(
                         selectedNote.noteContent,
                         ImageNoteContent::class.java
@@ -952,27 +929,19 @@ class NoteEditFragment : Fragment() {
                 else
                     selectedNote.noteContent
 
-            when (mainViewModel.noteType) {
-                NOTE_DEFAULT -> {
-                    mainViewModel.noteType = IMAGE_DEFAULT
-                    imageListAdapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
+            when (noteEditViewModel.noteType) {
+                NOTE_DEFAULT, LIST_DEFAULT, NOTE_ARCHIVED, LIST_ARCHIVED -> {
+                    imageListAdapter = ImageListAdapter(context!!, ArrayList(), noteEditViewModel)
                     imageRecyclerView.adapter = imageListAdapter
                 }
-                LIST_DEFAULT -> {
-                    mainViewModel.noteType = IMAGE_LIST_DEFAULT
-                    imageListAdapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                    imageRecyclerView.adapter = imageListAdapter
-                }
-                NOTE_ARCHIVED -> {
-                    mainViewModel.noteType = IMAGE_ARCHIVED
-                    imageListAdapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                    imageRecyclerView.adapter = imageListAdapter
-                }
-                LIST_ARCHIVED -> {
-                    mainViewModel.noteType = IMAGE_LIST_ARCHIVED
-                    imageListAdapter = ImageListAdapter(context!!, ArrayList(), mainViewModel)
-                    imageRecyclerView.adapter = imageListAdapter
-                }
+            }
+
+            noteEditViewModel.noteType = when(noteEditViewModel.noteType){
+                NOTE_DEFAULT -> IMAGE_DEFAULT
+                LIST_DEFAULT -> IMAGE_LIST_DEFAULT
+                NOTE_ARCHIVED -> IMAGE_ARCHIVED
+                LIST_ARCHIVED -> IMAGE_LIST_ARCHIVED
+                else -> noteEditViewModel.noteType
             }
 
             val noteText = Gson().toJson(
@@ -981,7 +950,7 @@ class NoteEditFragment : Fragment() {
                     arrayListOf(imageData.imageId!!)
                 )
             )
-            mainViewModel.setSelectedNote(
+            noteEditViewModel.setCurrentNote(
                 Note(
                     selectedNote.nId,
                     selectedNote.noteTitle,
@@ -999,7 +968,7 @@ class NoteEditFragment : Fragment() {
 
         imageRecyclerView.isNestedScrollingEnabled = false
         imageListAdapter?.addImage(imageData)
-        mainViewModel.addImageToImageList(imageData)
+        noteEditViewModel.addImageToImageList(imageData)
     }
 
     private fun saveBitmap(imageBitmap: Bitmap, filePath: String) {
@@ -1099,22 +1068,23 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun insertImageInDatabase(photoUri: Uri?, filePath: String?) {
-        val databaseViewModel = ViewModelProviders.of(activity!!).get(DatabaseViewModel::class.java)
-        val mainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        val noteEditDatabaseViewModel = ViewModelProviders.of(activity!!).get(NoteEditDatabaseViewModel::class.java)
+        val noteEditViewModel = ViewModelProviders.of(activity!!).get(NoteEditViewModel::class.java)
+
         GlobalScope.launch(Dispatchers.IO) {
-            val imageData = databaseViewModel.insertImage()
+            val imageData = noteEditDatabaseViewModel.insertImage()
             withContext(Dispatchers.Main) {
                 loadImage(imageData)
             }
             val isLoadSuccess = loadBitmap(photoUri, filePath, imageData.imagePath)
             // If there is a problem retrieving the image then delete the empty entry
             if (!isLoadSuccess)
-                databaseViewModel.deleteImage(imageData.imageId!!, imageData.imagePath)
+                noteEditDatabaseViewModel.deleteImage(imageData.imageId!!, imageData.imagePath)
             // Notify the changes to the view
             withContext(Dispatchers.Main) {
                 if(!isLoadSuccess)
                     Toast.makeText(context, "Error in retrieving image", LENGTH_SHORT).show()
-                mainViewModel.setRefreshImagesList(true)
+                noteEditViewModel.setRefreshImagesList(true)
             }
         }
     }
@@ -1128,8 +1098,8 @@ class NoteEditFragment : Fragment() {
                 else
                     Toast.makeText(context, "Can't access storage", LENGTH_SHORT).show()
             } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
-                if (mainViewModel.getCurrentPhotoPath() != null) {
-                    val photoFile = File(mainViewModel.getCurrentPhotoPath()!!)
+                if (noteEditViewModel.getCurrentPhotoPath() != null) {
+                    val photoFile = File(noteEditViewModel.getCurrentPhotoPath()!!)
                     if (photoFile.exists())
                         insertImageInDatabase(null, photoFile.absolutePath)
                     else

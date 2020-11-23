@@ -11,16 +11,15 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.util.ColorsUtil
-import com.infinitysolutions.notessync.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.color_picker_item.view.*
 
-class ColorPickerAdapter(val context: Context, val mainViewModel: MainViewModel?) : RecyclerView.Adapter<ColorPickerAdapter.ViewHolder>(){
+class ColorPickerAdapter(val context: Context, private val noteEditViewModel: NoteEditViewModel?) : RecyclerView.Adapter<ColorPickerAdapter.ViewHolder>(){
     private var selectedColor = 0
     private val colorsUtil = ColorsUtil()
 
     init{
-        if(mainViewModel != null)
-            selectedColor = mainViewModel.getSelectedColor().value!!
+        if(noteEditViewModel != null)
+            selectedColor = noteEditViewModel.getSelectedColor().value!!
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -40,7 +39,7 @@ class ColorPickerAdapter(val context: Context, val mainViewModel: MainViewModel?
 
         holder.colorImageView.setOnClickListener{
             selectedColor = position
-            mainViewModel?.setSelectedColor(position)
+            noteEditViewModel?.setSelectedColor(position)
             notifyDataSetChanged()
         }
     }

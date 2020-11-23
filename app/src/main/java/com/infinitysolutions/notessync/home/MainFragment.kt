@@ -471,23 +471,6 @@ class MainFragment : Fragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if(requestCode == LOGIN_REQUEST_CODE){
-            val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-            if(resultCode == RESULT_OK){
-                if(prefs != null)
-                    syncAll(prefs)
-            }else{
-                val editor = prefs?.edit()
-                editor?.remove(PREF_ACCESS_TOKEN)
-                editor?.remove(PREF_CLOUD_TYPE)
-                editor?.remove(PREF_ID)
-                editor?.apply()
-                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-                val googleSignInClient = GoogleSignIn.getClient(activity!!, gso)
-                googleSignInClient.signOut()
-            }
-        }
-
         if (resultCode == RESULT_OK) {
             if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
                 val photoUri: Uri? = data?.data
@@ -503,6 +486,23 @@ class MainFragment : Fragment() {
                     else
                         Toast.makeText(context, "Error in retrieving image", LENGTH_SHORT).show()
                 }
+            }
+        }
+
+        if(requestCode == LOGIN_REQUEST_CODE){
+            val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+            if(resultCode == RESULT_OK){
+                if(prefs != null)
+                    syncAll(prefs)
+            }else{
+                val editor = prefs?.edit()
+                editor?.remove(PREF_ACCESS_TOKEN)
+                editor?.remove(PREF_CLOUD_TYPE)
+                editor?.remove(PREF_ID)
+                editor?.apply()
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                val googleSignInClient = GoogleSignIn.getClient(activity!!, gso)
+                googleSignInClient.signOut()
             }
         }
     }

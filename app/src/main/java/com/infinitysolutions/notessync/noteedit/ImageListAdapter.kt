@@ -13,7 +13,7 @@ import com.infinitysolutions.notessync.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.image_list_item.view.*
 import java.io.File
 
-class ImageListAdapter(val context: Context, val list: ArrayList<ImageData>, private val mainViewModel: MainViewModel): RecyclerView.Adapter<ImageListAdapter.ViewHolder>(){
+class ImageListAdapter(val context: Context, val list: ArrayList<ImageData>, private val mainViewModel: NoteEditViewModel): RecyclerView.Adapter<ImageListAdapter.ViewHolder>(){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(context).inflate(R.layout.image_list_item, parent, false)
