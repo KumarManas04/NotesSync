@@ -11,26 +11,15 @@ import com.infinitysolutions.notessync.util.Event
 
 class MainViewModel: ViewModel(){
     private var selectedNote: Note? = null
-    private val multiSelectCount = MutableLiveData<Int>()
     private val selectedColor = MutableLiveData<Int>()
     private val shouldOpenEditor = MutableLiveData<Boolean>()
     private val imagesList = ArrayList<ImageData>()
     private val openImageView = MutableLiveData<Event<Int>>()
-    private val mToolbar = MutableLiveData<Toolbar?>()
-    private val viewMode = MutableLiveData<Int>()
     private val refreshImagesList = MutableLiveData<Event<Boolean>>()
     var noteType: Int? = null
     private var currentPhotoPath: String? = null
     var intent: Intent? = null
     var reminderTime = -1L
-
-    init{
-        viewMode.value = 1
-    }
-
-    fun setMultiSelectCount(value: Int){
-        multiSelectCount.value = value
-    }
 
     fun setRefreshImagesList(value: Boolean){
         refreshImagesList.value = Event(value)
@@ -38,14 +27,6 @@ class MainViewModel: ViewModel(){
 
     fun setCurrentPhotoPath(photoPath: String){
         currentPhotoPath = photoPath
-    }
-
-    fun setViewMode(mode: Int){
-        viewMode.value = mode
-    }
-
-    fun setToolbar(toolbar: Toolbar?){
-        mToolbar.value = toolbar
     }
 
     fun setSelectedNote(note: Note?){
@@ -84,11 +65,8 @@ class MainViewModel: ViewModel(){
         openImageView.value = Event(imageId)
     }
 
-    fun getMultiSelectCount(): LiveData<Int> = multiSelectCount
     fun getRefreshImagesList(): LiveData<Event<Boolean>> = refreshImagesList
     fun getCurrentPhotoPath(): String? = currentPhotoPath
-    fun getViewMode(): LiveData<Int> = viewMode
-    fun getToolbar(): LiveData<Toolbar?> = mToolbar
     fun getSelectedNote(): Note? = selectedNote
     fun getShouldOpenEditor(): LiveData<Boolean> = shouldOpenEditor
     fun getImagesList(): ArrayList<ImageData> = imagesList

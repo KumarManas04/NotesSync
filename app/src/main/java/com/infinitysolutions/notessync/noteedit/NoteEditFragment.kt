@@ -15,7 +15,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Matrix
-import android.media.ExifInterface
+import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -145,11 +145,7 @@ class NoteEditFragment : Fragment() {
         mainViewModel.getOpenImageView().observe(this, androidx.lifecycle.Observer {
             it.getContentIfNotHandled()?.let { imagePosition ->
                 val bundle = bundleOf("currentPosition" to imagePosition)
-                //TODO: Change
-//                findNavController(this).navigate(
-//                    R.id.action_noteEditFragment_to_imageGalleryFragment,
-//                    bundle
-//                )
+                findNavController(this).navigate(R.id.action_noteEditFragment2_to_imageGalleryFragment2, bundle)
             }
         })
 

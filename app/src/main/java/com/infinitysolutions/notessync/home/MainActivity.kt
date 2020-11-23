@@ -94,8 +94,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepareNavDrawer() {
-        val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        val index = mainViewModel.getViewMode().value
+        val homeViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
+        val index = homeViewModel.getViewMode().value
         if (index != null)
             navigation_view.menu[index - 1].isChecked = true
         else
@@ -103,15 +103,15 @@ class MainActivity : AppCompatActivity() {
         navigation_view.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.notes -> {
-                    mainViewModel.setViewMode(1)
+                    homeViewModel.setViewMode(1)
                     drawer_layout.closeDrawers()
                 }
                 R.id.archive -> {
-                    mainViewModel.setViewMode(2)
+                    homeViewModel.setViewMode(2)
                     drawer_layout.closeDrawers()
                 }
                 R.id.trash -> {
-                    mainViewModel.setViewMode(3)
+                    homeViewModel.setViewMode(3)
                     drawer_layout.closeDrawers()
                 }
                 R.id.settings -> {

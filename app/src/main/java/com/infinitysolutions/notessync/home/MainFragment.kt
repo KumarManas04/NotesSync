@@ -454,35 +454,20 @@ class MainFragment : Fragment() {
     }
 
     @Throws(IOException::class)
-    private fun createImageFile(): File? {
+    private fun createImageFile(): File {
         val path = activity!!.filesDir.toString()
         val time = Calendar.getInstance().timeInMillis
         return File(path, "$time.jpg")
     }
 
-    private fun createNewNote(imageData: ImageData, photoUri: Uri?, filePath: String?) {
-        val id: Long = imageData.imageId!!
-        val imageContent = ImageNoteContent("", arrayListOf(id))
-        val content = Gson().toJson(imageContent)
-
+    private fun createNewNote(photoUri: Uri?, filePath: String?) {
         // Open new note with the image details
         val newNoteIntent = Intent(activity, NoteEditActivity::class.java)
         newNoteIntent.putExtra(NOTE_ID_EXTRA, -1L)
         newNoteIntent.putExtra(NOTE_TYPE_EXTRA, IMAGE_DEFAULT)
-        newNoteIntent.putExtra(NOTE_CONTENT_EXTRA, content)
         newNoteIntent.putExtra(PHOTO_URI_EXTRA, photoUri)
         newNoteIntent.putExtra(FILE_PATH_EXTRA, filePath)
         startActivity(newNoteIntent)
-    }
-
-    private fun insertImageInDatabase(photoUri: Uri?, filePath: String?) {
-        val homeDatabaseViewModel = ViewModelProviders.of(activity!!).get(HomeDatabaseViewModel::class.java)
-        GlobalScope.launch(Dispatchers.IO) {
-            val imageData = homeDatabaseViewModel.insertImage()
-            withContext(Dispatchers.Main) {
-                createNewNote(imageData, photoUri, filePath)
-            }
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -507,14 +492,14 @@ class MainFragment : Fragment() {
             if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
                 val photoUri: Uri? = data?.data
                 if (photoUri != null)
-                    insertImageInDatabase(photoUri, null)
+                    createNewNote(photoUri, null)
                 else
                     Toast.makeText(context, "Can't access storage", LENGTH_SHORT).show()
             } else if (requestCode == IMAGE_CAPTURE_REQUEST_CODE) {
                 if (homeViewModel.getCurrentPhotoPath() != null) {
                     val photoFile = File(homeViewModel.getCurrentPhotoPath()!!)
                     if (photoFile.exists())
-                        insertImageInDatabase(null, photoFile.absolutePath)
+                        createNewNote(null, photoFile.absolutePath)
                     else
                         Toast.makeText(context, "Error in retrieving image", LENGTH_SHORT).show()
                 }

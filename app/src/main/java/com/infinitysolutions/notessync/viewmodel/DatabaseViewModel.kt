@@ -40,68 +40,9 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class DatabaseViewModel(application: Application) : AndroidViewModel(application) {
-    private val query = MutableLiveData<SimpleSQLiteQuery>()
-    private val viewMode = MutableLiveData<Int>()
-    private var orderBy = ORDER_BY_UPDATED
-    private var order = ORDER_DESC
     private val notesDao: NotesDao = NotesRoomDatabase.getDatabase(application).notesDao()
     private val imagesDao: ImagesDao = NotesRoomDatabase.getDatabase(application).imagesDao()
     private val repository: NotesRepository = NotesRepository(notesDao)
-    val searchResultList: LiveData<List<Note>> = Transformations.switchMap(query) { searchQuery ->
-        notesDao.getSearchResult(searchQuery)
-    }
-    val viewList: LiveData<List<Note>> = Transformations.switchMap(viewMode) { mode ->
-        when (mode) {
-            1 -> repository.getNotesList(orderBy, order)
-            2 -> repository.getArchiveList(orderBy, order)
-            3 -> repository.getTrashList(orderBy, order)
-            else -> null
-        }
-    }
-
-    init {
-        query.value = SimpleSQLiteQuery("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13")
-        viewMode.value = 1
-        val context = getApplication<Application>().applicationContext
-        val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
-        orderBy = prefs.getString(PREF_ORDER_BY, ORDER_BY_UPDATED)?: ORDER_BY_UPDATED
-        order = prefs.getString(PREF_ORDER, ORDER_DESC)?: ORDER_DESC
-    }
-
-    fun setSearchQuery(searchQuery: String) {
-        val tempList = searchQuery.split("\\s+".toRegex())
-        val list = ArrayList<String>()
-        for(str in tempList){
-            if(str.trim().isNotEmpty())
-                list.add(str)
-        }
-
-        if(list.isEmpty()) {
-            query.value = SimpleSQLiteQuery("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13")
-            return
-        }
-        val sB = StringBuilder("SELECT * FROM notes_table WHERE type != 0 AND type != 5 AND type != 6 AND type != 9 AND type != 10 AND type != 13 AND (")
-        list.forEachIndexed { index, str ->
-            if (index != 0)
-                sB.append(" OR ")
-            sB.append("title LIKE '%$str%' OR content LIKE '%$str%'")
-        }
-
-        sB.append(")")
-        val queryItem = SimpleSQLiteQuery(sB.toString())
-        query.value = queryItem
-    }
-
-    fun setViewMode(mode: Int) {
-        viewMode.value = mode
-    }
-
-    fun setOrder(order: String, orderBy: String){
-        this.order = order
-        this.orderBy = orderBy
-        val vM = viewMode.value
-        viewMode.value = vM
-    }
 
     fun insert(note: Note) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -268,5 +209,4 @@ class DatabaseViewModel(application: Application) : AndroidViewModel(application
 
     fun getNoteById(nId: Long): Note = notesDao.getNoteById(nId)
     fun getImagesByIds(idList: ArrayList<Long>): ArrayList<ImageData> = ArrayList(imagesDao.getImagesByIds(idList))
-    fun getImagePathById(id: Long): String = imagesDao.getImagePathById(id)
 }
