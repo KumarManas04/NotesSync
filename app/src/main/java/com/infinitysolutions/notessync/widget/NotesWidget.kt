@@ -17,6 +17,7 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_L
 import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_NOTE
 import com.infinitysolutions.notessync.home.MainActivity
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.noteedit.NoteEditActivity
 
 class NotesWidget : AppWidgetProvider() {
 
@@ -74,7 +75,7 @@ class NotesWidget : AppWidgetProvider() {
 
             val adapterIntent = Intent(context, WidgetRemoteViewsService::class.java)
             remoteViews.setRemoteAdapter(R.id.notes_list_view, adapterIntent)
-            val intentTemplate = Intent(context, MainActivity::class.java)
+            val intentTemplate = Intent(context, NoteEditActivity::class.java)   // The intent for click on a note in widget's list
             intentTemplate.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             val pendingIntentTemplate = TaskStackBuilder.create(context)
                 .addNextIntentWithParentStack(intentTemplate)

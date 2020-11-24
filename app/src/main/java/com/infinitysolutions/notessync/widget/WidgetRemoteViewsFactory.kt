@@ -11,6 +11,7 @@ import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
+import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_LIST_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.LIST_DEFAULT
@@ -18,7 +19,6 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_ID_EXTR
 import com.infinitysolutions.notessync.model.ImageNoteContent
 import com.infinitysolutions.notessync.model.Note
 import com.infinitysolutions.notessync.model.NotesRoomDatabase
-import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.util.ChecklistConverter
 import com.infinitysolutions.notessync.util.ColorsUtil
 import java.io.File
