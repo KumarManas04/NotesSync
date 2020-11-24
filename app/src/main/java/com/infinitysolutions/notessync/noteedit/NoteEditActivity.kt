@@ -28,6 +28,7 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_NOTE_E
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_AMOLED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DEFAULT
+import com.infinitysolutions.notessync.model.ImageData
 import com.infinitysolutions.notessync.model.ImageNoteContent
 import com.infinitysolutions.notessync.model.Note
 import kotlinx.coroutines.Dispatchers
@@ -58,33 +59,27 @@ class NoteEditActivity : AppCompatActivity() {
 
     private fun initializeNote() {
         val noteEditViewModel = ViewModelProviders.of(this)[NoteEditViewModel::class.java]
-        val noteEditDatabaseViewModel = ViewModelProviders.of(this)[NoteEditDatabaseViewModel::class.java]
+        val noteEditDatabaseViewModel =
+            ViewModelProviders.of(this)[NoteEditDatabaseViewModel::class.java]
 
-        val noteId: Long = intent.getLongExtra(NOTE_ID_EXTRA, -1)
+        val noteId = intent.getLongExtra(NOTE_ID_EXTRA, -1)
         val noteType = intent.getIntExtra(NOTE_TYPE_EXTRA, NOTE_DEFAULT)
         var noteContent = intent.getStringExtra(NOTE_CONTENT_EXTRA)
         val photoUri = intent.getParcelableExtra<Uri?>(PHOTO_URI_EXTRA)
         val filePath = intent.getStringExtra(FILE_PATH_EXTRA)
 
-        GlobalScope.launch (Dispatchers.IO){
-            if(noteId == -1L && noteType == IMAGE_DEFAULT){
+        GlobalScope.launch(Dispatchers.IO) {
+            if (noteId == -1L && noteType == IMAGE_DEFAULT) {
                 val imageData = noteEditDatabaseViewModel.insertImage()
-                noteContent = Gson().toJson(ImageNoteContent(
+                noteContent = Gson().toJson(
+                    ImageNoteContent(
                         noteContent,
                         arrayListOf(imageData.imageId!!)
                     )
                 )
 
-                val isLoadSuccess = loadBitmap(photoUri, filePath, imageData.imagePath)
-                // If there is a problem retrieving the image then delete the empty entry
-                if (!isLoadSuccess)
-                    noteEditDatabaseViewModel.deleteImage(imageData.imageId!!, imageData.imagePath)
-
-                // Notify the changes to the view
-                withContext(Dispatchers.Main) {
-                    if (!isLoadSuccess)
-                        Toast.makeText(this@NoteEditActivity, "Error in retrieving image", LENGTH_SHORT).show()
-                    noteEditViewModel.setRefreshImagesList(true)
+                withContext(Dispatchers.Main){
+                    insertImage(noteEditViewModel, noteEditDatabaseViewModel, imageData, photoUri, filePath)
                 }
             }
 
@@ -94,11 +89,31 @@ class NoteEditActivity : AppCompatActivity() {
                 noteEditDatabaseViewModel.getNoteById(noteId)
             noteEditViewModel.setCurrentNote(note)
 
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 val bundle = Bundle()
                 bundle.putInt(APP_LOCK_STATE, STATE_NOTE_EDIT)
-                findNavController(R.id.nav_host_fragment).setGraph(R.navigation.note_edit_nav_graph, bundle)
+                findNavController(R.id.nav_host_fragment).setGraph(
+                    R.navigation.note_edit_nav_graph,
+                    bundle
+                )
             }
+        }
+    }
+
+    private fun insertImage(noteEditViewModel: NoteEditViewModel, noteEditDatabaseViewModel: NoteEditDatabaseViewModel, imageData: ImageData, photoUri: Uri?, filePath: String?) {
+        GlobalScope.launch (Dispatchers.IO) {
+            val isLoadSuccess = loadBitmap(photoUri, filePath, imageData.imagePath)
+            // If there is a problem retrieving the image then delete the empty entry
+            if (!isLoadSuccess)
+                noteEditDatabaseViewModel.deleteImage(imageData.imageId!!, imageData.imagePath)
+
+            // Notify the changes to the view
+            withContext(Dispatchers.Main) {
+                if (!isLoadSuccess)
+                    Toast.makeText(this@NoteEditActivity, "Error in retrieving image", LENGTH_SHORT)
+                        .show()
+            }
+            noteEditViewModel.setRefreshImagesList(true)
         }
     }
 
