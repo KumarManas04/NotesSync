@@ -102,23 +102,6 @@ class NoteEditActivity : AppCompatActivity() {
         }
     }
 
-    private fun insertImageInDatabase(noteEditViewModel: NoteEditViewModel, noteEditDatabaseViewModel: NoteEditDatabaseViewModel, photoUri: Uri?, filePath: String?) {
-        GlobalScope.launch(Dispatchers.IO) {
-            val imageData = noteEditDatabaseViewModel.insertImage()
-            val isLoadSuccess = loadBitmap(photoUri, filePath, imageData.imagePath)
-            // If there is a problem retrieving the image then delete the empty entry
-            if (!isLoadSuccess)
-                noteEditDatabaseViewModel.deleteImage(imageData.imageId!!, imageData.imagePath)
-
-            // Notify the changes to the view
-            withContext(Dispatchers.Main) {
-                if (!isLoadSuccess)
-                    Toast.makeText(this@NoteEditActivity, "Error in retrieving image", LENGTH_SHORT).show()
-                noteEditViewModel.setRefreshImagesList(true)
-            }
-        }
-    }
-
     private fun loadBitmap(uri: Uri?, filePath: String?, destinationPath: String): Boolean {
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
