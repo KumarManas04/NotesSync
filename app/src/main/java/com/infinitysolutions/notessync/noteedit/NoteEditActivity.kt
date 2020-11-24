@@ -12,6 +12,7 @@ import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
+import com.google.gson.Gson
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.FILE_PATH_EXTRA
@@ -27,6 +28,7 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_NOTE_E
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_AMOLED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DEFAULT
+import com.infinitysolutions.notessync.model.ImageNoteContent
 import com.infinitysolutions.notessync.model.Note
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -51,11 +53,7 @@ class NoteEditActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_note_edit)
-
         initializeNote()
-        val bundle = Bundle()
-        bundle.putInt(APP_LOCK_STATE, STATE_NOTE_EDIT)
-        findNavController(R.id.nav_host_fragment).setGraph(R.navigation.note_edit_nav_graph, bundle)
     }
 
     private fun initializeNote() {
@@ -64,19 +62,43 @@ class NoteEditActivity : AppCompatActivity() {
 
         val noteId: Long = intent.getLongExtra(NOTE_ID_EXTRA, -1)
         val noteType = intent.getIntExtra(NOTE_TYPE_EXTRA, NOTE_DEFAULT)
-        val noteContent = intent.getStringExtra(NOTE_CONTENT_EXTRA) ?: ""
+        var noteContent = intent.getStringExtra(NOTE_CONTENT_EXTRA)
+        val photoUri = intent.getParcelableExtra<Uri?>(PHOTO_URI_EXTRA)
+        val filePath = intent.getStringExtra(FILE_PATH_EXTRA)
 
-        val note = if (noteId == -1L)
-            Note(noteId, "", noteContent, 0, 0, "-1", noteType, false, null, -1L)
-        else
-            noteEditDatabaseViewModel.getNoteById(noteId)
+        GlobalScope.launch (Dispatchers.IO){
+            if(noteId == -1L && noteType == IMAGE_DEFAULT){
+                val imageData = noteEditDatabaseViewModel.insertImage()
+                noteContent = Gson().toJson(ImageNoteContent(
+                        noteContent,
+                        arrayListOf(imageData.imageId!!)
+                    )
+                )
 
-        noteEditViewModel.setCurrentNote(note)
+                val isLoadSuccess = loadBitmap(photoUri, filePath, imageData.imagePath)
+                // If there is a problem retrieving the image then delete the empty entry
+                if (!isLoadSuccess)
+                    noteEditDatabaseViewModel.deleteImage(imageData.imageId!!, imageData.imagePath)
 
-        if(noteId == -1L && noteType == IMAGE_DEFAULT){
-            val photoUri = intent.getParcelableExtra<Uri?>(PHOTO_URI_EXTRA)
-            val filePath = intent.getStringExtra(FILE_PATH_EXTRA)
-            insertImageInDatabase(noteEditViewModel, noteEditDatabaseViewModel, photoUri, filePath)
+                // Notify the changes to the view
+                withContext(Dispatchers.Main) {
+                    if (!isLoadSuccess)
+                        Toast.makeText(this@NoteEditActivity, "Error in retrieving image", LENGTH_SHORT).show()
+                    noteEditViewModel.setRefreshImagesList(true)
+                }
+            }
+
+            val note = if (noteId == -1L)
+                Note(noteId, "", noteContent, 0, 0, "-1", noteType, false, null, -1L)
+            else
+                noteEditDatabaseViewModel.getNoteById(noteId)
+            noteEditViewModel.setCurrentNote(note)
+
+            withContext(Dispatchers.Main){
+                val bundle = Bundle()
+                bundle.putInt(APP_LOCK_STATE, STATE_NOTE_EDIT)
+                findNavController(R.id.nav_host_fragment).setGraph(R.navigation.note_edit_nav_graph, bundle)
+            }
         }
     }
 

@@ -20,6 +20,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -129,28 +130,26 @@ class NoteEditFragment : Fragment() {
         imageRecyclerView.layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
 
         noteEditViewModel.getSelectedColor()
-            .observe(this, androidx.lifecycle.Observer { selectedColor ->
+            .observe(this, { selectedColor ->
                 noteTitle.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
-                rootView.last_edited_text.setTextColor(
-                    Color.parseColor(
-                        colorsUtil.getColor(
-                            selectedColor
-                        )
-                    )
-                )
+                rootView.last_edited_text.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
             })
 
-        noteEditViewModel.getOpenImageView().observe(this, androidx.lifecycle.Observer {
+        noteEditViewModel.getOpenImageView().observe(this, {
             it.getContentIfNotHandled()?.let { imagePosition ->
+                Log.d(TAG, "Open Image View")
                 val bundle = bundleOf("currentPosition" to imagePosition)
                 findNavController(this).navigate(R.id.action_noteEditFragment2_to_imageGalleryFragment2, bundle)
             }
         })
 
-        noteEditViewModel.getRefreshImagesList().observe(this, androidx.lifecycle.Observer {
+        noteEditViewModel.getRefreshImagesList().observe(this, {
             it.getContentIfNotHandled()?.let { shouldRefresh ->
+                //TODO: This maybe called before imageListAdapter was assigned
                 if (shouldRefresh) {
+                    Log.d(TAG, "Refresh UI")
                     if(imageListAdapter != null) {
+                        Log.d(TAG, "ImageListAdapter was not null")
                         GlobalScope.launch(Dispatchers.IO) {
                             val newList = noteEditDatabaseViewModel.getImagesByIds(imageListAdapter!!.getIdsList())
                             withContext(Dispatchers.Main){
@@ -161,12 +160,13 @@ class NoteEditFragment : Fragment() {
                 }
             }
         })
+
         val toolbar = rootView.toolbar
         toolbar.title = ""
         toolbar.inflateMenu(R.menu.note_editor_menu)
 
         toolbar.setNavigationOnClickListener {
-            findNavController(this).navigateUp()
+            activity?.finish()
         }
 
         toolbar.setOnMenuItemClickListener { item ->
@@ -176,30 +176,17 @@ class NoteEditFragment : Fragment() {
             true
         }
 
-        if (arguments != null) {
-            val noteId = arguments?.getLong("NOTE_ID")
-            if (noteId != null) {
-                GlobalScope.launch(Dispatchers.IO) {
-                    val note = noteEditDatabaseViewModel.getNoteById(noteId)
-                    withContext(Dispatchers.Main) {
-                        noteEditViewModel.setCurrentNote(note)
-                        prepareNoteView(rootView)
-                    }
-                }
-            }
-        } else {
-            prepareNoteView(rootView)
-        }
+        prepareNoteView(rootView)
     }
 
     private fun prepareNoteView(rootView: View) {
-        val selectedNote = noteEditViewModel.getCurrentNote()
-        if (selectedNote != null) {
+        val currentNote = noteEditViewModel.getCurrentNote()
+        if (currentNote != null) {
             val noteType: Int = if (noteEditViewModel.noteType != null)
                 noteEditViewModel.noteType!!
             else {
-                noteEditViewModel.noteType = selectedNote.noteType
-                selectedNote.noteType
+                noteEditViewModel.noteType = currentNote.noteType
+                currentNote.noteType
             }
 
             when (noteEditViewModel.noteType) {
@@ -213,26 +200,26 @@ class NoteEditFragment : Fragment() {
                 }
             }
 
-            if (selectedNote.nId != -1L) {
-                noteTitle.setText(selectedNote.noteTitle)
-                noteEditViewModel.setSelectedColor(selectedNote.noteColor)
+            if (currentNote.nId != -1L) {
+                noteTitle.setText(currentNote.noteTitle)
+                noteEditViewModel.setSelectedColor(currentNote.noteColor)
                 val formatter = SimpleDateFormat("MMM d, yyyy", Locale.ENGLISH)
                 rootView.last_edited_text.text = getString(
                     R.string.edited_time_stamp,
-                    formatter.format(Calendar.getInstance().timeInMillis)
+                    formatter.format(currentNote.dateModified)
                 )
             }else{
                 val prefs = context!!.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
                 noteEditViewModel.setSelectedColor(prefs.getInt(PREF_DEFAULT_NOTE_COLOR, 0))
             }
 
-            noteEditViewModel.reminderTime = selectedNote.reminderTime
+            noteEditViewModel.reminderTime = currentNote.reminderTime
             when (noteType) {
                 LIST_DEFAULT, LIST_ARCHIVED -> {
                     checklistView.visibility = VISIBLE
                     noteContent.visibility = GONE
                     imageRecyclerView.visibility = GONE
-                    setChecklistContent(selectedNote.noteContent)
+                    setChecklistContent(currentNote.noteContent)
                 }
                 IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
                     imageRecyclerView.visibility = VISIBLE
@@ -244,8 +231,7 @@ class NoteEditFragment : Fragment() {
                         noteContent.visibility = VISIBLE
                     }
 
-                    val imageData =
-                        Gson().fromJson(selectedNote.noteContent, ImageNoteContent::class.java)
+                    val imageData = Gson().fromJson(currentNote.noteContent, ImageNoteContent::class.java)
                     if (noteType == IMAGE_LIST_DEFAULT || noteType == IMAGE_LIST_ARCHIVED) {
                         setChecklistContent(imageData.noteContent)
                     } else {
@@ -277,16 +263,16 @@ class NoteEditFragment : Fragment() {
 
                                 noteEditViewModel.setCurrentNote(
                                     Note(
-                                        selectedNote.nId,
-                                        selectedNote.noteTitle,
+                                        currentNote.nId,
+                                        currentNote.noteTitle,
                                         imageData.noteContent,
-                                        selectedNote.dateCreated,
-                                        selectedNote.dateModified,
-                                        selectedNote.gDriveId,
-                                        selectedNote.noteType,
-                                        selectedNote.synced,
-                                        selectedNote.noteColor,
-                                        selectedNote.reminderTime
+                                        currentNote.dateCreated,
+                                        currentNote.dateModified,
+                                        currentNote.gDriveId,
+                                        currentNote.noteType,
+                                        currentNote.synced,
+                                        currentNote.noteColor,
+                                        currentNote.reminderTime
                                     )
                                 )
                             } else {
@@ -300,14 +286,14 @@ class NoteEditFragment : Fragment() {
                     }
                 }
                 else -> {
-                    noteContent.setText(selectedNote.noteContent)
+                    noteContent.setText(currentNote.noteContent)
                     imageRecyclerView.visibility = GONE
                     checklistView.visibility = GONE
                     noteContent.visibility = VISIBLE
                 }
             }
 
-            if (selectedNote.nId == -1L) {
+            if (currentNote.nId == -1L) {
                 noteContent.postDelayed({
                     noteContent.requestFocus()
                     noteContent.setSelection(noteContent.text.length)
@@ -691,53 +677,6 @@ class NoteEditFragment : Fragment() {
         }
     }
 
-    private fun saveNote(content: String) {
-        val timeModified = Calendar.getInstance().timeInMillis
-        val selectedNote = noteEditViewModel.getCurrentNote()
-        if (selectedNote != null) {
-            if (selectedNote.nId == -1L) {
-                // New Note
-                if (content.isNotEmpty() || noteTitle.text.isNotEmpty()) {
-                    noteEditDatabaseViewModel.insert(
-                        Note(
-                            null,
-                            noteTitle.text.toString(),
-                            content,
-                            timeModified,
-                            timeModified,
-                            "-1",
-                            noteEditViewModel.noteType!!,
-                            false,
-                            noteEditViewModel.getSelectedColor().value,
-                            -1L
-                        )
-                    )
-                }
-            } else {
-                // Old Note
-                if (content.isEmpty() && noteTitle.text.isEmpty()) {
-                    // If the user removed everything from the note
-                    noteEditDatabaseViewModel.deleteNote(selectedNote)
-                } else {
-                    noteEditDatabaseViewModel.insert(
-                        Note(
-                            selectedNote.nId,
-                            noteTitle.text.toString(),
-                            content,
-                            selectedNote.dateCreated,
-                            timeModified,
-                            selectedNote.gDriveId,
-                            noteEditViewModel.noteType!!,
-                            selectedNote.synced,
-                            noteEditViewModel.getSelectedColor().value,
-                            noteEditViewModel.reminderTime
-                        )
-                    )
-                }
-            }
-        }
-    }
-
     private fun deleteNote() {
         AlertDialog.Builder(context)
             .setTitle(getString(R.string.delete_note))
@@ -891,28 +830,6 @@ class NoteEditFragment : Fragment() {
                 noteContent.text.toString()
             }
         }
-    }
-
-    override fun onDestroy() {
-        if (::noteEditViewModel.isInitialized) {
-            val selectedNote = noteEditViewModel.getCurrentNote()
-            if (selectedNote != null) {
-                val noteContentText = getNoteText()
-                if (!activity!!.isChangingConfigurations) {
-                    if ((selectedNote.noteContent != noteContentText)
-                        || (selectedNote.noteType != noteEditViewModel.noteType)
-                        || (selectedNote.noteTitle != noteTitle.text.toString())
-                        || (selectedNote.noteColor != noteEditViewModel.getSelectedColor().value)
-                        || (selectedNote.reminderTime != noteEditViewModel.reminderTime)
-                    ) {
-                        saveNote(noteContentText)
-                    }
-                    noteEditViewModel.setImagesList(null)
-                    noteEditViewModel.noteType = null
-                }
-            }
-        }
-        super.onDestroy()
     }
 
     private fun loadImage(imageData: ImageData) {
@@ -1107,5 +1024,73 @@ class NoteEditFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun saveNote(content: String) {
+        val timeModified = Calendar.getInstance().timeInMillis
+        val currentNote = noteEditViewModel.getCurrentNote()
+        if (currentNote != null) {
+            if (currentNote.nId == -1L) {
+                Log.d(TAG, "It is a new Note")
+                // New Note
+                if (content.isNotEmpty() || noteTitle.text.isNotEmpty()) {
+                    noteEditDatabaseViewModel.insert(
+                        Note(
+                            null,
+                            noteTitle.text.toString(),
+                            content,
+                            timeModified,
+                            timeModified,
+                            "-1",
+                            noteEditViewModel.noteType!!,
+                            false,
+                            noteEditViewModel.getSelectedColor().value,
+                            -1L
+                        )
+                    )
+                }
+            } else {
+                // Old Note
+                if (content.isEmpty() && noteTitle.text.isEmpty()) {
+                    // If the user removed everything from the note
+                    noteEditDatabaseViewModel.deleteNote(currentNote)
+                } else {
+                    noteEditDatabaseViewModel.insert(
+                        Note(
+                            currentNote.nId,
+                            noteTitle.text.toString(),
+                            content,
+                            currentNote.dateCreated,
+                            timeModified,
+                            currentNote.gDriveId,
+                            noteEditViewModel.noteType!!,
+                            currentNote.synced,
+                            noteEditViewModel.getSelectedColor().value,
+                            noteEditViewModel.reminderTime
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        if (::noteEditViewModel.isInitialized) {
+            val currentNote = noteEditViewModel.getCurrentNote()
+            if (currentNote != null) {
+                val noteContentText = getNoteText()
+                if (!activity!!.isChangingConfigurations) {
+                    if ((currentNote.noteContent != noteContentText)
+                        || (currentNote.noteType != noteEditViewModel.noteType)
+                        || (currentNote.noteTitle != noteTitle.text.toString())
+                        || (currentNote.noteColor != noteEditViewModel.getSelectedColor().value)
+                        || (currentNote.reminderTime != noteEditViewModel.reminderTime)
+                    ) {
+                        saveNote(noteContentText)
+                    }
+                }
+            }
+        }
+        super.onDestroy()
     }
 }

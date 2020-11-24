@@ -29,6 +29,7 @@ import com.infinitysolutions.notessync.repository.NotesRepository
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.widget.NotesWidget
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -41,7 +42,7 @@ class NoteEditDatabaseViewModel(application: Application) : AndroidViewModel(app
     private val repository: NotesRepository = NotesRepository(notesDao)
 
     fun insert(note: Note) {
-        viewModelScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.IO) {
             val noteId = repository.insert(note)
             withContext(Dispatchers.Main) {
                 val context = getApplication<Application>().applicationContext
