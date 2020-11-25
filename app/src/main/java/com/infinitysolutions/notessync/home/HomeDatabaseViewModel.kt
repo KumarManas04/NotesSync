@@ -21,6 +21,7 @@ import com.infinitysolutions.notessync.repository.NotesRepository
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.widget.NotesWidget
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -101,21 +102,21 @@ class HomeDatabaseViewModel(application: Application) : AndroidViewModel(applica
         if(isLoggedIn)
             changeNoteType(note, noteType)
         else {
-            viewModelScope.launch(Dispatchers.IO) {
+            GlobalScope.launch(Dispatchers.IO) {
                 notesDao.deleteNoteById(note.nId!!)
             }
         }
     }
 
-    fun deleteImagesByIds(idList: ArrayList<Long>) {
-        viewModelScope.launch(Dispatchers.IO) {
+    private fun deleteImagesByIds(idList: ArrayList<Long>) {
+        GlobalScope.launch(Dispatchers.IO) {
             val images = getImagesByIds(idList)
             for (image in images)
                 deleteImage(image.imageId!!, image.imagePath)
         }
     }
 
-    fun deleteImage(id: Long, path: String) {
+    private fun deleteImage(id: Long, path: String) {
         val file = File(path)
         if (file.exists())
             file.delete()

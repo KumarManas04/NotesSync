@@ -171,4 +171,6 @@
     <b>Translations</b>
     <li>Ronny Steiner (German translation and moving hardcoded strings to strings.xml)</li>
     </html>]]></string>
+    <string name="convert_to_note">Convert to note</string>
+    <string name="convert_to_checklist">Convert to checklist</string>
 </resources>

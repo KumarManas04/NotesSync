@@ -59,8 +59,7 @@ class NoteEditActivity : AppCompatActivity() {
 
     private fun initializeNote() {
         val noteEditViewModel = ViewModelProviders.of(this)[NoteEditViewModel::class.java]
-        val noteEditDatabaseViewModel =
-            ViewModelProviders.of(this)[NoteEditDatabaseViewModel::class.java]
+        val noteEditDatabaseViewModel = ViewModelProviders.of(this)[NoteEditDatabaseViewModel::class.java]
 
         val noteId = intent.getLongExtra(NOTE_ID_EXTRA, -1)
         val noteType = intent.getIntExtra(NOTE_TYPE_EXTRA, NOTE_DEFAULT)
@@ -112,8 +111,8 @@ class NoteEditActivity : AppCompatActivity() {
                 if (!isLoadSuccess)
                     Toast.makeText(this@NoteEditActivity, "Error in retrieving image", LENGTH_SHORT)
                         .show()
+                noteEditViewModel.setRefreshImagesList(true)
             }
-            noteEditViewModel.setRefreshImagesList(true)
         }
     }
 

@@ -11,7 +11,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.infinitysolutions.notessync.model.ImageData
-import com.infinitysolutions.notessync.viewmodel.DatabaseViewModel
 import com.ortiz.touchview.TouchImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -19,7 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class GalleryAdapter(private val context: Context, private val list: ArrayList<ImageData>, private val databaseViewModel: DatabaseViewModel): RecyclerView.Adapter<GalleryAdapter.ViewHolder>() {
+class GalleryAdapter(private val context: Context, private val list: ArrayList<ImageData>, private val noteEditDatabaseViewModel: NoteEditDatabaseViewModel): RecyclerView.Adapter<GalleryAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(TouchImageView(parent.context).apply {
@@ -62,7 +61,7 @@ class GalleryAdapter(private val context: Context, private val list: ArrayList<I
 
     fun deleteImage(position: Int){
         GlobalScope.launch(Dispatchers.IO) {
-            databaseViewModel.deleteImage(list[position].imageId!!, list[position].imagePath)
+            noteEditDatabaseViewModel.deleteImage(list[position].imageId!!, list[position].imagePath)
             withContext(Dispatchers.Main){
                 list.removeAt(position)
                 notifyItemRemoved(position)

@@ -145,11 +145,8 @@ class NoteEditFragment : Fragment() {
 
         noteEditViewModel.getRefreshImagesList().observe(this, {
             it.getContentIfNotHandled()?.let { shouldRefresh ->
-                //TODO: This maybe called before imageListAdapter was assigned
                 if (shouldRefresh) {
-                    Log.d(TAG, "Refresh UI")
                     if(imageListAdapter != null) {
-                        Log.d(TAG, "ImageListAdapter was not null")
                         GlobalScope.launch(Dispatchers.IO) {
                             val newList = noteEditDatabaseViewModel.getImagesByIds(imageListAdapter!!.getIdsList())
                             withContext(Dispatchers.Main){
@@ -253,6 +250,7 @@ class NoteEditFragment : Fragment() {
                         withContext(Dispatchers.Main) {
                             if (list.isEmpty()) {
                                 // All images deleted
+                                //TODO: Fix all images deleted and all text removed but note not deleting
                                 imageRecyclerView.visibility = GONE
                                 noteEditViewModel.noteType = when (noteType) {
                                     IMAGE_ARCHIVED -> NOTE_ARCHIVED
@@ -323,7 +321,7 @@ class NoteEditFragment : Fragment() {
         if (selectedNote != null) {
             if (noteEditViewModel.reminderTime != -1L) {
                 dialogView.cancel_reminder_button.visibility = VISIBLE
-                val formatter = SimpleDateFormat("h:mm a MMM d, YYYY", Locale.ENGLISH)
+                val formatter = SimpleDateFormat("h:mm a MMM d, yyyy", Locale.ENGLISH)
                 dialogView.reminder_text.text =
                     getString(R.string.reminder_set, formatter.format(noteEditViewModel.reminderTime))
                 dialogView.reminder_text.setTextColor(
@@ -371,10 +369,10 @@ class NoteEditFragment : Fragment() {
 
             when (noteEditViewModel.noteType) {
                 LIST_DEFAULT, LIST_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
-                    dialogView.checklist_button_text.text = "Convert to note"
+                    dialogView.checklist_button_text.text = getString(R.string.convert_to_note)
                 }
                 else -> {
-                    dialogView.checklist_button_text.text = "Convert to checklist"
+                    dialogView.checklist_button_text.text = getString(R.string.convert_to_checklist)
                 }
             }
         }
@@ -595,9 +593,7 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun getUriList(): ArrayList<Uri>? {
-        val list = imageListAdapter?.list
-        if(list == null)
-            return null
+        val list = imageListAdapter?.list ?: return null
         var bitmap: Bitmap
         val folder = File(activity!!.cacheDir, "images")
         folder.mkdirs()
