@@ -6,17 +6,20 @@ import android.graphics.Matrix
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.FILE_PATH_EXTRA
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_DEFAULT
+import com.infinitysolutions.notessync.contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_CONTENT_EXTRA
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_ID_EXTRA
@@ -28,9 +31,11 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_NOTE_E
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_AMOLED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DEFAULT
+import com.infinitysolutions.notessync.home.MainActivity
 import com.infinitysolutions.notessync.model.ImageData
 import com.infinitysolutions.notessync.model.ImageNoteContent
 import com.infinitysolutions.notessync.model.Note
+import kotlinx.android.synthetic.main.activity_note_edit.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -61,9 +66,9 @@ class NoteEditActivity : AppCompatActivity() {
         val noteEditViewModel = ViewModelProviders.of(this)[NoteEditViewModel::class.java]
         val noteEditDatabaseViewModel = ViewModelProviders.of(this)[NoteEditDatabaseViewModel::class.java]
 
-        val noteId = intent.getLongExtra(NOTE_ID_EXTRA, -1)
+        val noteId = intent.getLongExtra(NOTE_ID_EXTRA, -1L)
         val noteType = intent.getIntExtra(NOTE_TYPE_EXTRA, NOTE_DEFAULT)
-        var noteContent = intent.getStringExtra(NOTE_CONTENT_EXTRA)
+        var noteContent = intent.getStringExtra(NOTE_CONTENT_EXTRA) ?: ""
         val photoUri = intent.getParcelableExtra<Uri?>(PHOTO_URI_EXTRA)
         val filePath = intent.getStringExtra(FILE_PATH_EXTRA)
 
@@ -91,10 +96,10 @@ class NoteEditActivity : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 val bundle = Bundle()
                 bundle.putInt(APP_LOCK_STATE, STATE_NOTE_EDIT)
-                findNavController(R.id.nav_host_fragment).setGraph(
-                    R.navigation.note_edit_nav_graph,
-                    bundle
-                )
+                val navController = findNavController(R.id.nav_host_fragment)
+                navController.setGraph(R.navigation.note_edit_nav_graph, bundle)
+                if(callingActivity?.className == MainActivity::class.qualifiedName)
+                    navController.navigate(R.id.action_appLockFragment2_to_noteEditFragment2)
             }
         }
     }

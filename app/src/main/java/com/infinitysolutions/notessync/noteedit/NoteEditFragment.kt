@@ -211,8 +211,10 @@ class NoteEditFragment : Fragment() {
             }
 
             noteEditViewModel.reminderTime = currentNote.reminderTime
+            Log.d(TAG, "Note type = $noteType")
             when (noteType) {
                 LIST_DEFAULT, LIST_ARCHIVED -> {
+                    Log.d(TAG, "Note is of List type")
                     checklistView.visibility = VISIBLE
                     noteContent.visibility = GONE
                     imageRecyclerView.visibility = GONE

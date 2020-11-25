@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -60,6 +61,10 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ORDER
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ORDER_BY
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
+import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_BUTTON_EXTRA
+import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_IMAGE
+import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_LIST
+import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_NOTE
 import com.infinitysolutions.notessync.login.LoginActivity
 import com.infinitysolutions.notessync.model.ImageData
 import com.infinitysolutions.notessync.model.ImageNoteContent
@@ -285,20 +290,44 @@ class MainFragment : Fragment() {
                 notesRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE
                 recyclerAdapter =
-                    NotesAdapter(homeViewModel, homeDatabaseViewModel, viewList, context!!)
+                    NotesAdapter(homeViewModel, homeDatabaseViewModel, viewList, activity!!)
                 notesRecyclerView.adapter = recyclerAdapter
             } else {
                 notesRecyclerView.visibility = GONE
                 rootView.empty_items.visibility = VISIBLE
             }
         })
+
+        handleIntent(rootView, container)
+    }
+
+    private fun handleIntent(rootView: View, container: ViewGroup?){
+        val intent = activity?.intent ?: return
+
+        if(intent.hasExtra(WIDGET_BUTTON_EXTRA)) {
+            val text = intent.getStringExtra(WIDGET_BUTTON_EXTRA)
+            if (text != null) {
+                when (text) {
+                    WIDGET_NEW_NOTE -> openNewNote(NOTE_DEFAULT)
+                    WIDGET_NEW_LIST -> openNewNote(LIST_DEFAULT)
+                    WIDGET_NEW_IMAGE -> {
+                        rootView.new_image_note_btn.post {
+                            rootView.new_image_note_btn.setOnCreateContextMenuListener { _, _, _ ->
+                                openNewImageMenu(container)
+                            }
+                            rootView.new_image_note_btn.showContextMenu()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun openNewNote(noteType: Int){
         val newNoteIntent = Intent(activity, NoteEditActivity::class.java)
         newNoteIntent.putExtra(NOTE_ID_EXTRA, -1L)
         newNoteIntent.putExtra(NOTE_TYPE_EXTRA, noteType)
-        startActivity(newNoteIntent)
+        startActivityForResult(newNoteIntent, 10101)
     }
 
     private fun disableMultiSelect(prefs: SharedPreferences, toolbar: Toolbar, bottomBar: LinearLayout) {
@@ -467,7 +496,7 @@ class MainFragment : Fragment() {
         newNoteIntent.putExtra(NOTE_TYPE_EXTRA, IMAGE_DEFAULT)
         newNoteIntent.putExtra(PHOTO_URI_EXTRA, photoUri)
         newNoteIntent.putExtra(FILE_PATH_EXTRA, filePath)
-        startActivity(newNoteIntent)
+        startActivityForResult(newNoteIntent, 101010)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

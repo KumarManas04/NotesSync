@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/note_edit_nav_graph"
-    app:startDestination="@id/noteEditFragment2">
+    app:startDestination="@id/appLockFragment2">
 
     <fragment
         android:id="@+id/noteEditFragment2"

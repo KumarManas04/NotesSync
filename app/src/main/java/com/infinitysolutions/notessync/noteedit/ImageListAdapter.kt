@@ -7,9 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.infinitysolutions.notessync.model.ImageData
 import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.viewmodel.MainViewModel
+import com.infinitysolutions.notessync.model.ImageData
 import kotlinx.android.synthetic.main.image_list_item.view.*
 import java.io.File
 

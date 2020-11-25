@@ -20,6 +20,7 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.setPadding
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -60,7 +61,7 @@ class NotesAdapter(
     private val homeViewModel: HomeViewModel,
     private val databaseViewModel: HomeDatabaseViewModel,
     private var items: List<Note>,
-    val context: Context
+    val context: FragmentActivity
 ) : RecyclerView.Adapter<NotesAdapter.ViewHolder>() {
     private val colorsUtil = ColorsUtil()
     private val pathsMap = SparseArray<String>()
@@ -147,7 +148,7 @@ class NotesAdapter(
                 if (items[position].noteType != NOTE_TRASH && items[position].noteType != LIST_TRASH && items[position].noteType != IMAGE_TRASH && items[position].noteType != IMAGE_LIST_TRASH) {
                     val noteIntent = Intent(context, NoteEditActivity::class.java)
                     noteIntent.putExtra(NOTE_ID_EXTRA, items[position].nId)
-                    context.startActivity(noteIntent)
+                    context.startActivityForResult(noteIntent, 111)
                 }
             } else {
                 if (selectedPositions.contains(position)) {

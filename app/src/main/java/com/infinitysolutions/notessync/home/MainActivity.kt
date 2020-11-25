@@ -26,7 +26,6 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DARK
 import com.infinitysolutions.notessync.contracts.Contract.Companion.THEME_DEFAULT
 import com.infinitysolutions.notessync.settings.SettingsActivity
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper
-import com.infinitysolutions.notessync.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.support_development_dialog.view.*
 
@@ -182,11 +181,5 @@ class MainActivity : AppCompatActivity() {
             startActivity(browserIntent)
         else
             Toast.makeText(this, getString(R.string.toast_no_browser), LENGTH_SHORT).show()
-    }
-
-    override fun onDestroy() {
-        val mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        mainViewModel.intent = null
-        super.onDestroy()
     }
 }

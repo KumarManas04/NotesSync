@@ -44,7 +44,7 @@ class SearchFragment : Fragment() {
         val homeDatabaseViewModel = ViewModelProviders.of(activity!!).get(HomeDatabaseViewModel::class.java)
         val homeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
 
-        val recyclerAdapter = NotesAdapter(homeViewModel, homeDatabaseViewModel, listOf(), context!!)
+        val recyclerAdapter = NotesAdapter(homeViewModel, homeDatabaseViewModel, listOf(), activity!!)
         searchRecyclerView.adapter = recyclerAdapter
         val toolbar = rootView.toolbar
         toolbar.inflateMenu(R.menu.search_fragment_menu)
