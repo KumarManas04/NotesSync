@@ -327,7 +327,7 @@ class MainFragment : Fragment() {
         val newNoteIntent = Intent(activity, NoteEditActivity::class.java)
         newNoteIntent.putExtra(NOTE_ID_EXTRA, -1L)
         newNoteIntent.putExtra(NOTE_TYPE_EXTRA, noteType)
-        startActivityForResult(newNoteIntent, 10101)
+        startActivityForResult(newNoteIntent, 111)
     }
 
     private fun disableMultiSelect(prefs: SharedPreferences, toolbar: Toolbar, bottomBar: LinearLayout) {
@@ -496,7 +496,7 @@ class MainFragment : Fragment() {
         newNoteIntent.putExtra(NOTE_TYPE_EXTRA, IMAGE_DEFAULT)
         newNoteIntent.putExtra(PHOTO_URI_EXTRA, photoUri)
         newNoteIntent.putExtra(FILE_PATH_EXTRA, filePath)
-        startActivityForResult(newNoteIntent, 101010)
+        startActivityForResult(newNoteIntent, 111)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

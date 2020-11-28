@@ -218,7 +218,7 @@ class NoteEditFragment : Fragment() {
                     checklistView.visibility = VISIBLE
                     noteContent.visibility = GONE
                     imageRecyclerView.visibility = GONE
-                    setChecklistContent(currentNote.noteContent)
+                    setChecklistContent(noteEditViewModel.noteContent ?: currentNote.noteContent)
                 }
                 IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
                     imageRecyclerView.visibility = VISIBLE
@@ -232,7 +232,7 @@ class NoteEditFragment : Fragment() {
 
                     val imageData = Gson().fromJson(currentNote.noteContent, ImageNoteContent::class.java)
                     if (noteType == IMAGE_LIST_DEFAULT || noteType == IMAGE_LIST_ARCHIVED) {
-                        setChecklistContent(imageData.noteContent)
+                        setChecklistContent(noteEditViewModel.noteContent ?: imageData.noteContent)
                     } else {
                         noteContent.setText(imageData.noteContent)
                     }
@@ -1086,6 +1086,10 @@ class NoteEditFragment : Fragment() {
                     ) {
                         saveNote(noteContentText)
                     }
+                }else{
+                    val noteType = noteEditViewModel.noteType
+                    if(noteType == LIST_DEFAULT || noteType == LIST_ARCHIVED || noteType == IMAGE_LIST_DEFAULT || noteType == IMAGE_LIST_ARCHIVED)
+                        noteEditViewModel.noteContent = checklistView.toString()
                 }
             }
         }

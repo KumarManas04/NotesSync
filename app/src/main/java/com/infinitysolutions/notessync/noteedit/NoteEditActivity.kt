@@ -59,7 +59,8 @@ class NoteEditActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_note_edit)
-        initializeNote()
+        if(savedInstanceState == null)
+            initializeNote()
     }
 
     private fun initializeNote() {

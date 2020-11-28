@@ -11,6 +11,7 @@ class NoteEditViewModel: ViewModel(){
     private var currentNote: Note? = null
     var noteType: Int? = null
     var reminderTime = -1L
+    var noteContent: String? = null
     private var currentPhotoPath: String? = null
     private val selectedColor = MutableLiveData<Int>()
     private val openImageView = MutableLiveData<Event<Int>>()
