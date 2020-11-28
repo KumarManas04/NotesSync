@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -31,13 +32,15 @@ import kotlinx.android.synthetic.main.support_development_dialog.view.*
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
+    private var currTheme: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         if (prefs.contains(PREF_THEME)) {
-            when (prefs.getInt(PREF_THEME, THEME_DEFAULT)) {
+            currTheme = prefs.getInt(PREF_THEME, THEME_DEFAULT)
+            when (currTheme) {
                 THEME_DEFAULT -> setTheme(R.style.AppTheme)
                 THEME_DARK -> setTheme(R.style.AppThemeDark)
                 THEME_AMOLED -> setTheme(R.style.AppThemeAmoled)
@@ -51,6 +54,16 @@ class MainActivity : AppCompatActivity() {
         bundle.putInt(APP_LOCK_STATE, STATE_MAIN_PIN)
         findNavController(R.id.nav_host_fragment).setGraph(R.navigation.home_nav_graph, bundle)
         initDataBinding()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        if (prefs.contains(PREF_THEME)) {
+            if(currTheme != null && currTheme != prefs.getInt(PREF_THEME, THEME_DEFAULT))
+                recreate()
+        }
     }
 
     private fun initDataBinding() {
