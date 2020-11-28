@@ -252,7 +252,6 @@ class NoteEditFragment : Fragment() {
                         withContext(Dispatchers.Main) {
                             if (list.isEmpty()) {
                                 // All images deleted
-                                //TODO: Fix all images deleted and all text removed but note not deleting
                                 imageRecyclerView.visibility = GONE
                                 noteEditViewModel.noteType = when (noteType) {
                                     IMAGE_ARCHIVED -> NOTE_ARCHIVED

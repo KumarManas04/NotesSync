@@ -8,11 +8,8 @@ import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
-import com.infinitysolutions.notessync.contracts.Contract
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_ARCHIVED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_DELETED
@@ -64,7 +61,7 @@ class NoteEditDatabaseViewModel(application: Application) : AndroidViewModel(app
 
     fun makeCopy(note: Note?, noteType: Int?, noteTitle: String, noteContent: String) {
         if(noteType != null && note != null) {
-            viewModelScope.launch(Dispatchers.IO) {
+            GlobalScope.launch(Dispatchers.IO) {
                 val currentTime = Calendar.getInstance().timeInMillis
                 when (noteType) {
                     IMAGE_DEFAULT, IMAGE_ARCHIVED, IMAGE_LIST_DEFAULT, IMAGE_LIST_ARCHIVED -> {
@@ -110,6 +107,10 @@ class NoteEditDatabaseViewModel(application: Application) : AndroidViewModel(app
                         )
                         insert(newNote)
                     }
+                }
+                withContext(Dispatchers.Main){
+                    val context = getApplication<Application>().applicationContext
+                    updateWidgets(context)
                 }
             }
         }
@@ -159,19 +160,24 @@ class NoteEditDatabaseViewModel(application: Application) : AndroidViewModel(app
             NOTE_DELETED
         }
 
-        val prefs = getApplication<Application>().applicationContext.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
+        val context = getApplication<Application>().applicationContext
+        val prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         val isLoggedIn = prefs != null && prefs.contains(PREF_CLOUD_TYPE)
         if(isLoggedIn)
             changeNoteType(note, noteType)
         else {
-            viewModelScope.launch(Dispatchers.IO) {
+            GlobalScope.launch(Dispatchers.IO) {
                 notesDao.deleteNoteById(note.nId!!)
+
+                withContext(Dispatchers.Main){
+                    updateWidgets(context)
+                }
             }
         }
     }
 
     fun deleteImagesByIds(idList: ArrayList<Long>) {
-        viewModelScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.IO) {
             val images = getImagesByIds(idList)
             for (image in images)
                 deleteImage(image.imageId!!, image.imagePath)

@@ -71,7 +71,6 @@ class NoteEditActivity : AppCompatActivity() {
         }
     }
 
-
     private fun checkAndInitIntents(noteEditViewModel: NoteEditViewModel, noteEditDatabaseViewModel: NoteEditDatabaseViewModel) {
         val intentAction = intent.action
         val intentType = intent.type
