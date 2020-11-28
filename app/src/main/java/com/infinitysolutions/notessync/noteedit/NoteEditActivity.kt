@@ -1,11 +1,13 @@
 package com.infinitysolutions.notessync.noteedit
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
@@ -59,14 +61,61 @@ class NoteEditActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_note_edit)
-        if(savedInstanceState == null)
-            initializeNote()
+        if (savedInstanceState == null) {
+            val noteEditViewModel = ViewModelProviders.of(this)[NoteEditViewModel::class.java]
+            val noteEditDatabaseViewModel = ViewModelProviders.of(this)[NoteEditDatabaseViewModel::class.java]
+            if(intent.action == Intent.ACTION_SEND)
+                checkAndInitIntents(noteEditViewModel, noteEditDatabaseViewModel)
+            else
+                initializeNote(noteEditViewModel, noteEditDatabaseViewModel)
+        }
     }
 
-    private fun initializeNote() {
-        val noteEditViewModel = ViewModelProviders.of(this)[NoteEditViewModel::class.java]
-        val noteEditDatabaseViewModel = ViewModelProviders.of(this)[NoteEditDatabaseViewModel::class.java]
 
+    private fun checkAndInitIntents(noteEditViewModel: NoteEditViewModel, noteEditDatabaseViewModel: NoteEditDatabaseViewModel) {
+        val intentAction = intent.action
+        val intentType = intent.type
+
+        GlobalScope.launch(Dispatchers.IO) {
+            var noteContent = ""
+            var noteType = NOTE_DEFAULT
+
+            if (intentAction == Intent.ACTION_SEND && intentType == "text/plain") {
+                noteContent = intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
+                noteType = NOTE_DEFAULT
+            }else if (intentAction == Intent.ACTION_SEND && intentType?.startsWith("image/") == true) {
+                (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
+                    val imageData = noteEditDatabaseViewModel.insertImage()
+                    noteType = IMAGE_DEFAULT
+                    noteContent = Gson().toJson(
+                        ImageNoteContent(
+                            noteContent,
+                            arrayListOf(imageData.imageId!!)
+                        )
+                    )
+
+                    withContext(Dispatchers.Main){
+                        insertImage(noteEditViewModel, noteEditDatabaseViewModel, imageData, uri, null)
+                    }
+                }
+            }
+
+            noteEditViewModel.setCurrentNote(
+                Note(-1L, "", noteContent, 0, 0, "-1", noteType, false, null, -1L)
+            )
+
+            withContext(Dispatchers.Main) {
+                val bundle = Bundle()
+                bundle.putInt(APP_LOCK_STATE, STATE_NOTE_EDIT)
+                findNavController(R.id.nav_host_fragment).setGraph(R.navigation.note_edit_nav_graph, bundle)
+            }
+        }
+    }
+
+    private fun initializeNote(
+        noteEditViewModel: NoteEditViewModel,
+        noteEditDatabaseViewModel: NoteEditDatabaseViewModel
+    ) {
         val noteId = intent.getLongExtra(NOTE_ID_EXTRA, -1L)
         val noteType = intent.getIntExtra(NOTE_TYPE_EXTRA, NOTE_DEFAULT)
         var noteContent = intent.getStringExtra(NOTE_CONTENT_EXTRA) ?: ""
@@ -83,8 +132,14 @@ class NoteEditActivity : AppCompatActivity() {
                     )
                 )
 
-                withContext(Dispatchers.Main){
-                    insertImage(noteEditViewModel, noteEditDatabaseViewModel, imageData, photoUri, filePath)
+                withContext(Dispatchers.Main) {
+                    insertImage(
+                        noteEditViewModel,
+                        noteEditDatabaseViewModel,
+                        imageData,
+                        photoUri,
+                        filePath
+                    )
                 }
             }
 
@@ -99,14 +154,20 @@ class NoteEditActivity : AppCompatActivity() {
                 bundle.putInt(APP_LOCK_STATE, STATE_NOTE_EDIT)
                 val navController = findNavController(R.id.nav_host_fragment)
                 navController.setGraph(R.navigation.note_edit_nav_graph, bundle)
-                if(callingActivity?.className == MainActivity::class.qualifiedName)
+                if (callingActivity?.className == MainActivity::class.qualifiedName)
                     navController.navigate(R.id.action_appLockFragment2_to_noteEditFragment2)
             }
         }
     }
 
-    private fun insertImage(noteEditViewModel: NoteEditViewModel, noteEditDatabaseViewModel: NoteEditDatabaseViewModel, imageData: ImageData, photoUri: Uri?, filePath: String?) {
-        GlobalScope.launch (Dispatchers.IO) {
+    private fun insertImage(
+        noteEditViewModel: NoteEditViewModel,
+        noteEditDatabaseViewModel: NoteEditDatabaseViewModel,
+        imageData: ImageData,
+        photoUri: Uri?,
+        filePath: String?
+    ) {
+        GlobalScope.launch(Dispatchers.IO) {
             val isLoadSuccess = loadBitmap(photoUri, filePath, imageData.imagePath)
             // If there is a problem retrieving the image then delete the empty entry
             if (!isLoadSuccess)
