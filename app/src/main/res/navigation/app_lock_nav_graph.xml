@@ -12,6 +12,8 @@
         <action
             android:id="@+id/action_pinCheckFragment_to_pinChangeFragment"
             app:destination="@id/pinChangeFragment"
+            app:enterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
             app:popUpTo="@id/app_lock_nav_graph" />
     </fragment>
     <fragment

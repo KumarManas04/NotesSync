@@ -1,7 +1,6 @@
 package com.infinitysolutions.notessync.login
 
 
-import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent

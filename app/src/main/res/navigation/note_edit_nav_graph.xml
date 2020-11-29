@@ -11,7 +11,9 @@
         android:label="NoteEditFragment" >
         <action
             android:id="@+id/action_noteEditFragment2_to_imageGalleryFragment2"
-            app:destination="@id/imageGalleryFragment2" />
+            app:destination="@id/imageGalleryFragment2"
+            app:enterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/appLockFragment2"
@@ -21,6 +23,8 @@
         <action
             android:id="@+id/action_appLockFragment2_to_noteEditFragment2"
             app:destination="@id/noteEditFragment2"
+            app:enterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
             app:popUpTo="@id/note_edit_nav_graph" />
     </fragment>
     <fragment

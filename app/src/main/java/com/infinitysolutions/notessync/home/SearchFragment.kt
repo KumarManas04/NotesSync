@@ -14,7 +14,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -41,8 +41,8 @@ class SearchFragment : Fragment() {
     }
 
     private fun initDataBinding(rootView: View){
-        val homeDatabaseViewModel = ViewModelProviders.of(activity!!).get(HomeDatabaseViewModel::class.java)
-        val homeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
+        val homeDatabaseViewModel = ViewModelProvider(activity!!).get(HomeDatabaseViewModel::class.java)
+        val homeViewModel = ViewModelProvider(activity!!).get(HomeViewModel::class.java)
 
         val recyclerAdapter = NotesAdapter(homeViewModel, homeDatabaseViewModel, listOf(), activity!!)
         searchRecyclerView.adapter = recyclerAdapter
@@ -69,7 +69,7 @@ class SearchFragment : Fragment() {
                 recyclerAdapter.clearAll()
             }
         }
-        homeViewModel.getMultiSelectCount().observe(this, { count ->
+        homeViewModel.getMultiSelectCount().observe(viewLifecycleOwner, { count ->
                 if (count > 0) {
                     toolbar.title = "$count selected"
                     if (count == 1) {
@@ -94,7 +94,7 @@ class SearchFragment : Fragment() {
             imm.showSoftInput(rootView.search_edit_text, 0)
         }, 50)
 
-        homeDatabaseViewModel.searchResultList.observe(this, { resultList->
+        homeDatabaseViewModel.searchResultList.observe(viewLifecycleOwner, { resultList->
             if(resultList != null && resultList.isNotEmpty()){
                 searchRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE

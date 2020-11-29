@@ -172,16 +172,6 @@ class HomeDatabaseViewModel(application: Application) : AndroidViewModel(applica
         viewMode.value = mode
     }
 
-    fun insertImage(): ImageData{
-        val path = getApplication<Application>().applicationContext.filesDir.toString()
-
-        val time = Calendar.getInstance().timeInMillis
-        val file = File(path, "$time.jpg")
-        val imageData = ImageData(null, file.absolutePath, time, time, null)
-        imageData.imageId = imagesDao.insert(imageData)
-        return imageData
-    }
-
     private fun updateWidgets(context: Context) {
         val intent = Intent(context, NotesWidget::class.java)
         intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
@@ -191,6 +181,6 @@ class HomeDatabaseViewModel(application: Application) : AndroidViewModel(applica
         context.sendBroadcast(intent)
     }
 
-    fun getImagesByIds(idList: ArrayList<Long>): ArrayList<ImageData> = ArrayList(imagesDao.getImagesByIds(idList))
+    private fun getImagesByIds(idList: ArrayList<Long>): ArrayList<ImageData> = ArrayList(imagesDao.getImagesByIds(idList))
     fun getImagePathById(id: Long): String = imagesDao.getImagePathById(id)
 }

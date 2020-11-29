@@ -35,8 +35,6 @@ import com.infinitysolutions.notessync.contracts.Contract
 import com.infinitysolutions.notessync.contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.CLOUD_DROPBOX
 import com.infinitysolutions.notessync.contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
-import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_CHANGE_PASSWORD
-import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_NEW_PASSWORD
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_APP_LOCK_CODE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CLOUD_TYPE
@@ -233,11 +231,11 @@ class SettingsFragment : Fragment() {
             seekBar.progress = value
             seekBar.keyProgressIncrement = 1
             val linesText = dialogView.lines_text
-            linesText.text = if(value == 32) "No Limit" else "$value"
+            linesText.text = if(value >= 32) "No Limit" else "$value"
             seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seek: SeekBar, progress: Int, fromUser: Boolean) {
                     value = progress
-                    linesText.text = if(value == 32) "No Limit" else "$value"
+                    linesText.text = if(value >= 32) "No Limit" else "$value"
                 }
 
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
@@ -246,9 +244,9 @@ class SettingsFragment : Fragment() {
 
             dialog.setOnDismissListener {
                 val editor = prefs.edit()
-                editor.putInt(PREF_MAX_PREVIEW_LINES, if(value == 32) Integer.MAX_VALUE else value)
+                editor.putInt(PREF_MAX_PREVIEW_LINES, if(value >= 32) Integer.MAX_VALUE else value)
                 editor.apply()
-                rootView.preview_lines_count_text.text = if(value == 32) "No Limit" else "$value lines"
+                rootView.preview_lines_count_text.text = if(value >= 32) "No Limit" else "$value lines"
             }
             dialog.setContentView(dialogView)
             dialog.show()
@@ -309,7 +307,7 @@ class SettingsFragment : Fragment() {
         if(!prefs.contains(PREF_ENCRYPTED))
             return
 
-        if(prefs.getBoolean(PREF_ENCRYPTED, false)){
+        if(prefs.contains(PREF_ENCRYPTED) && prefs.getBoolean(PREF_ENCRYPTED, false)){
             rootView.change_pass_title.text = getString(R.string.change_password)
             rootView.change_pass_text.text = getString(R.string.change_password_summary)
             rootView.change_pass_button.setOnClickListener {
@@ -357,7 +355,7 @@ class SettingsFragment : Fragment() {
         if (browserIntent.resolveActivity(activity!!.packageManager) != null)
             startActivity(browserIntent)
         else
-            Toast.makeText(activity, getString(R.string.toast_no_browser), Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, getString(R.string.toast_no_browser), LENGTH_SHORT).show()
     }
 
     private fun updateWidgets() {

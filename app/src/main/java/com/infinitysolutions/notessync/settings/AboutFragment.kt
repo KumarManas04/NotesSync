@@ -38,7 +38,7 @@ class AboutFragment : Fragment() {
         toolbar.setNavigationOnClickListener {
             activity?.onBackPressed()
         }
-        rootView.app_version.text = "${BuildConfig.VERSION_NAME}"
+        rootView.app_version.text = BuildConfig.VERSION_NAME
         rootView.rate_button.setOnClickListener {
             openLink("https://play.google.com/store/apps/details?id=com.infinitysolutions.notessync")
         }

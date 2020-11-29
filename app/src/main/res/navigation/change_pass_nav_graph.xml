@@ -11,7 +11,9 @@
         android:label="PasswordCheckFragment" >
         <action
             android:id="@+id/action_passwordCheckFragment2_to_passwordSetFragment2"
-            app:destination="@id/passwordSetFragment2" />
+            app:destination="@id/passwordSetFragment2"
+            app:enterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/passwordSetFragment2"

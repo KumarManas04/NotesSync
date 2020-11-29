@@ -10,7 +10,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -26,14 +25,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.gson.Gson
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract
 import com.infinitysolutions.notessync.contracts.Contract.Companion.CLOUD_DROPBOX
@@ -44,7 +42,6 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_CAPTUR
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_PICKER_REQUEST_CODE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.LIST_DEFAULT
-import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_CONTENT_EXTRA
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_ID_EXTRA
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_TYPE_EXTRA
@@ -66,17 +63,11 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_I
 import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_LIST
 import com.infinitysolutions.notessync.contracts.Contract.Companion.WIDGET_NEW_NOTE
 import com.infinitysolutions.notessync.login.LoginActivity
-import com.infinitysolutions.notessync.model.ImageData
-import com.infinitysolutions.notessync.model.ImageNoteContent
 import com.infinitysolutions.notessync.noteedit.NoteEditActivity
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper
 import kotlinx.android.synthetic.main.add_image_dialog.view.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.sort_dialog.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -97,8 +88,8 @@ class MainFragment : Fragment() {
     }
 
     private fun initDataBinding(rootView: View, container: ViewGroup?) {
-        val homeDatabaseViewModel = ViewModelProviders.of(activity!!).get(HomeDatabaseViewModel::class.java)
-        homeViewModel = ViewModelProviders.of(activity!!).get(HomeViewModel::class.java)
+        val homeDatabaseViewModel = ViewModelProvider(activity!!).get(HomeDatabaseViewModel::class.java)
+        homeViewModel = ViewModelProvider(activity!!).get(HomeViewModel::class.java)
 
         val toolbar = rootView.toolbar
         toolbar.title = "All"

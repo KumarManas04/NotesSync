@@ -36,7 +36,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
@@ -115,8 +115,8 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun initDataBinding(rootView: View) {
-        noteEditDatabaseViewModel = ViewModelProviders.of(activity!!).get(NoteEditDatabaseViewModel::class.java)
-        noteEditViewModel = ViewModelProviders.of(activity!!).get(NoteEditViewModel::class.java)
+        noteEditDatabaseViewModel = ViewModelProvider(activity!!).get(NoteEditDatabaseViewModel::class.java)
+        noteEditViewModel = ViewModelProvider(activity!!).get(NoteEditViewModel::class.java)
 
         noteTitle = rootView.note_title
         noteContent = rootView.note_content
@@ -130,12 +130,12 @@ class NoteEditFragment : Fragment() {
         imageRecyclerView.layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
 
         noteEditViewModel.getSelectedColor()
-            .observe(this, { selectedColor ->
+            .observe(viewLifecycleOwner, { selectedColor ->
                 noteTitle.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
                 rootView.last_edited_text.setTextColor(Color.parseColor(colorsUtil.getColor(selectedColor)))
             })
 
-        noteEditViewModel.getOpenImageView().observe(this, {
+        noteEditViewModel.getOpenImageView().observe(viewLifecycleOwner, {
             it.getContentIfNotHandled()?.let { imagePosition ->
                 Log.d(TAG, "Open Image View")
                 val bundle = bundleOf("currentPosition" to imagePosition)
@@ -143,7 +143,7 @@ class NoteEditFragment : Fragment() {
             }
         })
 
-        noteEditViewModel.getRefreshImagesList().observe(this, {
+        noteEditViewModel.getRefreshImagesList().observe(viewLifecycleOwner, {
             it.getContentIfNotHandled()?.let { shouldRefresh ->
                 if (shouldRefresh) {
                     if(imageListAdapter != null) {
@@ -982,8 +982,8 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun insertImageInDatabase(photoUri: Uri?, filePath: String?) {
-        val noteEditDatabaseViewModel = ViewModelProviders.of(activity!!).get(NoteEditDatabaseViewModel::class.java)
-        val noteEditViewModel = ViewModelProviders.of(activity!!).get(NoteEditViewModel::class.java)
+        val noteEditDatabaseViewModel = ViewModelProvider(activity!!).get(NoteEditDatabaseViewModel::class.java)
+        val noteEditViewModel = ViewModelProvider(activity!!).get(NoteEditViewModel::class.java)
 
         GlobalScope.launch(Dispatchers.IO) {
             val imageData = noteEditDatabaseViewModel.insertImage()

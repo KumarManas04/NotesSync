@@ -8,7 +8,11 @@
               android:label="fragment_main" tools:layout="@layout/fragment_main">
         <action android:id="@+id/action_mainFragment_to_searchFragment" app:destination="@id/searchFragment"
                 app:enterAnim="@anim/fade_in" app:popExitAnim="@anim/fade_out"/>
-        <action android:id="@+id/action_mainFragment_to_aboutFragment" app:destination="@id/aboutFragment"/>
+        <action
+            android:id="@+id/action_mainFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment"
+            app:enterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
     <fragment android:id="@+id/searchFragment" android:name="com.infinitysolutions.notessync.home.SearchFragment"
               android:label="fragment_search" tools:layout="@layout/fragment_search"/>

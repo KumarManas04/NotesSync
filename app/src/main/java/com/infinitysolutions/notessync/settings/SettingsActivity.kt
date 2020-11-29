@@ -2,6 +2,7 @@ package com.infinitysolutions.notessync.settings
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.navigation.findNavController
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract
 
@@ -20,6 +21,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_settings)
+        findNavController(R.id.nav_host_fragment).setGraph(R.navigation.settings_nav_graph)
     }
 
 }

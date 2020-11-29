@@ -12,10 +12,14 @@
         tools:layout="@layout/fragment_settings" >
         <action
             android:id="@+id/action_settingsFragment2_to_resourcesFragment2"
-            app:destination="@id/resourcesFragment2" />
+            app:destination="@id/resourcesFragment2"
+            app:enterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
         <action
             android:id="@+id/action_settingsFragment2_to_aboutFragment3"
-            app:destination="@id/aboutFragment3" />
+            app:destination="@id/aboutFragment3"
+            app:enterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/resourcesFragment2"

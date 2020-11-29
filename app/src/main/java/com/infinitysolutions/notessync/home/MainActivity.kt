@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -14,7 +13,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import com.infinitysolutions.notessync.R
@@ -67,7 +66,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initDataBinding() {
-        val homeViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
+        val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
 
         homeViewModel.getToolbar().observe(this, { toolbar ->
             if (toolbar != null) {
@@ -106,7 +105,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepareNavDrawer() {
-        val homeViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
+        val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
         val index = homeViewModel.getViewMode().value
         if (index != null)
             navigation_view.menu[index - 1].isChecked = true

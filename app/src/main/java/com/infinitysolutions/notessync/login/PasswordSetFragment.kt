@@ -13,7 +13,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.infinitysolutions.notessync.contracts.Contract
 import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_CHANGE_PASSWORD
 import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_NEW_PASSWORD
@@ -63,6 +63,12 @@ class PasswordSetFragment : Fragment() {
         if(passwordMode == MODE_LOGIN_TIME_PASSWORD){
             rootView.ps_skip_button.visibility = VISIBLE
             rootView.ps_skip_button.setOnClickListener {
+                val prefs = activity?.getSharedPreferences(Contract.SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+                val editor = prefs?.edit()
+                editor?.putBoolean(PREF_ENCRYPTED, false)
+                editor?.putString(PREF_ID, userId)
+                editor?.putInt(PREF_CLOUD_TYPE, cloudType)
+                editor?.commit()
                 activity?.setResult(RESULT_OK)
                 activity?.finish()
             }
@@ -74,22 +80,22 @@ class PasswordSetFragment : Fragment() {
     }
 
     private fun initDataBinding(rootView: View, userId: String, cloudType: Int) {
-        passwordViewModel = ViewModelProviders.of(activity!!)[PasswordViewModel::class.java]
+        passwordViewModel = ViewModelProvider(activity!!)[PasswordViewModel::class.java]
 
-        passwordViewModel.getLoadingMessage().observe(this, Observer { message ->
+        passwordViewModel.getLoadingMessage().observe(viewLifecycleOwner, Observer { message ->
             if (message != null) {
-                rootView.ps_loading_panel.visibility = View.VISIBLE
-                rootView.ps_input_bar.visibility = View.GONE
+                rootView.ps_loading_panel.visibility = VISIBLE
+                rootView.ps_input_bar.visibility = GONE
                 rootView.ps_loading_message.text = message
-                rootView.ps_skip_button.visibility = View.GONE
+                rootView.ps_skip_button.visibility = GONE
             } else {
-                rootView.ps_loading_panel.visibility = View.GONE
-                rootView.ps_input_bar.visibility = View.VISIBLE
-                rootView.ps_skip_button.visibility = View.VISIBLE
+                rootView.ps_loading_panel.visibility = GONE
+                rootView.ps_input_bar.visibility = VISIBLE
+                rootView.ps_skip_button.visibility = VISIBLE
             }
         })
 
-        passwordViewModel.getPasswordSetResult().observe(this, Observer{result ->
+        passwordViewModel.getPasswordSetResult().observe(viewLifecycleOwner, { result ->
             if(result != null){
                 if(result)
                     finishLogin(rootView.ps_password_edit_text.text.toString(), userId, cloudType)

@@ -36,7 +36,7 @@ class PinCheckFragment : Fragment() {
         val type = arguments?.getInt(APP_LOCK_STATE) ?: STATE_CHECK_PIN
         initEntryPin(rootView, type)
 
-        passCode.observe(this, { code ->
+        passCode.observe(viewLifecycleOwner, { code ->
             when (code.length) {
                 0 -> {
                     rootView.indicator_1.setImageResource(R.drawable.circle_stroke)

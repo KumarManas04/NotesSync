@@ -13,6 +13,8 @@
         <action
             android:id="@+id/action_cloudPickerFragment2_to_passwordCheckFragment"
             app:destination="@id/passwordCheckFragment"
+            app:enterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
             app:popUpTo="@id/cloud_login_nav_graph" />
     </fragment>
     <fragment
@@ -22,6 +24,8 @@
         <action
             android:id="@+id/action_passwordCheckFragment_to_passwordSetFragment"
             app:destination="@id/passwordSetFragment"
+            app:enterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
             app:popUpTo="@id/cloud_login_nav_graph" />
     </fragment>
     <fragment

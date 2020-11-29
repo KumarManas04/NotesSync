@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -17,8 +16,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.http.OkHttp3Requestor
@@ -93,8 +91,8 @@ class PasswordCheckFragment : Fragment() {
         passwordCheckMode: Int
     ) {
         passwordViewModel =
-            ViewModelProviders.of(activity!!)[PasswordViewModel::class.java]
-        passwordViewModel.getLoadingMessage().observe(this, { loading ->
+            ViewModelProvider(activity!!)[PasswordViewModel::class.java]
+        passwordViewModel.getLoadingMessage().observe(viewLifecycleOwner, { loading ->
             if (loading != null) {
                 rootView.loading_panel.visibility = VISIBLE
                 rootView.input_bar.visibility = GONE
@@ -104,7 +102,7 @@ class PasswordCheckFragment : Fragment() {
             }
         })
 
-        passwordViewModel.getEncryptionCheckResult().observe(this, { result ->
+        passwordViewModel.getEncryptionCheckResult().observe(viewLifecycleOwner, { result ->
             if(result != null){
                 when(result){
                     ENCRYPTED_NO ->{
@@ -139,7 +137,7 @@ class PasswordCheckFragment : Fragment() {
             }
         })
 
-        passwordViewModel.getVerifyPasswordResult().observe(this, { result ->
+        passwordViewModel.getVerifyPasswordResult().observe(viewLifecycleOwner, { result ->
             if (result != null) {
                 when (result) {
                     PASSWORD_VERIFY_INVALID -> {
@@ -198,7 +196,7 @@ class PasswordCheckFragment : Fragment() {
 
     private fun finishLogin(password: String, userId: String, cloudType: Int) {
         // Login successful. Return to previous activity with result ok
-        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = activity?.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         val editor = prefs?.edit()
         editor?.putString(PREF_CODE, password)
         editor?.putBoolean(PREF_ENCRYPTED, true)

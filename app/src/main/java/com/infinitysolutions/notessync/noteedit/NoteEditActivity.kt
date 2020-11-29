@@ -8,20 +8,17 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.exifinterface.media.ExifInterface
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract.Companion.APP_LOCK_STATE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.FILE_PATH_EXTRA
 import com.infinitysolutions.notessync.contracts.Contract.Companion.IMAGE_DEFAULT
-import com.infinitysolutions.notessync.contracts.Contract.Companion.LIST_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_CONTENT_EXTRA
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_DEFAULT
 import com.infinitysolutions.notessync.contracts.Contract.Companion.NOTE_ID_EXTRA
@@ -62,8 +59,8 @@ class NoteEditActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_note_edit)
         if (savedInstanceState == null) {
-            val noteEditViewModel = ViewModelProviders.of(this)[NoteEditViewModel::class.java]
-            val noteEditDatabaseViewModel = ViewModelProviders.of(this)[NoteEditDatabaseViewModel::class.java]
+            val noteEditViewModel = ViewModelProvider(this)[NoteEditViewModel::class.java]
+            val noteEditDatabaseViewModel = ViewModelProvider(this)[NoteEditDatabaseViewModel::class.java]
             if(intent.action == Intent.ACTION_SEND)
                 checkAndInitIntents(noteEditViewModel, noteEditDatabaseViewModel)
             else

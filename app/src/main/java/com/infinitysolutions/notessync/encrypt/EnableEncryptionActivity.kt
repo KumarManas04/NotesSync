@@ -8,7 +8,7 @@ import android.view.View
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.http.OkHttp3Requestor
 import com.dropbox.core.v2.DbxClientV2
@@ -24,6 +24,8 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.CLOUD_DROPBO
 import com.infinitysolutions.notessync.contracts.Contract.Companion.CLOUD_GOOGLE_DRIVE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ACCESS_TOKEN
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CLOUD_TYPE
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CODE
+import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ID
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.util.DropboxHelper
@@ -36,7 +38,6 @@ class EnableEncryptionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_enable_encrypion)
 
         val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         if (prefs.contains(Contract.PREF_THEME)) {
@@ -46,6 +47,8 @@ class EnableEncryptionActivity : AppCompatActivity() {
                 Contract.THEME_AMOLED -> setTheme(R.style.AppThemeAmoled)
             }
         }
+
+        setContentView(R.layout.activity_enable_encrypion)
 
         val cloudType = getCloudType(prefs)
         val userId = prefs.getString(PREF_ID, null) ?: "-1"
@@ -76,7 +79,7 @@ class EnableEncryptionActivity : AppCompatActivity() {
     }
 
     private fun initDataBinding(cloudType: Int, userId: String){
-        encryptionViewModel = ViewModelProviders.of(this)[EncryptionViewModel::class.java]
+        encryptionViewModel = ViewModelProvider(this)[EncryptionViewModel::class.java]
         encryptionViewModel.setLocalStoragePath(filesDir.toString())
         initializeLogin(cloudType)
 
@@ -171,9 +174,9 @@ class EnableEncryptionActivity : AppCompatActivity() {
     private fun finishLogin(password: String, userId: String, cloudType: Int) {
         val prefs = getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE)
         val editor = prefs.edit()
-        editor.putString(Contract.PREF_CODE, password)
-        editor.putBoolean(Contract.PREF_ENCRYPTED, true)
-        editor.putString(Contract.PREF_ID, userId)
+        editor.putString(PREF_CODE, password)
+        editor.putBoolean(PREF_ENCRYPTED, true)
+        editor.putString(PREF_ID, userId)
         editor.putInt(PREF_CLOUD_TYPE, cloudType)
         editor.commit()
         Toast.makeText(this, "Success", LENGTH_SHORT).show()
