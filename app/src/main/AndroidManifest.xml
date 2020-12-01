@@ -18,12 +18,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".encrypt.EnableEncryptionActivity"/>
+        <activity android:name=".widget.WidgetConfigureActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".encrypt.EnableEncryptionActivity" />
         <activity android:name=".applock.AppLockActivity" />
         <activity android:name=".login.ChangePasswordActivity" />
         <activity android:name=".login.LoginActivity" />
         <activity android:name=".settings.SettingsActivity" />
-        <activity android:name=".noteedit.NoteEditActivity" >
+        <activity android:name=".noteedit.NoteEditActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -48,6 +53,16 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/notes_widget_info" />
+        </receiver>
+
+        <receiver android:name=".widget.SimpleNotesWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/simple_widget_info" />
         </receiver>
 
         <service

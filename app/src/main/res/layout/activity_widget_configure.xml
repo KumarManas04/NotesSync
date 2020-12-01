@@ -6,7 +6,7 @@
     android:background="?attr/mainBackground"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    tools:context=".applock.AppLockActivity">
+    tools:context=".widget.WidgetConfigureActivity">
 
     <fragment
         android:id="@+id/nav_host_fragment"

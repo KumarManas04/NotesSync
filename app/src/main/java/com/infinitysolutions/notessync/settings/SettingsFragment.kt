@@ -57,6 +57,7 @@ import com.infinitysolutions.notessync.widget.NotesWidget
 import com.infinitysolutions.notessync.util.ColorsUtil
 import com.infinitysolutions.notessync.util.WorkSchedulerHelper
 import com.infinitysolutions.notessync.login.ChangePasswordActivity
+import com.infinitysolutions.notessync.widget.SimpleNotesWidget
 import kotlinx.android.synthetic.main.bottom_sheet.view.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import kotlinx.android.synthetic.main.preview_lines_dialog.view.*
@@ -359,12 +360,17 @@ class SettingsFragment : Fragment() {
     }
 
     private fun updateWidgets() {
-        val intent = Intent(activity, NotesWidget::class.java)
-        intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-        val ids =
-            AppWidgetManager.getInstance(activity).getAppWidgetIds(ComponentName(activity!!, NotesWidget::class.java))
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-        activity?.sendBroadcast(intent)
+        val notesWidgetIntent = Intent(activity, NotesWidget::class.java)
+        notesWidgetIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        var ids = AppWidgetManager.getInstance(activity).getAppWidgetIds(ComponentName(activity!!, NotesWidget::class.java))
+        notesWidgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        activity?.sendBroadcast(notesWidgetIntent)
+
+        val simpleWidgetIntent = Intent(activity, SimpleNotesWidget::class.java)
+        simpleWidgetIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+        ids = AppWidgetManager.getInstance(activity).getAppWidgetIds(ComponentName(activity!!, SimpleNotesWidget::class.java))
+        simpleWidgetIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        activity?.sendBroadcast(simpleWidgetIntent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

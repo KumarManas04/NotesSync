@@ -26,12 +26,14 @@ import java.io.File
 
 class WidgetRemoteViewsFactory(private val context: Context) :
     RemoteViewsService.RemoteViewsFactory {
-    private lateinit var notesList: List<Note>
+    private var notesList: List<Note>? = null
     private val colorsUtil = ColorsUtil()
     private val pathsMap = SparseArray<String>()
 
     override fun getViewAt(position: Int): RemoteViews {
         val rv = RemoteViews(context.packageName, R.layout.widget_notes_item)
+        val notesList = this.notesList ?: return rv
+
         val noteTitle = notesList[position].noteTitle
         if (noteTitle != null && noteTitle.isNotEmpty()){
             rv.setViewVisibility(R.id.title_text, VISIBLE)
@@ -74,7 +76,8 @@ class WidgetRemoteViewsFactory(private val context: Context) :
     }
 
     override fun getCount(): Int {
-        return notesList.size
+        val notesList = this.notesList
+        return notesList?.size ?: 0
     }
 
     override fun onCreate() {
@@ -92,9 +95,10 @@ class WidgetRemoteViewsFactory(private val context: Context) :
         val notesDao = NotesRoomDatabase.getDatabase(context).notesDao()
         val imagesDao = NotesRoomDatabase.getDatabase(context).imagesDao()
         val identityToken = Binder.clearCallingIdentity()
-        notesList = notesDao.getAllPresent()
         var imageContent: ImageNoteContent
         var path: String
+        val notesList = notesDao.getAllPresent()
+        this.notesList = notesList
         for(i in notesList.indices){
             if(notesList[i].noteType == IMAGE_DEFAULT || notesList[i].noteType == IMAGE_LIST_DEFAULT){
                 imageContent = Gson().fromJson(notesList[i].noteContent, ImageNoteContent::class.java)

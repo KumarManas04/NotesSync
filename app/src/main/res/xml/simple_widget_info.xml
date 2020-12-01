@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:initialKeyguardLayout="@layout/notes_widget"
-    android:initialLayout="@layout/notes_widget"
+    android:initialKeyguardLayout="@layout/simple_widget"
+    android:initialLayout="@layout/simple_widget"
     android:minWidth="180dp"
-    android:minHeight="110dp"
+    android:minHeight="80dp"
     android:previewImage="@drawable/widget_preview"
-    android:resizeMode="horizontal|vertical"
+    android:resizeMode="horizontal"
     android:updatePeriodMillis="1800000"
-    android:configure="com.infinitysolutions.notessync.widget.WidgetConfigureActivity"
     android:widgetCategory="home_screen" />
