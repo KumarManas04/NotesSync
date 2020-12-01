@@ -221,7 +221,7 @@ class MainFragment : Fragment() {
             }
         }
 
-        homeViewModel.getMultiSelectCount().observe(this, { count ->
+        homeViewModel.getMultiSelectCount().observe(viewLifecycleOwner, { count ->
             if (count > 0) {
                 toolbar.title = "$count selected"
                 if (count == 1) {
@@ -251,7 +251,7 @@ class MainFragment : Fragment() {
             openNewNote(LIST_DEFAULT)
         }
 
-        homeViewModel.getViewMode().observe(this, { mode ->
+        homeViewModel.getViewMode().observe(viewLifecycleOwner, { mode ->
             if (mode != null) {
                 when (mode) {
                     1 -> {
@@ -276,7 +276,7 @@ class MainFragment : Fragment() {
             }
         })
 
-        homeDatabaseViewModel.viewList.observe(this, { viewList ->
+        homeDatabaseViewModel.viewList.observe(viewLifecycleOwner, { viewList ->
             if (viewList != null && viewList.isNotEmpty()) {
                 notesRecyclerView.visibility = VISIBLE
                 rootView.empty_items.visibility = GONE

@@ -4,7 +4,6 @@ import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -12,18 +11,18 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
-import androidx.lifecycle.Observer
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.infinitysolutions.notessync.R
 import com.infinitysolutions.notessync.contracts.Contract
 import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_CHANGE_PASSWORD
+import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_LOGIN_TIME_PASSWORD
 import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_NEW_PASSWORD
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PASSWORD_MODE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CLOUD_TYPE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_CODE
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ENCRYPTED
 import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_ID
-import com.infinitysolutions.notessync.R
-import com.infinitysolutions.notessync.contracts.Contract.Companion.MODE_LOGIN_TIME_PASSWORD
 import kotlinx.android.synthetic.main.fragment_password_set.view.*
 
 class PasswordSetFragment : Fragment() {
@@ -48,7 +47,7 @@ class PasswordSetFragment : Fragment() {
             activity?.finish()
         }
 
-        initDataBinding(rootView, userId, cloudType)
+        initDataBinding(rootView, userId, cloudType, passwordMode)
 
         rootView.ps_submit_button.setOnClickListener {
             submitPassword(
@@ -79,10 +78,10 @@ class PasswordSetFragment : Fragment() {
         return rootView
     }
 
-    private fun initDataBinding(rootView: View, userId: String, cloudType: Int) {
+    private fun initDataBinding(rootView: View, userId: String, cloudType: Int, passwordMode: Int) {
         passwordViewModel = ViewModelProvider(activity!!)[PasswordViewModel::class.java]
 
-        passwordViewModel.getLoadingMessage().observe(viewLifecycleOwner, Observer { message ->
+        passwordViewModel.getLoadingMessage().observe(viewLifecycleOwner, { message ->
             if (message != null) {
                 rootView.ps_loading_panel.visibility = VISIBLE
                 rootView.ps_input_bar.visibility = GONE
@@ -91,7 +90,10 @@ class PasswordSetFragment : Fragment() {
             } else {
                 rootView.ps_loading_panel.visibility = GONE
                 rootView.ps_input_bar.visibility = VISIBLE
-                rootView.ps_skip_button.visibility = VISIBLE
+                if(passwordMode == MODE_LOGIN_TIME_PASSWORD)
+                    rootView.ps_skip_button.visibility = VISIBLE
+                else
+                    rootView.ps_skip_button.visibility = GONE
             }
         })
 
