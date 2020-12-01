@@ -51,9 +51,6 @@ class Contract{
         const val MODE_CHANGE_PASSWORD = 0
         const val MODE_NEW_PASSWORD = 1
         const val MODE_LOGIN_TIME_PASSWORD = 2
-        const val PASSWORD_CHANGE_OLD_INVALID = 0
-        const val PASSWORD_CHANGE_SUCCESS = 1
-        const val PASSWORD_CHANGE_NETWORK_ERROR = 2
         const val PASSWORD_VERIFY_INVALID = 0
         const val PASSWORD_VERIFY_CORRECT = 1
         const val PASSWORD_VERIFY_ERROR = 2
