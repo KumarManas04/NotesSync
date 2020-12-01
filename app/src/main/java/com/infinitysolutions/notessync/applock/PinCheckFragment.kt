@@ -1,13 +1,17 @@
 package com.infinitysolutions.notessync.applock
 
 
+import android.app.Activity.RESULT_OK
+import android.appwidget.AppWidgetManager
 import android.content.Context.MODE_PRIVATE
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.NavHostFragment.findNavController
@@ -16,10 +20,12 @@ import com.infinitysolutions.notessync.contracts.Contract.Companion.PREF_APP_LOC
 import com.infinitysolutions.notessync.contracts.Contract.Companion.SHARED_PREFS_NAME
 import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_NEW_PIN
 import com.infinitysolutions.notessync.R
+import com.infinitysolutions.notessync.contracts.Contract.Companion.APP_WIDGET_ID
 import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_CHANGE_PIN
 import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_CHECK_PIN
 import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_MAIN_PIN
 import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_NOTE_EDIT
+import com.infinitysolutions.notessync.contracts.Contract.Companion.STATE_WIDGET_CHECK
 import kotlinx.android.synthetic.main.fragment_app_lock.view.*
 
 class PinCheckFragment : Fragment() {
@@ -119,6 +125,13 @@ class PinCheckFragment : Fragment() {
             STATE_NEW_PIN, STATE_CHANGE_PIN -> findNavController(this).navigate(R.id.action_pinCheckFragment_to_pinChangeFragment)
             STATE_MAIN_PIN -> findNavController(this).navigate(R.id.action_appLockFragment_to_mainFragment)
             STATE_NOTE_EDIT -> findNavController(this).navigate(R.id.action_appLockFragment2_to_noteEditFragment2)
+            STATE_WIDGET_CHECK ->{
+                val appWidgetId: Int? = arguments?.getInt(APP_WIDGET_ID)
+                val intent = Intent()
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                activity?.setResult(RESULT_OK, intent)
+                activity?.finish()
+            }
             else ->{
                 activity?.finish()
             }
