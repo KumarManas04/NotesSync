@@ -4,7 +4,7 @@
     android:initialLayout="@layout/notes_widget"
     android:minWidth="180dp"
     android:minHeight="110dp"
-    android:previewImage="@drawable/widget_preview"
+    android:previewImage="@drawable/notes_widget_preview"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="1800000"
     android:configure="com.infinitysolutions.notessync.widget.WidgetConfigureActivity"
